@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhotoWhisper — UI Design Spec V1.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Serif+SC:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#111113;--surface:#1a1a1e;--card:#222226;
+  --text:#f0ede8;--text2:#a09a90;--text3:#6e6a63;
+  --accent:#C17A56;--accent-lt:#E8A97E;
+  --border:#333338;
+  --ff-d:'Playfair Display','Noto Serif SC',serif;
+  --ff-b:'IBM Plex Sans',-apple-system,sans-serif;
+  --ff-m:'IBM Plex Mono',monospace;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+
+/* Layout */
+.spec{max-width:1280px;margin:0 auto;padding:40px 32px 80px}
+
+/* Header */
+.spec-header{margin-bottom:64px;padding-bottom:40px;border-bottom:1px solid var(--border)}
+.spec-header .tag{font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+.spec-header h1{font-family:var(--ff-d);font-size:42px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px}
+.spec-header h1 em{font-style:italic;color:var(--accent)}
+.spec-header .meta{font-size:13px;color:var(--text3)}
+
+/* Section */
+.section{margin-bottom:72px}
+.section-tag{font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.section-title{font-family:var(--ff-d);font-size:28px;font-weight:600;letter-spacing:-.01em;margin-bottom:8px}
+.section-desc{font-size:14px;color:var(--text2);margin-bottom:32px;max-width:600px;line-height:1.65}
+
+/* ─── PHONE FRAME ─── */
+.screens-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:48px}
+.screen-col{display:flex;flex-direction:column;align-items:center}
+
+.phone{
+  width:280px;height:580px;
+  background:#000;border-radius:40px;
+  padding:12px;position:relative;
+  box-shadow:0 20px 60px rgba(0,0,0,.5),inset 0 0 0 2px #333;
+}
+.phone::before{
+  content:'';position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  width:90px;height:26px;background:#000;border-radius:0 0 16px 16px;z-index:10;
+}
+.phone-screen{
+  width:100%;height:100%;border-radius:28px;overflow:hidden;
+  background:#F7F4EF;position:relative;
+}
+.phone-screen img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* Screen content (rendered inside phone) */
+.ps{width:100%;height:100%;display:flex;flex-direction:column;font-family:var(--ff-b);color:#1A1A1A;overflow:hidden}
+.ps .status-bar{height:44px;padding:12px 20px 0;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:600;color:#1A1A1A;flex-shrink:0}
+.ps .status-bar .time{margin-left:4px}
+.ps .status-bar .icons{display:flex;gap:4px;align-items:center}
+
+/* Screen: Landing */
+.ps-landing{background:#F7F4EF;text-align:center;padding-top:0}
+.ps-landing .hero-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 20px}
+.ps-landing .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border:1px solid #E3DED6;border-radius:100px;font-size:9px;color:#6E6A63;margin-bottom:20px}
+.ps-landing .badge .dot{width:4px;height:4px;border-radius:50%;background:#C17A56}
+.ps-landing h2{font-family:var(--ff-d);font-size:22px;font-weight:700;line-height:1.2;margin-bottom:10px;letter-spacing:-.02em}
+.ps-landing h2 em{font-style:italic;color:#C17A56}
+.ps-landing .sub{font-size:10px;color:#6E6A63;line-height:1.5;margin-bottom:20px;max-width:200px}
+.ps-landing .upload{width:100%;max-width:200px;border:1.5px dashed #E3DED6;border-radius:14px;padding:18px 12px;background:#fff;margin:0 auto}
+.ps-landing .upload .ico{width:28px;height:28px;border-radius:50%;background:#F7F4EF;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.ps-landing .upload .t1{font-size:10px;font-weight:600;margin-bottom:3px}
+.ps-landing .upload .t2{font-size:8px;color:#A09A90}
+.ps-landing .thumbs{display:flex;gap:6px;margin-top:16px;justify-content:center}
+.ps-landing .thumbs .th{width:44px;height:58px;border-radius:8px;overflow:hidden;border:1.5px solid transparent}
+.ps-landing .thumbs .th img{width:100%;height:100%;object-fit:cover}
+
+/* Screen: Results Photo */
+.ps-results{background:#F7F4EF}
+.ps-results .photo-area{position:relative;flex-shrink:0}
+.ps-results .photo-area img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block}
+.ps-results .photo-area .grid-overlay{position:absolute;inset:0;pointer-events:none}
+.ps-results .photo-area .grid-overlay line{stroke:rgba(255,255,255,.4);stroke-width:.8;stroke-dasharray:3 2}
+.ps-results .photo-area .grid-overlay circle{fill:#C17A56;opacity:.9}
+.ps-results .comp-tag{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);color:#fff;font-size:8px;font-weight:500;padding:3px 8px;border-radius:100px}
+.ps-results .summary{padding:12px 14px}
+.ps-results .quote{font-family:var(--ff-d);font-size:11px;font-style:italic;line-height:1.4;margin-bottom:8px;padding-left:8px;border-left:2px solid #C17A56}
+.ps-results .tags{display:flex;gap:4px;flex-wrap:wrap}
+.ps-results .tags span{font-size:8px;padding:2px 7px;border-radius:100px;background:#EDEAE3;color:#6E6A63}
+
+/* Screen: Diagram */
+.ps-diagram{background:#F7F4EF}
+.ps-diagram .diagram-header{padding:10px 14px 6px;display:flex;align-items:center;gap:6px}
+.ps-diagram .diagram-header .label{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#C17A56}
+.ps-diagram .seg{display:flex;margin:0 14px 10px;background:#EDEAE3;border-radius:8px;padding:2px}
+.ps-diagram .seg button{flex:1;padding:5px 0;font-size:8px;font-weight:500;border:none;border-radius:6px;background:none;color:#6E6A63;font-family:var(--ff-b)}
+.ps-diagram .seg button.on{background:#fff;color:#1A1A1A;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ps-diagram .diagram-body{margin:0 14px;background:#fff;border:1px solid #F0ECE5;border-radius:14px;padding:14px;display:flex;justify-content:center}
+.ps-diagram .legend{display:flex;gap:12px;justify-content:center;margin-top:10px;padding:0 14px}
+.ps-diagram .legend .li{display:flex;align-items:center;gap:4px;font-size:8px;color:#6E6A63}
+.ps-diagram .legend .ld{width:6px;height:6px;border-radius:50%}
+
+/* Screen: Tabs */
+.ps-tabs{background:#F7F4EF}
+.ps-tabs .tab-label{padding:10px 14px 6px;font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#C17A56}
+.ps-tabs .tab-bar{display:flex;gap:5px;padding:0 14px 10px;overflow:hidden}
+.ps-tabs .tab-bar .tb{padding:5px 10px;border:1.5px solid #E3DED6;border-radius:100px;font-size:8px;font-weight:500;color:#6E6A63;white-space:nowrap}
+.ps-tabs .tab-bar .tb.on{background:#1A1A1A;color:#fff;border-color:#1A1A1A}
+.ps-tabs .tab-body{padding:4px 14px}
+.ps-tabs .tab-item{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid #F0ECE5;align-items:flex-start}
+.ps-tabs .tab-item:last-child{border-bottom:none}
+.ps-tabs .tab-item .dot{width:4px;height:4px;border-radius:50%;background:#C17A56;margin-top:6px;flex-shrink:0}
+.ps-tabs .tab-item .lbl{font-size:9px;font-weight:600;min-width:40px;flex-shrink:0}
+.ps-tabs .tab-item .dsc{font-size:9px;color:#6E6A63;line-height:1.45}
+
+/* Screen: Checklist */
+.ps-checklist{background:#1A1A1A;color:#fff}
+.ps-checklist .cl-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px}
+.ps-checklist .cl-head h3{font-family:var(--ff-d);font-size:14px;font-weight:600}
+.ps-checklist .cl-head .btn{padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:100px;font-size:8px;color:#fff}
+.ps-checklist .cl-item{display:flex;align-items:flex-start;gap:10px;padding:6px 14px}
+.ps-checklist .cl-num{width:18px;height:18px;border-radius:50%;border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:8px;color:#E8A97E;flex-shrink:0;margin-top:1px}
+.ps-checklist .cl-item p{font-size:9px;color:rgba(255,255,255,.8);line-height:1.45}
+
+/* Screen annotations */
+.screen-label{font-size:12px;font-weight:600;margin-top:20px;margin-bottom:4px}
+.screen-desc{font-size:12px;color:var(--text3);line-height:1.5;max-width:260px;text-align:center}
+
+/* ─── DESIGN TOKENS ─── */
+.tokens-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+.token-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;overflow:hidden}
+.token-card h4{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:16px}
+
+/* Color swatches */
+.swatches{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.swatch{width:48px;height:48px;border-radius:12px;position:relative;cursor:default;border:1px solid rgba(255,255,255,.06)}
+.swatch .name{position:absolute;bottom:-18px;left:0;font-size:9px;color:var(--text3);white-space:nowrap}
+.swatch .hex{position:absolute;bottom:-30px;left:0;font-size:9px;color:var(--text3);font-family:var(--ff-m);white-space:nowrap}
+
+/* Typography */
+.type-row{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.type-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.type-row .t-label{font-size:10px;color:var(--text3);margin-bottom:4px;font-family:var(--ff-m)}
+.type-row .t-sample-lg{font-family:var(--ff-d);font-size:28px;font-weight:700;letter-spacing:-.02em}
+.type-row .t-sample-md{font-family:var(--ff-d);font-size:18px;font-weight:600}
+.type-row .t-sample-body{font-family:var(--ff-b);font-size:14px;line-height:1.6}
+.type-row .t-sample-sm{font-family:var(--ff-b);font-size:12px;color:var(--text2)}
+
+/* Spacing */
+.spacing-list{display:flex;flex-direction:column;gap:10px}
+.spacing-row{display:flex;align-items:center;gap:12px}
+.spacing-bar{height:8px;border-radius:4px;background:var(--accent)}
+.spacing-row .s-val{font-size:10px;font-family:var(--ff-m);color:var(--text3);min-width:50px}
+.spacing-row .s-name{font-size:10px;color:var(--text2)}
+
+/* Components */
+.comp-list{display:flex;flex-direction:column;gap:14px}
+.comp-row{display:flex;align-items:center;gap:14px}
+.comp-row .c-preview{flex-shrink:0}
+.comp-row .c-info .c-name{font-size:12px;font-weight:600;margin-bottom:2px}
+.comp-row .c-info .c-spec{font-size:10px;color:var(--text3);font-family:var(--ff-m);line-height:1.5}
+
+/* Mini component previews */
+.mini-upload{width:120px;height:56px;border:1.5px dashed #555;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:7px;color:#888}
+.mini-tab{padding:4px 10px;border-radius:100px;font-size:9px;font-weight:500;display:inline-flex;align-items:center;gap:3px}
+.mini-tag{padding:2px 8px;border-radius:100px;font-size:8px;display:inline-block}
+.mini-seg{display:flex;background:#333;border-radius:6px;padding:1px;width:120px}
+.mini-seg span{flex:1;text-align:center;padding:3px 0;font-size:7px;border-radius:5px}
+
+/* ─── FLOW ARROWS ─── */
+.flow-section{margin-bottom:72px}
+.flow-row{display:flex;align-items:center;gap:24px;justify-content:center;flex-wrap:wrap;padding:20px 0}
+.flow-arrow{color:var(--accent);font-size:24px;flex-shrink:0}
+.flow-phone-mini{
+  width:100px;height:200px;background:#000;border-radius:18px;padding:5px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+}
+.flow-phone-mini .inner{width:100%;height:100%;border-radius:14px;overflow:hidden;background:#F7F4EF}
+.flow-phone-mini .inner img{width:100%;height:100%;object-fit:cover}
+.flow-phone-mini .inner.dark{background:#1A1A1A}
+.flow-label{font-size:10px;color:var(--text3);text-align:center;margin-top:8px}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  .spec{padding:24px 16px 60px}
+  .spec-header h1{font-size:28px}
+  .screens-grid{grid-template-columns:1fr}
+  .tokens-grid{grid-template-columns:1fr}
+  .flow-row{gap:12px}
+}
+</style>
+</head>
+<body>
+<div class="spec">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="spec-header">
+    <div class="tag">UI Design Spec · V1.0</div>
+    <h1>Photo<em>Whisper</em></h1>
+    <div class="meta">拍照助手 · 移动端优先 · 简洁摄影风 · 2026.06.26</div>
+  </div>
+
+  <!-- ═══ 01 USER FLOW ═══ -->
+  <div class="flow-section">
+    <div class="section-tag">01 · User Flow</div>
+    <div class="section-title">核心用户流程</div>
+    <div class="section-desc">上传 → 分析 → 结果（场景图 + Tab 分析 + 清单），全流程单手操作、三步完成。</div>
+    <div class="flow-row">
+      <div>
+        <div class="flow-phone-mini"><div class="inner" style="display:flex;align-items:center;justify-content:center;font-size:28px;background:#F7F4EF">📤</div></div>
+        <div class="flow-label">上传照片</div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div>
+        <div class="flow-phone-mini"><div class="inner" style="display:flex;align-items:center;justify-content:center;font-size:28px;background:#F7F4EF">🔍</div></div>
+        <div class="flow-label">AI 分析</div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div>
+        <div class="flow-phone-mini"><div class="inner" style="display:flex;align-items:center;justify-content:center;font-size:28px;background:#F7F4EF">🗺️</div></div>
+        <div class="flow-label">场景还原图</div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div>
+        <div class="flow-phone-mini"><div class="inner" style="display:flex;align-items:center;justify-content:center;font-size:28px;background:#F7F4EF">📋</div></div>
+        <div class="flow-label">Tab 分析</div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div>
+        <div class="flow-phone-mini"><div class="inner dark" style="display:flex;align-items:center;justify-content:center;font-size:28px">✅</div></div>
+        <div class="flow-label">拍摄清单</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 02 KEY SCREENS ═══ -->
+  <div class="section">
+    <div class="section-tag">02 · Key Screens</div>
+    <div class="section-title">关键页面设计</div>
+    <div class="section-desc">5 个核心页面的高保真展示，所有交互均适配 375×812（iPhone 标准尺寸）。</div>
+
+    <div class="screens-grid">
+
+      <!-- Screen 1: Landing -->
+      <div class="screen-col">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="ps ps-landing">
+              <div class="status-bar"><span class="time">9:41</span><span class="icons">
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="#1A1A1A"><rect x="0" y="6" width="2.5" height="4" rx=".5"/><rect x="3.5" y="4" width="2.5" height="6" rx=".5"/><rect x="7" y="2" width="2.5" height="8" rx=".5"/><rect x="10.5" y="0" width="2.5" height="10" rx=".5"/></svg>
+                <svg width="18" height="10" viewBox="0 0 18 10" fill="none"><rect x=".5" y=".5" width="15" height="9" rx="2" stroke="#1A1A1A" fill="none"/><rect x="2" y="2" width="10" height="6" rx="1" fill="#1A1A1A"/><rect x="16" y="3" width="1.5" height="4" rx=".5" fill="#1A1A1A"/></svg>
+              </span></div>
+              <div class="hero-area">
+                <div class="badge"><span class="dot"></span>AI 拍摄拆解工具</div>
+                <h2>看懂好照片<br>背后的<em>秘密</em></h2>
+                <div class="sub">上传一张参考照片，AI 帮你拆解姿势、机位、光线</div>
+                <div class="upload">
+                  <div class="ico">↑</div>
+                  <div class="t1">拖放或点击上传</div>
+                  <div class="t2">也可以 Ctrl+V 粘贴</div>
+                </div>
+                <div class="thumbs">
+                  <div class="th"><img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=140&fit=crop&q=80" alt=""></div>
+                  <div class="th"><img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=140&fit=crop&q=80" alt=""></div>
+                  <div class="th"><img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=100&h=140&fit=crop&q=80" alt=""></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">首页 · 上传入口</div>
+        <div class="screen-desc">极简 Hero 区，一句话说清价值。上传区支持拖放、点击、粘贴三种方式。</div>
+      </div>
+
+      <!-- Screen 2: Results Photo -->
+      <div class="screen-col">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="ps ps-results">
+              <div class="status-bar" style="position:absolute;z-index:2;color:#fff"><span class="time">9:41</span><span class="icons">
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="#fff"><rect x="0" y="6" width="2.5" height="4" rx=".5"/><rect x="3.5" y="4" width="2.5" height="6" rx=".5"/><rect x="7" y="2" width="2.5" height="8" rx=".5"/><rect x="10.5" y="0" width="2.5" height="10" rx=".5"/></svg>
+                <svg width="18" height="10" viewBox="0 0 18 10" fill="none"><rect x=".5" y=".5" width="15" height="9" rx="2" stroke="#fff" fill="none"/><rect x="2" y="2" width="10" height="6" rx="1" fill="#fff"/><rect x="16" y="3" width="1.5" height="4" rx=".5" fill="#fff"/></svg>
+              </span></div>
+              <div class="photo-area">
+                <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=500&fit=crop&q=85" alt="">
+                <svg class="grid-overlay" viewBox="0 0 256 320" preserveAspectRatio="none">
+                  <line x1="85" y1="0" x2="85" y2="320"/><line x1="171" y1="0" x2="171" y2="320"/>
+                  <line x1="0" y1="107" x2="256" y2="107"/><line x1="0" y1="213" x2="256" y2="213"/>
+                  <circle cx="171" cy="130" r="6"/>
+                </svg>
+                <div class="comp-tag">三分法 · 右侧1/3竖线</div>
+              </div>
+              <div class="summary">
+                <div class="quote">"黄金时段侧逆光 + 微仰视角，打造温暖户外人像"</div>
+                <div class="tags">
+                  <span>户外人像</span><span>黄金时段</span><span>侧逆光</span><span>三分法</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">结果页 · 照片 + 构图叠加</div>
+        <div class="screen-desc">参考照片占满屏宽，叠加三分法网格和主体标记点。下方一句话总结 + 标签。</div>
+      </div>
+
+      <!-- Screen 3: Scene Diagram -->
+      <div class="screen-col">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="ps ps-diagram">
+              <div class="status-bar"><span class="time">9:41</span><span class="icons">
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="#1A1A1A"><rect x="0" y="6" width="2.5" height="4" rx=".5"/><rect x="3.5" y="4" width="2.5" height="6" rx=".5"/><rect x="7" y="2" width="2.5" height="8" rx=".5"/><rect x="10.5" y="0" width="2.5" height="10" rx=".5"/></svg>
+                <svg width="18" height="10" viewBox="0 0 18 10" fill="none"><rect x=".5" y=".5" width="15" height="9" rx="2" stroke="#1A1A1A" fill="none"/><rect x="2" y="2" width="10" height="6" rx="1" fill="#1A1A1A"/><rect x="16" y="3" width="1.5" height="4" rx=".5" fill="#1A1A1A"/></svg>
+              </span></div>
+              <div class="diagram-header"><span class="label">场景还原</span></div>
+              <div class="seg">
+                <button class="on">俯视图 · 位置关系</button>
+                <button>侧视图 · 拍摄角度</button>
+              </div>
+              <div class="diagram-body">
+                <svg viewBox="0 0 200 220" width="200" xmlns="http://www.w3.org/2000/svg">
+                  <g opacity=".15"><line x1="0" y1="44" x2="200" y2="44" stroke="#ccc" stroke-width=".5"/><line x1="0" y1="88" x2="200" y2="88" stroke="#ccc" stroke-width=".5"/><line x1="0" y1="132" x2="200" y2="132" stroke="#ccc" stroke-width=".5"/><line x1="0" y1="176" x2="200" y2="176" stroke="#ccc" stroke-width=".5"/><line x1="40" y1="0" x2="40" y2="220" stroke="#ccc" stroke-width=".5"/><line x1="80" y1="0" x2="80" y2="220" stroke="#ccc" stroke-width=".5"/><line x1="120" y1="0" x2="120" y2="220" stroke="#ccc" stroke-width=".5"/><line x1="160" y1="0" x2="160" y2="220" stroke="#ccc" stroke-width=".5"/></g>
+                  <!-- FOV -->
+                  <path d="M100 180 L80 80 L120 80 Z" fill="#5B8FB9" opacity=".06"/>
+                  <line x1="100" y1="180" x2="80" y2="80" stroke="#5B8FB9" stroke-width=".8" opacity=".15" stroke-dasharray="3 2"/>
+                  <line x1="100" y1="180" x2="120" y2="80" stroke="#5B8FB9" stroke-width=".8" opacity=".15" stroke-dasharray="3 2"/>
+                  <!-- Distance -->
+                  <line x1="100" y1="180" x2="100" y2="90" stroke="#5B8FB9" stroke-width="1" stroke-dasharray="4 3" opacity=".25"/>
+                  <text x="62" y="138" fill="#5B8FB9" font-size="7" font-family="IBM Plex Sans" opacity=".6">约 2~3 米</text>
+                  <!-- Light rays -->
+                  <line x1="55" y1="55" x2="108" y2="95" stroke="#D4A24E" stroke-width="1.2" opacity=".25" stroke-linecap="round"/>
+                  <line x1="60" y1="45" x2="105" y2="88" stroke="#D4A24E" stroke-width="1.2" opacity=".25" stroke-linecap="round"/>
+                  <line x1="65" y1="55" x2="108" y2="82" stroke="#D4A24E" stroke-width="1.2" opacity=".25" stroke-linecap="round"/>
+                  <!-- Sun -->
+                  <circle cx="50" cy="48" r="10" fill="#D4A24E" opacity=".12" stroke="#D4A24E" stroke-width="1"/>
+                  <text x="50" y="52" text-anchor="middle" font-size="10">☀</text>
+                  <text x="50" y="68" text-anchor="middle" fill="#D4A24E" font-size="6.5" font-family="IBM Plex Sans">侧逆光</text>
+                  <!-- Subject -->
+                  <circle cx="100" cy="90" r="10" fill="#C17A56" opacity=".12" stroke="#C17A56" stroke-width="1.5"/>
+                  <circle cx="100" cy="90" r="4" fill="#C17A56"/>
+                  <text x="100" y="76" text-anchor="middle" fill="#C17A56" font-size="8" font-weight="600" font-family="IBM Plex Sans">被拍人</text>
+                  <!-- Photographer -->
+                  <rect x="92" y="172" width="16" height="16" rx="4" fill="#5B8FB9" opacity=".12" stroke="#5B8FB9" stroke-width="1.5"/>
+                  <text x="100" y="183" text-anchor="middle" font-size="9">📱</text>
+                  <text x="100" y="200" text-anchor="middle" fill="#5B8FB9" font-size="8" font-weight="600" font-family="IBM Plex Sans">摄影师</text>
+                </svg>
+              </div>
+              <div class="legend">
+                <div class="li"><div class="ld" style="background:#C17A56"></div>被拍人</div>
+                <div class="li"><div class="ld" style="background:#5B8FB9"></div>摄影师</div>
+                <div class="li"><div class="ld" style="background:#D4A24E"></div>光源</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">结果页 · 场景还原图</div>
+        <div class="screen-desc">Segment Control 切换俯视/侧视，SVG 矢量图清晰展示位置关系、光线方向和拍摄距离。</div>
+      </div>
+
+      <!-- Screen 4: Analysis Tabs -->
+      <div class="screen-col">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="ps ps-tabs">
+              <div class="status-bar"><span class="time">9:41</span><span class="icons">
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="#1A1A1A"><rect x="0" y="6" width="2.5" height="4" rx=".5"/><rect x="3.5" y="4" width="2.5" height="6" rx=".5"/><rect x="7" y="2" width="2.5" height="8" rx=".5"/><rect x="10.5" y="0" width="2.5" height="10" rx=".5"/></svg>
+                <svg width="18" height="10" viewBox="0 0 18 10" fill="none"><rect x=".5" y=".5" width="15" height="9" rx="2" stroke="#1A1A1A" fill="none"/><rect x="2" y="2" width="10" height="6" rx="1" fill="#1A1A1A"/><rect x="16" y="3" width="1.5" height="4" rx=".5" fill="#1A1A1A"/></svg>
+              </span></div>
+              <div class="tab-label">拍摄拆解</div>
+              <div class="tab-bar">
+                <div class="tb on">🧍 被拍人</div>
+                <div class="tb">📸 摄影师</div>
+                <div class="tb">☀️ 光线</div>
+                <div class="tb">📐 构图</div>
+                <div class="tb">⚙️ 设置</div>
+              </div>
+              <div class="tab-body">
+                <div class="tab-item"><span class="dot"></span><span class="lbl">身体朝向</span><span class="dsc">与镜头呈约 30° 角，微侧身，自然放松</span></div>
+                <div class="tab-item"><span class="dot"></span><span class="lbl">姿势</span><span class="dsc">自然站立，重心后脚，前脚轻点地面</span></div>
+                <div class="tab-item"><span class="dot"></span><span class="lbl">面部</span><span class="dsc">脸微转向镜头，目光直视或略偏上</span></div>
+                <div class="tab-item"><span class="dot"></span><span class="lbl">手部</span><span class="dsc">一手轻触头发或自然垂落，避免僵硬</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">结果页 · Tab 分析</div>
+        <div class="screen-desc">6 个分析维度做成横向滑动 Tab，每次只看一个模块，减少信息过载。</div>
+      </div>
+
+      <!-- Screen 5: Checklist -->
+      <div class="screen-col">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="ps ps-checklist">
+              <div class="status-bar" style="color:#fff"><span class="time">9:41</span><span class="icons">
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="#fff"><rect x="0" y="6" width="2.5" height="4" rx=".5"/><rect x="3.5" y="4" width="2.5" height="6" rx=".5"/><rect x="7" y="2" width="2.5" height="8" rx=".5"/><rect x="10.5" y="0" width="2.5" height="10" rx=".5"/></svg>
+                <svg width="18" height="10" viewBox="0 0 18 10" fill="none"><rect x=".5" y=".5" width="15" height="9" rx="2" stroke="#fff" fill="none"/><rect x="2" y="2" width="10" height="6" rx="1" fill="#fff"/><rect x="16" y="3" width="1.5" height="4" rx=".5" fill="#fff"/></svg>
+              </span></div>
+              <div class="cl-head">
+                <h3>拍摄清单</h3>
+                <div class="btn">☑ 保存</div>
+              </div>
+              <div class="cl-item"><span class="cl-num">01</span><p>日落前 1h 到户外开阔场地</p></div>
+              <div class="cl-item"><span class="cl-num">02</span><p>人物侧身 30°，重心后移</p></div>
+              <div class="cl-item"><span class="cl-num">03</span><p>手机竖屏，略低于眼部高度</p></div>
+              <div class="cl-item"><span class="cl-num">04</span><p>开人像模式，对焦眼睛</p></div>
+              <div class="cl-item"><span class="cl-num">05</span><p>利用逆光制造头发光晕</p></div>
+              <div class="cl-item"><span class="cl-num">06</span><p>三分法构图，人物放右侧 1/3</p></div>
+              <div class="cl-item"><span class="cl-num">07</span><p>降曝光保留天空细节</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">结果页 · 拍摄清单</div>
+        <div class="screen-desc">深色底卡片突出行动感，7 条精简步骤可一键复制。用户带着这张清单就能去现场拍。</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ 03 DESIGN TOKENS ═══ -->
+  <div class="section">
+    <div class="section-tag">03 · Design Tokens</div>
+    <div class="section-title">设计系统</div>
+    <div class="section-desc">统一的色彩、字体、间距规范，确保所有页面视觉一致性。</div>
+
+    <div class="tokens-grid">
+
+      <!-- Colors -->
+      <div class="token-card">
+        <h4>色彩 Color</h4>
+        <div style="margin-bottom:28px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:10px">基础色</div>
+          <div class="swatches">
+            <div class="swatch" style="background:#F7F4EF"><div class="name">BG</div><div class="hex">#F7F4EF</div></div>
+            <div class="swatch" style="background:#FFFFFF;border-color:#ddd"><div class="name">Surface</div><div class="hex">#FFFFFF</div></div>
+            <div class="swatch" style="background:#1A1A1A"><div class="name">Text</div><div class="hex">#1A1A1A</div></div>
+            <div class="swatch" style="background:#6E6A63"><div class="name">Text 2</div><div class="hex">#6E6A63</div></div>
+            <div class="swatch" style="background:#A09A90"><div class="name">Text 3</div><div class="hex">#A09A90</div></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:10px">品牌色 & 场景图色</div>
+          <div class="swatches">
+            <div class="swatch" style="background:#C17A56"><div class="name">Accent</div><div class="hex">#C17A56</div></div>
+            <div class="swatch" style="background:#E8A97E"><div class="name">Accent Lt</div><div class="hex">#E8A97E</div></div>
+            <div class="swatch" style="background:#5B8FB9"><div class="name">摄影师</div><div class="hex">#5B8FB9</div></div>
+            <div class="swatch" style="background:#D4A24E"><div class="name">光源</div><div class="hex">#D4A24E</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typography -->
+      <div class="token-card">
+        <h4>字体 Typography</h4>
+        <div class="type-row">
+          <div class="t-label">Display · Playfair Display 700</div>
+          <div class="t-sample-lg">看懂好照片的秘密</div>
+        </div>
+        <div class="type-row">
+          <div class="t-label">Heading · Playfair Display 600</div>
+          <div class="t-sample-md">拍摄拆解报告</div>
+        </div>
+        <div class="type-row">
+          <div class="t-label">Body · IBM Plex Sans 400</div>
+          <div class="t-sample-body">上传一张参考照片，AI 帮你拆解姿势、机位、光线——给你可直接执行的拍摄指南。</div>
+        </div>
+        <div class="type-row">
+          <div class="t-label">Caption · IBM Plex Sans 500 · 12px</div>
+          <div class="t-sample-sm">三分法 · 右侧1/3竖线</div>
+        </div>
+      </div>
+
+      <!-- Spacing -->
+      <div class="token-card">
+        <h4>间距 Spacing</h4>
+        <div class="spacing-list">
+          <div class="spacing-row"><div class="spacing-bar" style="width:4px"></div><span class="s-val">4px</span><span class="s-name">Compact · 标签内间距</span></div>
+          <div class="spacing-row"><div class="spacing-bar" style="width:8px"></div><span class="s-val">8px</span><span class="s-name">Tight · 图标与文字间距</span></div>
+          <div class="spacing-row"><div class="spacing-bar" style="width:12px"></div><span class="s-val">12px</span><span class="s-name">Small · 列表项间距</span></div>
+          <div class="spacing-row"><div class="spacing-bar" style="width:16px"></div><span class="s-val">16px</span><span class="s-name">Base · 页面边距</span></div>
+          <div class="spacing-row"><div class="spacing-bar" style="width:24px"></div><span class="s-val">24px</span><span class="s-name">Medium · 模块间距</span></div>
+          <div class="spacing-row"><div class="spacing-bar" style="width:32px"></div><span class="s-val">32px</span><span class="s-name">Large · 区块间距</span></div>
+          <div class="spacing-row"><div class="spacing-bar" style="width:48px"></div><span class="s-val">48px</span><span class="s-name">XL · 大段落间距</span></div>
+        </div>
+      </div>
+
+      <!-- Components -->
+      <div class="token-card">
+        <h4>组件 Components</h4>
+        <div class="comp-list">
+          <div class="comp-row">
+            <div class="c-preview"><div class="mini-upload">↑<span style="font-size:6px">拖放或点击上传</span></div></div>
+            <div class="c-info"><div class="c-name">Upload Zone</div><div class="c-spec">border: 2px dashed #E3DED6<br>radius: 20px · bg: #FFFFFF<br>active: border→accent, bg→accent-bg</div></div>
+          </div>
+          <div class="comp-row">
+            <div class="c-preview">
+              <div style="display:flex;gap:4px">
+                <span class="mini-tab" style="background:#1A1A1A;color:#fff">🧍 被拍人</span>
+                <span class="mini-tab" style="border:1.5px solid #E3DED6;color:#6E6A63">📸 摄影师</span>
+              </div>
+            </div>
+            <div class="c-info"><div class="c-name">Tab Pill</div><div class="c-spec">radius: 100px · padding: 8px 14px<br>active: bg #1A1A1A, text #FFF<br>font: 12px/500</div></div>
+          </div>
+          <div class="comp-row">
+            <div class="c-preview">
+              <div style="display:flex;gap:4px">
+                <span class="mini-tag" style="background:#EDEAE3;color:#6E6A63">户外人像</span>
+                <span class="mini-tag" style="background:#EDEAE3;color:#6E6A63">黄金时段</span>
+              </div>
+            </div>
+            <div class="c-info"><div class="c-name">Tag</div><div class="c-spec">radius: 100px · padding: 5px 14px<br>bg: #EDEAE3 · border: 1px #F0ECE5<br>font: 12px/500</div></div>
+          </div>
+          <div class="comp-row">
+            <div class="c-preview"><div class="mini-seg"><span style="background:#fff;color:#1A1A1A">俯视图</span><span style="color:#6E6A63">侧视图</span></div></div>
+            <div class="c-info"><div class="c-name">Segment Control</div><div class="c-spec">bg: #EDEAE3 · radius: 10px<br>active: bg #FFF, shadow-sm<br>font: 12px/500</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ 04 INTERACTION NOTES ═══ -->
+  <div class="section">
+    <div class="section-tag">04 · Interaction Notes</div>
+    <div class="section-title">交互细节</div>
+
+    <div class="tokens-grid">
+      <div class="token-card">
+        <h4>页面切换</h4>
+        <div style="font-size:13px;color:var(--text2);line-height:1.7">
+          <p style="margin-bottom:10px"><strong style="color:var(--text)">Landing → Analyzing：</strong>点击上传/示例后，0.25s fade-out → 显示扫描动画。扫描线从上到下循环 2.5s，4 个分析步骤依次亮起（间隔 0.8s）。</p>
+          <p><strong style="color:var(--text)">Analyzing → Results：</strong>全部步骤完成后 0.5s → fade-in 结果页。构图网格 0.6s 淡入 → 场景图区域 0.2s 后浮现 → Tab 区域 0.3s 后浮现 → 清单卡片 0.4s 后浮现。</p>
+        </div>
+      </div>
+      <div class="token-card">
+        <h4>手势与触控</h4>
+        <div style="font-size:13px;color:var(--text2);line-height:1.7">
+          <p style="margin-bottom:10px"><strong style="color:var(--text)">Tab Bar 横向滑动：</strong>overflow-x: auto + -webkit-overflow-scrolling: touch。选中 Tab 自动 scrollIntoView 居中。</p>
+          <p style="margin-bottom:10px"><strong style="color:var(--text)">Segment Control：</strong>点击切换俯视/侧视，SVG 图表 0.3s 交叉淡入。</p>
+          <p><strong style="color:var(--text)">按钮触控反馈：</strong>:active 状态 scale(0.96) + 无 -webkit-tap-highlight-color。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

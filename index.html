@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyHtml — Tools & Dashboards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0C0C0F;--surface:#16161A;--card:#1C1C22;
+  --text:#ECEAE6;--text2:#8A8A8E;--text3:#55555A;
+  --accent:#C17A56;--accent-lt:#E8A97E;
+  --green:#34D399;--blue:#60A5FA;--purple:#A78BFA;--red:#F87171;
+  --border:#2A2A30;
+  --ff-b:'Inter',-apple-system,sans-serif;
+  --ff-d:'Playfair Display',serif;
+  --ff-m:'IBM Plex Mono',monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--ff-b);background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ─── BACKGROUND GRADIENT ─── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 20%, rgba(193,122,86,.06) 0%, transparent 70%),
+    radial-gradient(ellipse 500px 500px at 80% 80%, rgba(96,165,250,.04) 0%, transparent 70%);
+}
+
+/* ─── LAYOUT ─── */
+.wrap{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:60px 20px 80px}
+
+/* ─── HEADER ─── */
+.header{text-align:center;margin-bottom:56px;animation:fadeIn .8s var(--ease) both}
+.header .logo{font-family:var(--ff-d);font-size:28px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px}
+.header .logo em{font-style:italic;color:var(--accent)}
+.header .subtitle{font-size:13px;color:var(--text2);line-height:1.6}
+.header .divider{width:40px;height:1px;background:var(--border);margin:20px auto 0}
+
+/* ─── NAV CARDS ─── */
+.cards{display:flex;flex-direction:column;gap:14px}
+
+.nav-card{
+  display:flex;align-items:center;gap:16px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:20px 22px;
+  text-decoration:none;color:var(--text);
+  transition:all .35s var(--ease);
+  cursor:pointer;position:relative;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+  animation:fadeIn .6s var(--ease) both;
+}
+.nav-card:nth-child(1){animation-delay:.1s}
+.nav-card:nth-child(2){animation-delay:.2s}
+.nav-card:nth-child(3){animation-delay:.3s}
+
+.nav-card::before{
+  content:'';position:absolute;inset:0;opacity:0;
+  transition:opacity .35s;pointer-events:none;
+}
+.nav-card:hover{
+  border-color:rgba(255,255,255,.1);
+  transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(0,0,0,.3);
+}
+.nav-card:hover::before{opacity:1}
+.nav-card:active{transform:translateY(0) scale(.99)}
+
+/* Card glow variants */
+.nav-card.glow-orange::before{background:radial-gradient(ellipse 300px 200px at 80% 50%, rgba(193,122,86,.08), transparent)}
+.nav-card.glow-blue::before{background:radial-gradient(ellipse 300px 200px at 80% 50%, rgba(96,165,250,.06), transparent)}
+.nav-card.glow-green::before{background:radial-gradient(ellipse 300px 200px at 80% 50%, rgba(52,211,153,.06), transparent)}
+
+/* Icon */
+.card-icon{
+  width:48px;height:48px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:22px;position:relative;z-index:1;
+}
+.card-icon.orange{background:rgba(193,122,86,.12);border:1px solid rgba(193,122,86,.2)}
+.card-icon.blue{background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.15)}
+.card-icon.green{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.15)}
+
+/* Text */
+.card-body{flex:1;min-width:0;position:relative;z-index:1}
+.card-body h3{font-size:15px;font-weight:600;margin-bottom:3px;letter-spacing:-.01em}
+.card-body p{font-size:12px;color:var(--text2);line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Arrow */
+.card-arrow{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;position:relative;z-index:1;
+  transition:all .3s var(--ease);
+}
+.card-arrow svg{width:16px;height:16px;stroke:var(--text3);stroke-width:2;fill:none;transition:stroke .3s}
+.nav-card:hover .card-arrow{background:rgba(255,255,255,.05)}
+.nav-card:hover .card-arrow svg{stroke:var(--text)}
+
+/* Badge */
+.card-badge{
+  font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 8px;border-radius:100px;flex-shrink:0;position:relative;z-index:1;
+}
+.card-badge.lock{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.15)}
+.card-badge.live{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.15)}
+
+/* ─── FOOTER ─── */
+.footer{text-align:center;margin-top:48px;animation:fadeIn .8s var(--ease) .5s both}
+.footer .line{width:40px;height:1px;background:var(--border);margin:0 auto 16px}
+.footer p{font-size:11px;color:var(--text3);font-family:var(--ff-m)}
+
+/* ─── KEYFRAMES ─── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── DESKTOP ─── */
+@media(min-width:640px){
+  .wrap{padding:80px 32px 100px}
+  .header{margin-bottom:64px}
+  .header .logo{font-size:34px}
+  .cards{gap:16px}
+  .nav-card{padding:24px 28px;gap:20px}
+  .card-icon{width:52px;height:52px;font-size:24px}
+  .card-body h3{font-size:16px}
+  .card-body p{font-size:13px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo">My<em>Html</em></div>
+    <div class="subtitle">Tools & Dashboards</div>
+    <div class="divider"></div>
+  </div>
+
+  <div class="cards">
+
+    <!-- PhotoWhisper -->
+    <a class="nav-card glow-orange" href="photowhisper/index.html">
+      <div class="card-icon orange">📷</div>
+      <div class="card-body">
+        <h3>PhotoWhisper</h3>
+        <p>AI 拍摄拆解 — 上传参考照片，还原姿势、机位、光线</p>
+      </div>
+      <span class="card-badge live">LIVE</span>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+
+    <!-- Data Analysis -->
+    <a class="nav-card glow-blue" href="dashboard/QR数据看盘.html" id="card-data">
+      <div class="card-icon blue">📊</div>
+      <div class="card-body">
+        <h3>数据看盘</h3>
+        <p>QR Scan Max 广告数据分析与商业化指标追踪</p>
+      </div>
+      <span class="card-badge lock">🔒 需验证</span>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+
+    <!-- AI Image -->
+    <a class="nav-card glow-orange" href="aiimage/index.html" id="card-aiimage">
+      <div class="card-icon orange">🎨</div>
+      <div class="card-body">
+        <h3>AI 图片工坊</h3>
+        <p>ChatGPT / Gemini 文生图 & 图生图，AI 对话式创作</p>
+      </div>
+      <span class="card-badge lock">🔒 需验证</span>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+
+    <!-- QR Ad Page -->
+    <a class="nav-card glow-green" href="qr/qr_home.html">
+      <div class="card-icon green">📱</div>
+      <div class="card-body">
+        <h3>QR Scan Max</h3>
+        <p>App 推广落地页 — 扫码下载体验</p>
+      </div>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+
+  </div>
+
+  <div class="footer">
+    <div class="line"></div>
+    <p>© 2026 MyHtml</p>
+  </div>
+
+</div>
+
+<script>
+// ─── Password gate for Data Analysis page ───
+(function(){
+  const TARGET_HASH = -551981607;
+  const TARGET_XOR  = 'MSQYTkljAEBJYA9I';
+  const KEY = 'pW9x';
+
+  function check(input) {
+    let h = 0;
+    for (let i = 0; i < input.length; i++) h = ((h << 5) - h + input.charCodeAt(i)) | 0;
+    if (h !== TARGET_HASH) return false;
+    const x = [];
+    for (let i = 0; i < input.length; i++) x.push(input.charCodeAt(i) ^ KEY.charCodeAt(i % KEY.length));
+    return btoa(String.fromCharCode(...x)) === TARGET_XOR;
+  }
+
+  const card = document.getElementById('card-data');
+  const card2 = document.getElementById('card-aiimage');
+
+  function gateCard(el) {
+    if (!el) return;
+    el.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (sessionStorage.getItem('_v') === '1') {
+        window.location.href = el.href;
+        return;
+      }
+      showAuth(el.href);
+    });
+  }
+  gateCard(card);
+  gateCard(card2);
+
+  function showAuth(targetUrl) {
+    // Remove existing overlay
+    const old = document.getElementById('auth-overlay');
+    if (old) old.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'auth-overlay';
+    overlay.innerHTML = `
+      <style>
+        #auth-overlay{position:fixed;inset:0;z-index:9999;background:rgba(12,12,15,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:center;animation:authFadeIn .3s ease}
+        @keyframes authFadeIn{from{opacity:0}to{opacity:1}}
+        .auth-box{background:#1C1C22;border:1px solid #2A2A30;border-radius:20px;padding:32px 28px;width:90%;max-width:340px;text-align:center;animation:authSlideUp .35s cubic-bezier(.22,1,.36,1)}
+        @keyframes authSlideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        .auth-box .lock-icon{font-size:32px;margin-bottom:12px}
+        .auth-box h3{font-family:var(--ff-b);font-size:16px;font-weight:600;color:#ECEAE6;margin-bottom:6px}
+        .auth-box p{font-size:12px;color:#8A8A8E;margin-bottom:20px;line-height:1.5}
+        .auth-input{width:100%;padding:12px 16px;border:1.5px solid #2A2A30;border-radius:12px;background:#16161A;color:#ECEAE6;font-size:14px;font-family:var(--ff-m);outline:none;transition:border-color .25s;text-align:center;letter-spacing:.08em}
+        .auth-input:focus{border-color:rgba(96,165,250,.5)}
+        .auth-input.err{border-color:rgba(248,113,113,.5);animation:authShake .4s ease}
+        @keyframes authShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+        .auth-btn{width:100%;margin-top:12px;padding:12px;border:none;border-radius:12px;background:rgba(96,165,250,.15);color:#60A5FA;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--ff-b);transition:all .25s}
+        .auth-btn:hover{background:rgba(96,165,250,.25)}
+        .auth-btn:active{transform:scale(.97)}
+        .auth-cancel{margin-top:12px;font-size:12px;color:#55555A;cursor:pointer;background:none;border:none;font-family:var(--ff-b);transition:color .2s}
+        .auth-cancel:hover{color:#8A8A8E}
+        .auth-err-msg{font-size:11px;color:#F87171;margin-top:8px;min-height:16px}
+      </style>
+      <div class="auth-box">
+        <div class="lock-icon">🔒</div>
+        <h3>需要验证</h3>
+        <p>此页面包含内部数据，请输入访问密码</p>
+        <input class="auth-input" id="auth-pw" type="password" placeholder="输入密码" autocomplete="off" autofocus>
+        <div class="auth-err-msg" id="auth-err"></div>
+        <button class="auth-btn" id="auth-submit">验证并进入</button>
+        <button class="auth-cancel" id="auth-close">取消</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const input = document.getElementById('auth-pw');
+    const submitBtn = document.getElementById('auth-submit');
+    const closeBtn = document.getElementById('auth-close');
+    const errMsg = document.getElementById('auth-err');
+
+    function attempt() {
+      const val = input.value;
+      if (!val) { input.focus(); return; }
+      if (check(val)) {
+        sessionStorage.setItem('_v', '1');
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity .25s';
+        setTimeout(() => { overlay.remove(); window.location.href = targetUrl; }, 250);
+      } else {
+        input.classList.add('err');
+        errMsg.textContent = '密码错误，请重试';
+        setTimeout(() => { input.classList.remove('err'); }, 500);
+        input.select();
+      }
+    }
+
+    submitBtn.addEventListener('click', attempt);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+    closeBtn.addEventListener('click', () => {
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity .2s';
+      setTimeout(() => overlay.remove(), 200);
+    });
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) {
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity .2s';
+        setTimeout(() => overlay.remove(), 200);
+      }
+    });
+    setTimeout(() => input.focus(), 100);
+  }
+
+  // Auto-focus: if URL hash matches, trigger auth immediately
+  if (window.location.hash === '#data' && card) {
+    showAuth(card.href);
+  } else if (window.location.hash === '#aiimage' && card2) {
+    showAuth(card2.href);
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PhotoWhisper — 拆解每一张好照片</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Serif+SC:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F4EF;--bg-deep:#EDEAE3;--surface:#fff;
+  --text:#1A1A1A;--text2:#6E6A63;--text3:#A09A90;
+  --accent:#C17A56;--accent-lt:#E8A97E;--accent-bg:#FDF5EE;
+  --border:#E3DED6;--border-lt:#F0ECE5;
+  --sh-sm:0 1px 3px rgba(26,26,26,.04);
+  --sh-md:0 4px 16px rgba(26,26,26,.06);
+  --sh-lg:0 8px 32px rgba(26,26,26,.08);
+  --r:14px;--r-lg:20px;
+  --ff-d:'Playfair Display','Noto Serif SC',serif;
+  --ff-b:'IBM Plex Sans',-apple-system,sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --c-sub:#C17A56;--c-pho:#5B8FB9;--c-lit:#D4A24E;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ─── NAV ─── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;background:rgba(247,244,239,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border-lt)}
+.nav-logo{font-family:var(--ff-d);font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
+.nav-logo .dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.nav-back{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--text2);background:none;border:none;cursor:pointer;font-family:var(--ff-b);font-weight:500;padding:6px 0}
+
+/* ─── VIEWS ─── */
+.view{display:none;opacity:0;transition:opacity .4s var(--ease)}.view.active{display:block;opacity:1}
+
+/* ─── HERO ─── */
+.hero{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:80px 20px 40px;position:relative}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border:1px solid var(--border);border-radius:100px;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:28px;animation:fadeIn .7s var(--ease) both}
+.hero-badge .ld{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+.hero h1{font-family:var(--ff-d);font-size:32px;font-weight:700;line-height:1.2;letter-spacing:-.02em;margin-bottom:16px;animation:fadeIn .7s var(--ease) .08s both}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero-sub{font-size:14px;color:var(--text2);max-width:320px;line-height:1.65;margin-bottom:36px;animation:fadeIn .7s var(--ease) .16s both}
+
+/* ─── UPLOAD ─── */
+.upload-zone{width:100%;max-width:360px;border:2px dashed var(--border);border-radius:var(--r-lg);padding:32px 20px;text-align:center;cursor:pointer;transition:all .3s var(--ease);background:var(--surface);animation:fadeIn .7s var(--ease) .24s both;-webkit-tap-highlight-color:transparent}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:var(--accent-bg)}
+.upload-icon{width:48px;height:48px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;transition:all .3s}
+.upload-zone:hover .upload-icon{background:var(--accent)}
+.upload-icon svg{width:20px;height:20px;stroke:var(--text2);transition:stroke .3s}
+.upload-zone:hover .upload-icon svg{stroke:#fff}
+.upload-title{font-size:14px;font-weight:600;margin-bottom:6px}
+.upload-hint{font-size:12px;color:var(--text3)}
+.upload-formats{display:flex;gap:5px;justify-content:center;margin-top:12px}
+.upload-formats span{font-size:10px;font-weight:500;padding:2px 8px;border-radius:100px;background:var(--bg);color:var(--text3);letter-spacing:.04em}
+#file-input{display:none}
+
+/* ─── EXAMPLES ─── */
+.examples{margin-top:40px;animation:fadeIn .7s var(--ease) .32s both}
+.examples-label{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
+.examples-grid{display:flex;gap:10px;justify-content:center}
+.example-thumb{width:90px;height:120px;border-radius:var(--r);overflow:hidden;cursor:pointer;position:relative;border:2px solid transparent;transition:all .3s var(--ease);-webkit-tap-highlight-color:transparent}
+.example-thumb:active{transform:scale(.95)}
+.example-thumb img{width:100%;height:100%;object-fit:cover}
+.example-thumb .overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.55),transparent 50%);display:flex;align-items:flex-end;padding:8px}
+.example-thumb .overlay span{color:#fff;font-size:10px;font-weight:500}
+
+/* ─── FEATURES (hidden on mobile, shown on desktop) ─── */
+.features-section{display:none}
+
+/* ─── ANALYZING ─── */
+.analyzing-view{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;text-align:center}
+.analyzing-photo{width:180px;height:240px;border-radius:var(--r);overflow:hidden;margin-bottom:36px;box-shadow:var(--sh-lg);position:relative}
+.analyzing-photo img{width:100%;height:100%;object-fit:cover}
+.analyzing-photo .scan-line{position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:scan 2.5s ease-in-out infinite;box-shadow:0 0 16px var(--accent)}
+.analyzing-spinner{width:40px;height:40px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .9s linear infinite;margin-bottom:24px}
+.analyzing-text{font-size:15px;font-weight:500;margin-bottom:6px}
+.analyzing-subtext{font-size:12px;color:var(--text3)}
+.analyzing-error{margin-top:20px;padding:12px 20px;background:rgba(196,68,68,.08);border:1px solid rgba(196,68,68,.2);border-radius:var(--r);font-size:13px;color:#C44;max-width:320px;display:none}
+.analyzing-error.vis{display:block;animation:fadeIn .3s var(--ease)}
+.analyzing-steps{display:flex;flex-direction:column;gap:10px;margin-top:28px}
+.analyzing-step{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3);transition:color .4s}
+.analyzing-step.active{color:var(--accent)}
+.analyzing-step.done{color:var(--text2)}
+.step-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:all .4s;flex-shrink:0}
+.analyzing-step.active .step-dot{background:var(--accent);box-shadow:0 0 6px var(--accent-lt);animation:pulse 1.5s infinite}
+.analyzing-step.done .step-dot{background:var(--text2)}
+
+/* ═══════════════════════════════════════════
+   RESULTS — MOBILE FIRST
+   ═══════════════════════════════════════════ */
+.results-view{padding-top:52px}
+
+/* Photo hero */
+.r-photo{width:100%;aspect-ratio:4/5;overflow:hidden;position:relative}
+.r-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.r-photo .comp-grid{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .6s}
+.r-photo .comp-grid.vis{opacity:1}
+.r-photo .comp-grid line{stroke:rgba(255,255,255,.4);stroke-width:1;stroke-dasharray:4 3}
+.r-photo .comp-grid circle{fill:var(--accent);opacity:.9}
+.r-photo .comp-grid text{fill:#fff;font-size:10px;font-family:var(--ff-b);font-weight:500}
+.comp-badge{position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-size:11px;font-weight:500;padding:5px 14px;border-radius:100px;opacity:0;transition:opacity .5s .4s}
+.comp-grid.vis ~ .comp-badge{opacity:1}
+
+/* Scroll hint */
+.scroll-hint-bar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:90;opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
+.scroll-hint-bar.vis{opacity:1}
+.scroll-hint-bar.gone{opacity:0;transition:opacity .3s}
+.scroll-hint-bar .sh-text{font-size:11px;font-weight:500;color:#fff;background:rgba(26,26,26,.65);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:6px 16px;border-radius:100px;white-space:nowrap}
+.scroll-hint-bar .sh-arrow{width:20px;height:20px;display:flex;align-items:center;justify-content:center;animation:shBounce 1.8s ease-in-out infinite}
+.scroll-hint-bar .sh-arrow svg{width:14px;height:14px;stroke:rgba(26,26,26,.5);stroke-width:2;fill:none}
+@keyframes shBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+/* Summary strip */
+.r-summary{padding:20px 16px 0}
+.r-quote{font-family:var(--ff-d);font-size:16px;font-style:italic;line-height:1.45;margin-bottom:10px;padding-left:14px;border-left:2.5px solid var(--accent)}
+.r-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.r-tag{font-size:11px;font-weight:500;padding:3px 10px;border-radius:100px;background:var(--bg);color:var(--text2);border:1px solid var(--border-lt)}
+
+/* ─── Scene diagram section ─── */
+.r-scene{padding:20px 16px 0}
+.r-scene .sec-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.r-scene .sec-label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.r-scene .sec-desc{font-size:12px;color:var(--text3);margin-bottom:16px;line-height:1.5}
+
+/* Diagram toggle */
+.diagram-toggle{display:flex;background:var(--bg);border-radius:10px;padding:3px;margin-bottom:16px}
+.diagram-toggle button{flex:1;padding:8px 0;font-size:12px;font-weight:500;border:none;background:none;border-radius:8px;cursor:pointer;color:var(--text2);font-family:var(--ff-b);transition:all .25s;-webkit-tap-highlight-color:transparent}
+.diagram-toggle button.active{background:var(--surface);color:var(--text);box-shadow:var(--sh-sm)}
+
+.diagram-container{background:var(--surface);border:1px solid var(--border-lt);border-radius:var(--r-lg);padding:20px 16px;margin-bottom:12px}
+.diagram-svg-wrap{display:flex;justify-content:center;transition:opacity .3s var(--ease)}
+.diagram-svg-wrap svg{max-width:100%;height:auto}
+.diagram-svg-wrap.fading{opacity:0}
+.diagram-legend{display:flex;gap:16px;justify-content:center;margin-top:14px;flex-wrap:wrap;transition:opacity .3s var(--ease)}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ─── Analysis tabs ─── */
+.r-tabs{padding:24px 0 0}
+.r-tabs .sec-head{padding:0 16px;margin-bottom:14px}
+.r-tabs .sec-label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+
+.tab-bar{display:flex;overflow-x:auto;gap:6px;padding:0 16px 0;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:relative}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-indicator{position:absolute;bottom:0;height:2.5px;background:var(--text);border-radius:2px;transition:all .3s var(--ease);pointer-events:none;z-index:1}
+.tab-btn{flex-shrink:0;display:flex;align-items:center;gap:5px;padding:8px 14px;border:1.5px solid var(--border);border-radius:100px;background:none;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;white-space:nowrap;font-family:var(--ff-b);transition:all .25s;-webkit-tap-highlight-color:transparent}
+.tab-btn.active{background:var(--text);color:#fff;border-color:var(--text)}
+
+.tab-content{padding:16px 16px 0;min-height:120px;transition:opacity .15s ease,transform .15s ease}
+.tab-panel{display:none;animation:tabIn .3s var(--ease)}
+.tab-panel.active{display:block}
+.tab-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border-lt)}
+.tab-item:last-child{border-bottom:none}
+.tab-item .t-label{font-size:13px;font-weight:600;min-width:64px;flex-shrink:0;padding-top:1px}
+.tab-item .t-desc{font-size:13px;color:var(--text2);line-height:1.55}
+.tab-item .t-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);margin-top:8px;flex-shrink:0}
+
+/* ─── Checklist ─── */
+.r-checklist{margin:24px 16px 0;background:var(--text);color:#fff;border-radius:var(--r-lg);padding:24px 20px;position:relative;overflow:hidden}
+.r-checklist::before{content:'';position:absolute;top:0;right:0;width:140px;height:140px;background:radial-gradient(circle,rgba(193,122,86,.15),transparent 70%);pointer-events:none}
+.r-cl-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.r-cl-head h3{font-family:var(--ff-d);font-size:18px;font-weight:600}
+.r-cl-save{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border:1px solid rgba(255,255,255,.2);border-radius:100px;background:transparent;color:#fff;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--ff-b);transition:all .3s;-webkit-tap-highlight-color:transparent}
+.r-cl-save:active{background:rgba(255,255,255,.1);border-color:var(--accent)}
+.r-cl-item{display:flex;align-items:flex-start;gap:12px;padding:8px 0}
+.r-cl-num{width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;color:var(--accent-lt)}
+.r-cl-item p{font-size:13px;line-height:1.55;color:rgba(255,255,255,.85);padding-top:2px}
+
+/* ─── CTA ─── */
+.r-cta{text-align:center;padding:28px 16px 32px}
+.r-cta button{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--accent);color:#fff;border:none;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--ff-b);transition:all .3s;-webkit-tap-highlight-color:transparent}
+.r-cta button:active{transform:scale(.96)}
+
+.footer{padding:24px 16px;text-align:center;font-size:12px;color:var(--text3);border-top:1px solid var(--border-lt)}
+
+/* ─── Composition grid toggle ─── */
+.comp-toggle{position:absolute;top:12px;right:12px;z-index:5;display:flex;align-items:center;gap:5px;padding:5px 12px;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:100px;color:#fff;font-size:11px;font-weight:500;cursor:pointer;font-family:var(--ff-b);transition:all .3s;-webkit-tap-highlight-color:transparent}
+.comp-toggle:active{transform:scale(.95)}
+.comp-toggle.active{background:var(--accent);border-color:var(--accent)}
+.comp-toggle svg{width:14px;height:14px;stroke:currentColor;fill:none}
+
+/* ─── History panel ─── */
+.hist-btn{position:relative;display:flex;align-items:center;gap:4px;background:none;border:none;cursor:pointer;color:var(--text2);padding:6px;-webkit-tap-highlight-color:transparent}
+.hist-btn svg{width:18px;height:18px;stroke:currentColor;fill:none}
+.hist-badge{position:absolute;top:0;right:-4px;min-width:15px;height:15px;border-radius:100px;background:var(--accent);color:#fff;font-size:9px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 4px;line-height:1}
+
+.hist-panel{position:fixed;inset:0;z-index:200;background:var(--bg);transform:translateX(100%);transition:transform .35s var(--ease);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.hist-panel.open{transform:translateX(0)}
+.hist-head{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(247,244,239,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border-lt)}
+.hist-head h2{font-family:var(--ff-d);font-size:17px;font-weight:600}
+.hist-actions{display:flex;gap:8px}
+.hist-close,.hist-clear{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--bg);border:none;cursor:pointer;color:var(--text2)}
+.hist-clear{font-size:13px;color:var(--text3)}
+
+.hist-body{padding:16px}
+.hist-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hist-item{border-radius:var(--r);overflow:hidden;cursor:pointer;border:1px solid var(--border-lt);background:var(--surface);transition:all .25s;-webkit-tap-highlight-color:transparent}
+.hist-item:active{transform:scale(.97)}
+.hist-item-img{width:100%;aspect-ratio:3/4;overflow:hidden}
+.hist-item-img img{width:100%;height:100%;object-fit:cover;display:block}
+.hist-item-info{padding:8px 10px}
+.hist-item-type{font-size:11px;font-weight:500;margin-bottom:2px}
+.hist-item-time{font-size:10px;color:var(--text3)}
+
+.hist-empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.hist-empty-icon{font-size:40px;margin-bottom:12px;opacity:.4}
+.hist-empty p{font-size:13px;line-height:1.5}
+
+/* ─── History detail ─── */
+.hist-detail{position:fixed;inset:0;z-index:210;background:var(--bg);transform:translateX(100%);transition:transform .35s var(--ease);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.hist-detail.open{transform:translateX(0)}
+.hist-detail .hd-head{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:14px 16px;background:rgba(247,244,239,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border-lt)}
+.hist-detail .hd-back{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--bg);border:none;cursor:pointer;color:var(--text2)}
+.hist-detail .hd-title{font-size:14px;font-weight:600;flex:1}
+.hist-detail .hd-del{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--bg);border:none;cursor:pointer;color:#C44}
+.hist-detail .hd-body{padding:16px}
+.hist-detail .hd-photo{width:100%;border-radius:var(--r-lg);overflow:hidden;margin-bottom:16px}
+.hist-detail .hd-photo img{width:100%;display:block}
+.hist-detail .hd-quote{font-family:var(--ff-d);font-size:15px;font-style:italic;line-height:1.45;padding-left:14px;border-left:2.5px solid var(--accent);margin-bottom:10px}
+.hist-detail .hd-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.hist-detail .hd-meta{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);margin-bottom:16px}
+.hist-detail .hd-reopen{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px 0;background:var(--accent);color:#fff;border:none;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--ff-b);transition:all .3s;-webkit-tap-highlight-color:transparent}
+.hist-detail .hd-reopen:active{transform:scale(.97)}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes scan{0%{top:0;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
+@keyframes tabIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+
+.reveal{opacity:0;transform:translateY(16px);transition:all .5s var(--ease)}
+.reveal.vis{opacity:1;transform:translateY(0)}
+
+/* ═══════════════════════════════════════════
+   DESKTOP (≥768px)
+   ═══════════════════════════════════════════ */
+@media(min-width:768px){
+  .nav{padding:18px 32px}
+  .nav-logo{font-size:20px}
+  .hero{padding:120px 32px 80px}
+  .hero h1{font-size:clamp(42px,6vw,72px)}
+  .hero-sub{font-size:17px;max-width:480px}
+  .upload-zone{max-width:580px;padding:48px 32px}
+  .example-thumb{width:120px;height:160px}
+  .examples{margin-top:64px}
+
+  .features-section{display:block;padding:100px 32px 120px;background:var(--surface);border-top:1px solid var(--border-lt)}
+  .features-section .container{max-width:960px;margin:0 auto}
+  .section-label{font-size:12px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+  .section-title{font-family:var(--ff-d);font-size:36px;font-weight:600;letter-spacing:-.02em;line-height:1.25;margin-bottom:56px;max-width:500px}
+  .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+  .feature-card{padding:32px 28px;border-radius:var(--r);border:1px solid var(--border-lt);transition:all .35s var(--ease)}
+  .feature-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:var(--sh-md)}
+  .feature-icon{width:44px;height:44px;border-radius:12px;background:var(--accent-bg);display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:20px}
+  .feature-card h3{font-size:15px;font-weight:600;margin-bottom:10px}
+  .feature-card p{font-size:14px;color:var(--text2);line-height:1.6}
+
+  /* Results desktop */
+  .results-view{padding-top:72px}
+  .r-photo{max-width:600px;margin:0 auto;border-radius:var(--r-lg)}
+  .r-summary{max-width:600px;margin:0 auto;padding:28px 0 0}
+  .r-quote{font-size:20px}
+  .r-scene{max-width:900px;margin:0 auto;padding:28px 0 0}
+  .diagrams-row{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+  .diagram-container{padding:24px}
+  .r-tabs{max-width:700px;margin:0 auto}
+  .r-checklist{max-width:700px;margin-left:auto;margin-right:auto}
+  .r-cta{padding:36px 0 40px}
+  .analyzing-steps{flex-direction:row;gap:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="nav-logo" id="nav-home" onclick="showLanding()" style="cursor:pointer"><span class="dot"></span>PhotoWhisper</div>
+  <button class="nav-back" id="nav-back-btn" style="display:none" onclick="showLanding()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    换一张
+  </button>
+  <button class="hist-btn" id="hist-btn" onclick="showHistory()" style="display:none">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span class="hist-badge" id="hist-badge" style="display:none">0</span>
+  </button>
+</nav>
+
+<!-- ═══ LANDING ═══ -->
+<div class="view active" id="view-landing">
+  <section class="hero">
+    <div class="hero-badge"><span class="ld"></span>AI 拍摄拆解工具</div>
+    <h1>看懂好照片<br>背后的<em>秘密</em></h1>
+    <p class="hero-sub">上传一张参考照片，AI 帮你拆解姿势、机位、光线——给你可直接执行的拍摄指南。</p>
+    <div class="upload-zone" id="upload-zone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+      <div class="upload-title">拖放或点击上传照片</div>
+      <div class="upload-hint">也可以 Ctrl+V 粘贴</div>
+      <div class="upload-formats"><span>JPG</span><span>PNG</span><span>WebP</span></div>
+    </div>
+    <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)">
+    <div class="examples">
+      <div class="examples-label">试试示例照片</div>
+      <div class="examples-grid">
+        <div class="example-thumb" onclick="analyzeDemo('portrait')"><img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&h=400&fit=crop&q=80" alt=""><div class="overlay"><span>户外人像</span></div></div>
+        <div class="example-thumb" onclick="analyzeDemo('street')"><img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=400&fit=crop&q=80" alt=""><div class="overlay"><span>街拍</span></div></div>
+        <div class="example-thumb" onclick="analyzeDemo('scenic')"><img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=400&fit=crop&q=80" alt=""><div class="overlay"><span>风光</span></div></div>
+      </div>
+    </div>
+  </section>
+  <section class="features-section">
+    <div class="container">
+      <div class="section-label">核心能力</div>
+      <div class="section-title">六个维度，完整还原拍摄过程</div>
+      <div class="features-grid">
+        <div class="feature-card"><div class="feature-icon">🧍</div><h3>被拍人指南</h3><p>姿势、朝向、表情和手部摆放</p></div>
+        <div class="feature-card"><div class="feature-icon">📸</div><h3>摄影师指南</h3><p>距离、角度和手机持握方式</p></div>
+        <div class="feature-card"><div class="feature-icon">☀️</div><h3>光线与时机</h3><p>光线类型、方向和最佳拍摄时段</p></div>
+        <div class="feature-card"><div class="feature-icon">📐</div><h3>构图技巧</h3><p>三分法、引导线、对称等构图法则</p></div>
+        <div class="feature-card"><div class="feature-icon">🌿</div><h3>拍摄条件</h3><p>场景类型、天气环境等外部条件</p></div>
+        <div class="feature-card"><div class="feature-icon">⚙️</div><h3>手机设置</h3><p>拍摄模式、HDR、曝光补偿等参数</p></div>
+      </div>
+    </div>
+  </section>
+  <footer class="footer">PhotoWhisper &mdash; 拆解每一张好照片</footer>
+</div>
+
+<!-- ═══ ANALYZING ═══ -->
+<div class="view" id="view-analyzing">
+  <div class="analyzing-view">
+    <div class="analyzing-photo"><img src="" id="analyzing-img"><div class="scan-line"></div></div>
+    <div class="analyzing-spinner"></div>
+    <div class="analyzing-text">正在分析...</div>
+    <div class="analyzing-subtext">AI 正在拆解这张照片的拍摄手法</div>
+    <div class="analyzing-steps">
+      <div class="analyzing-step" id="step-0"><span class="step-dot"></span><span>姿势分析</span></div>
+      <div class="analyzing-step" id="step-1"><span class="step-dot"></span><span>机位判断</span></div>
+      <div class="analyzing-step" id="step-2"><span class="step-dot"></span><span>光线识别</span></div>
+      <div class="analyzing-step" id="step-3"><span class="step-dot"></span><span>生成指南</span></div>
+    </div>
+    <div class="analyzing-error" id="analyze-error"></div>
+  </div>
+</div>
+
+<!-- ═══ RESULTS ═══ -->
+<div class="view" id="view-results">
+  <div class="results-view">
+
+    <!-- 1. PHOTO + COMPOSITION OVERLAY -->
+    <div class="r-photo" id="r-photo-wrap">
+      <img src="" id="r-photo">
+      <svg class="comp-grid" id="comp-grid" viewBox="0 0 300 400" preserveAspectRatio="none">
+        <line x1="100" y1="0" x2="100" y2="400"/><line x1="200" y1="0" x2="200" y2="400"/>
+        <line x1="0" y1="133" x2="300" y2="133"/><line x1="0" y1="267" x2="300" y2="267"/>
+        <circle id="comp-dot" cx="200" cy="160" r="7"/>
+        <text id="comp-dot-label" x="200" y="148" text-anchor="middle">主体</text>
+      </svg>
+      <div class="comp-badge" id="comp-badge"></div>
+      <button class="comp-toggle" id="comp-toggle" onclick="toggleCompGrid()">
+        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+        构图线
+      </button>
+    </div>
+
+    <!-- 2. SUMMARY -->
+    <div class="r-summary reveal">
+      <div class="r-quote" id="r-quote"></div>
+      <div class="r-tags" id="r-tags"></div>
+    </div>
+
+    <!-- SCROLL HINT -->
+    <div class="scroll-hint-bar" id="scroll-hint">
+      <div class="sh-text">向下滑动查看拍摄拆解</div>
+      <div class="sh-arrow"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+    </div>
+
+    <!-- 3. SCENE DIAGRAMS -->
+    <div class="r-scene reveal" style="transition-delay:.1s">
+      <div class="sec-head"><span class="sec-label">场景还原</span></div>
+      <div class="sec-desc">以下示意图还原拍摄现场——谁站哪、光从哪来、手机怎么拿</div>
+
+      <div class="diagram-toggle" id="diagram-toggle">
+        <button class="active" onclick="switchDiagram('top')">俯视图 · 位置关系</button>
+        <button onclick="switchDiagram('side')">侧视图 · 拍摄角度</button>
+      </div>
+
+      <div class="diagram-container">
+        <div class="diagram-svg-wrap" id="diagram-display"></div>
+        <div class="diagram-legend" id="diagram-legend"></div>
+      </div>
+    </div>
+
+    <!-- 4. ANALYSIS TABS -->
+    <div class="r-tabs reveal" style="transition-delay:.2s">
+      <div class="sec-head"><span class="sec-label">拍摄拆解</span></div>
+      <div class="tab-bar" id="tab-bar">
+        <div class="tab-indicator" id="tab-indicator"></div>
+        <button class="tab-btn active" data-tab="pose">🧍 被拍人</button>
+        <button class="tab-btn" data-tab="angle">📸 摄影师</button>
+        <button class="tab-btn" data-tab="light">☀️ 光线</button>
+        <button class="tab-btn" data-tab="comp">📐 构图</button>
+        <button class="tab-btn" data-tab="env">🌿 条件</button>
+        <button class="tab-btn" data-tab="settings">⚙️ 设置</button>
+      </div>
+      <div class="tab-content" id="tab-content">
+        <div class="tab-panel active" id="tab-pose"></div>
+        <div class="tab-panel" id="tab-angle"></div>
+        <div class="tab-panel" id="tab-light"></div>
+        <div class="tab-panel" id="tab-comp"></div>
+        <div class="tab-panel" id="tab-env"></div>
+        <div class="tab-panel" id="tab-settings"></div>
+      </div>
+    </div>
+
+    <!-- 5. CHECKLIST -->
+    <div class="r-checklist reveal" style="transition-delay:.3s" id="r-checklist">
+      <div class="r-cl-head">
+        <h3>拍摄清单</h3>
+        <button class="r-cl-save" onclick="saveChecklist()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>
+          保存
+        </button>
+      </div>
+      <div id="r-cl-steps"></div>
+    </div>
+
+    <!-- 6. CTA -->
+    <div class="r-cta reveal" style="transition-delay:.4s">
+      <button onclick="showLanding()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        分析另一张
+      </button>
+    </div>
+
+    <footer class="footer">PhotoWhisper</footer>
+  </div>
+</div>
+
+<!-- ═══ HISTORY PANEL ═══ -->
+<div class="hist-panel" id="hist-panel">
+  <div class="hist-head">
+    <h2>分析历史</h2>
+    <div class="hist-actions">
+      <button class="hist-clear" onclick="clearAllHistory()" title="清空">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
+      <button class="hist-close" onclick="closeHistory()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="hist-body" id="hist-body"></div>
+</div>
+
+<!-- ═══ HISTORY DETAIL ═══ -->
+<div class="hist-detail" id="hist-detail">
+  <div class="hd-head">
+    <button class="hd-back" onclick="closeHistDetail()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="hd-title" id="hd-title">分析详情</span>
+    <button class="hd-del" onclick="deleteHistDetail()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+    </button>
+  </div>
+  <div class="hd-body" id="hd-body"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════
+const D={
+  portrait:{
+    img:'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&q=85',
+    quote:'"黄金时段侧逆光 + 微仰视角，打造温暖户外人像"',
+    tags:['户外人像','黄金时段','侧逆光','三分法'],
+    compBadge:'三分法 · 右侧1/3竖线',compDot:{x:200,y:160},
+    scene:{subX:165,subY:155,phoX:165,phoY:295,lightAngle:225,lightLabel:'侧逆光 135°',distLabel:'约 2~3 米',fovHalf:18},
+    side:{camH:140,subH:170,camX:80,subX:290,groundY:220,angleDeg:10,angleLabel:'微仰 ~10°',hLabel:'腰部~胸口'},
+    pose:[{l:'身体朝向',d:'与镜头呈约 30° 角，微侧身，自然放松'},{l:'姿势',d:'自然站立，重心后脚，前脚轻点地面'},{l:'面部',d:'脸微转向镜头，目光直视或略偏上'},{l:'手部',d:'一手轻触头发或自然垂落，避免僵硬'}],
+    angle:[{l:'距离',d:'中景 2~3 米，膝盖以上入画'},{l:'角度',d:'微仰拍约 10°，手机略低于眼部'},{l:'持握',d:'竖屏，双手持机保持稳定'},{l:'对焦',d:'对焦点在眼睛，确保面部清晰'}],
+    light:[{l:'类型',d:'自然光 — 黄金时段（日落前约 1h）'},{l:'方向',d:'侧逆光，从人物左后方 ~135°'},{l:'时段',d:'下午 4:30~6:00（冬季提前）'},{l:'技巧',d:'逆光勾勒头发光晕（Rim Light）'}],
+    comp:[{l:'法则',d:'三分法，人物在右侧 1/3 竖线'},{l:'比例',d:'人物占画面约 60%，留足呼吸空间'},{l:'层次',d:'前景虚化树叶 + 背景天空留白'},{l:'焦距',d:'1x 主摄（~26mm）或 2x 压缩感'}],
+    env:[{l:'场景',d:'户外公园草地、海边或开阔田野'},{l:'天气',d:'晴/多云均可，云层柔化光线更佳'},{l:'建议',d:'选有纵深感的开阔地，避开杂乱元素'}],
+    settings:[{l:'模式',d:'人像模式（虚化背景突出主体）'},{l:'HDR',d:'开启 HDR+，平衡高光与阴影'},{l:'曝光',d:'降 -0.3EV，保留高光细节'},{l:'白平衡',d:'自动，黄金时段暖色自然还原'}],
+    checklist:['日落前 1h 到户外开阔场地','人物侧身 30°，重心后移','手机竖屏，略低于眼部高度','开人像模式，对焦眼睛','利用逆光制造头发光晕','三分法构图，人物放右侧 1/3','降曝光保留天空细节'],
+  },
+  street:{
+    img:'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&q=85',
+    quote:'"低角度正面拍摄 + 行走姿态，街头感十足"',
+    tags:['街拍','行走抓拍','正面构图','都市感'],
+    compBadge:'中心对称 · 引导线构图',compDot:{x:150,y:180},
+    scene:{subX:165,subY:135,phoX:165,phoY:295,lightAngle:90,lightLabel:'正面柔光',distLabel:'约 4~5 米',fovHalf:22},
+    side:{camH:110,subH:170,camX:70,subX:290,groundY:220,angleDeg:15,angleLabel:'仰拍 ~15°',hLabel:'腰部以下'},
+    pose:[{l:'朝向',d:'正面朝镜头，身体略前倾，动态感'},{l:'姿势',d:'自然行走中定格，步伐放松'},{l:'面部',d:'目光直视镜头或微偏下，冷感表情'},{l:'手部',d:'一手插兜或自然摆动'}],
+    angle:[{l:'距离',d:'中远景 4~5 米，全身入画'},{l:'角度',d:'仰拍约 15°，手机在腰部高度'},{l:'持握',d:'竖屏，单手或双手持机'},{l:'对焦',d:'对焦点在全身，保证整体清晰'}],
+    light:[{l:'类型',d:'自然散射光 — 阴天或建筑阴影'},{l:'方向',d:'正面柔光，均匀照亮人物'},{l:'时段',d:'阴天全天或晴天阴影区（建筑北侧）'},{l:'技巧',d:'地面反射光补充底部，减少面部阴影'}],
+    comp:[{l:'法则',d:'中心对称构图，人物在画面正中'},{l:'比例',d:'人物占 ~50%，环境信息丰富'},{l:'层次',d:'街道建筑线条引导视线，增强纵深'},{l:'焦距',d:'1x 主摄，利用广角纳入更多环境'}],
+    env:[{l:'场景',d:'城市街道 — 特色建筑商业区或文艺街区'},{l:'天气',d:'阴天最佳，光线柔和色彩还原好'},{l:'建议',d:'选背景干净有线条感的街道，避开行人'}],
+    settings:[{l:'模式',d:'普通或专业模式（保留环境细节）'},{l:'HDR',d:'自动 HDR，平衡天空与建筑'},{l:'曝光',d:'正常曝光，保持自然感'},{l:'色彩',d:'后期可加冷色调滤镜增强氛围'}],
+    checklist:['选有特色的城市街道做背景','等阴天或在建筑阴影区拍摄','手机放低到腰部，微仰角','人物自然走向镜头，连拍选最佳','中心构图，人物放正中','注意背景建筑线条对称感','后期加冷色调滤镜增强氛围'],
+  },
+  scenic:{
+    img:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=85',
+    quote:'"广角低机位 + 前景引导线，展现壮阔自然"',
+    tags:['自然风光','广角','前景引导','云海'],
+    compBadge:'三分法 + 引导线构图',compDot:{x:150,y:267},
+    scene:{subX:165,subY:100,phoX:165,phoY:295,lightAngle:200,lightLabel:'侧逆光',distLabel:'远景 · 超广角',fovHalf:35,subLabel:'远景山峰'},
+    side:{camH:70,subH:200,camX:70,subX:290,groundY:220,angleDeg:-8,angleLabel:'俯拍 ~8°',hLabel:'贴近地面'},
+    pose:[{l:'适用',d:'无人物的纯风景拍摄'},{l:'如有模特',d:'站前景做比例尺，面向远方山峦'},{l:'朝向',d:'背对镜头或侧面剪影，增强壮阔感'}],
+    angle:[{l:'距离',d:'远景，广角纳入最大画面信息'},{l:'角度',d:'低机位贴近地面，增强前景冲击'},{l:'持握',d:'横屏，双手持机保持稳定'},{l:'对焦',d:'对焦前景 1/3 处，小光圈全景清晰'}],
+    light:[{l:'类型',d:'自然光 — 日出或日落前后黄金光线'},{l:'方向',d:'侧光或逆光，营造丰富光影层次'},{l:'时段',d:'日出后 30min 或日落前 1h'},{l:'特效',d:'云海反射阳光形成梦幻光效'}],
+    comp:[{l:'法则',d:'三分法 + 引导线，前景引导至远山'},{l:'层次',d:'前景（岩石）→ 中景（云海）→ 远景（山峰）'},{l:'前景',d:'贴近岩石或花草，增强纵深感'},{l:'焦距',d:'0.6x 超广角，最大化壮阔感'}],
+    env:[{l:'场景',d:'高海拔山区 — 山顶、山脊或观景台'},{l:'天气',d:'雨后初晴最易出现云海，清晨概率高'},{l:'建议',d:'找有前景元素的机位，避免纯远景'}],
+    settings:[{l:'模式',d:'专业或普通模式（风景自动优化）'},{l:'HDR',d:'强烈建议开启，平衡天空地面曝光'},{l:'曝光',d:'降 -0.5~-1EV，保留色彩层次'},{l:'网格线',d:'开启九宫格，确保地平线水平'}],
+    checklist:['查天气：雨后晴天清晨最易遇云海','踩点找有前景元素的机位','横屏 + 超广角模式（0.6x）','机位贴近地面，前景更有冲击力','开 HDR + 网格线，保证曝光和水平','对焦前景 1/3 处，全画面清晰','降曝光保留天空色彩层次'],
+  },
+};
+
+// ═══════════════════════════════════════════
+// SVG RENDERERS
+// ═══════════════════════════════════════════
+function svgTopDown(s){
+  const sub={x:s.subX,y:s.subY},pho={x:s.phoX,y:s.phoY};
+  const dx=sub.x-pho.x,dy=sub.y-pho.y,a=Math.atan2(dy,dx),r=s.fovHalf*Math.PI/180;
+  const L=Math.sqrt(dx*dx+dy*dy)*1.1;
+  const fL={x:pho.x+L*Math.cos(a-r),y:pho.y+L*Math.sin(a-r)};
+  const fR={x:pho.x+L*Math.cos(a+r),y:pho.y+L*Math.sin(a+r)};
+  const lr=s.lightAngle*Math.PI/180;
+  const lf={x:sub.x+80*Math.cos(lr),y:sub.y+80*Math.sin(lr)};
+  const rays=[-12,0,12].map(o=>{const or=o*Math.PI/180;return`<line x1="${sub.x-45*Math.cos(lr+or)}" y1="${sub.y-45*Math.sin(lr+or)}" x2="${sub.x+25*Math.cos(lr+or)}" y2="${sub.y+25*Math.sin(lr+or)}" stroke="var(--c-lit)" stroke-width="1.5" opacity=".3" stroke-linecap="round"/>`}).join('');
+  const sl=s.subLabel||'被拍人';
+  return`<svg viewBox="0 0 330 340" xmlns="http://www.w3.org/2000/svg">
+<g opacity=".2">${Array.from({length:8},(_,i)=>`<line x1="${(i+1)*37}" y1="0" x2="${(i+1)*37}" y2="340" stroke="#ddd" stroke-width=".5"/>`).join('')}${Array.from({length:8},(_,i)=>`<line x1="0" y1="${(i+1)*37}" x2="330" y2="${(i+1)*37}" stroke="#ddd" stroke-width=".5"/>`).join('')}</g>
+<path d="M${pho.x} ${pho.y} L${fL.x} ${fL.y} L${fR.x} ${fR.y} Z" fill="var(--c-pho)" opacity=".06"/>
+<line x1="${pho.x}" y1="${pho.y}" x2="${fL.x}" y2="${fL.y}" stroke="var(--c-pho)" stroke-width="1" opacity=".18" stroke-dasharray="4 3"/>
+<line x1="${pho.x}" y1="${pho.y}" x2="${fR.x}" y2="${fR.y}" stroke="var(--c-pho)" stroke-width="1" opacity=".18" stroke-dasharray="4 3"/>
+<line x1="${pho.x}" y1="${pho.y}" x2="${sub.x}" y2="${sub.y}" stroke="var(--c-pho)" stroke-width="1.2" stroke-dasharray="5 4" opacity=".3"/>
+<text x="${(pho.x+sub.x)/2-35}" y="${(pho.y+sub.y)/2+4}" fill="var(--c-pho)" font-size="10" font-family="var(--ff-b)" opacity=".7">${s.distLabel}</text>
+${rays}
+<circle cx="${lf.x}" cy="${lf.y}" r="14" fill="var(--c-lit)" opacity=".12" stroke="var(--c-lit)" stroke-width="1.2"/>
+<text x="${lf.x}" y="${lf.y+5}" text-anchor="middle" font-size="13">☀</text>
+<text x="${lf.x}" y="${lf.y+28}" text-anchor="middle" fill="var(--c-lit)" font-size="9" font-family="var(--ff-b)">${s.lightLabel}</text>
+<circle cx="${sub.x}" cy="${sub.y}" r="14" fill="var(--c-sub)" opacity=".12" stroke="var(--c-sub)" stroke-width="2"/>
+<circle cx="${sub.x}" cy="${sub.y}" r="5" fill="var(--c-sub)"/>
+<text x="${sub.x}" y="${sub.y-20}" text-anchor="middle" fill="var(--c-sub)" font-size="11" font-weight="600" font-family="var(--ff-b)">${sl}</text>
+<rect x="${pho.x-10}" y="${pho.y-10}" width="20" height="20" rx="5" fill="var(--c-pho)" opacity=".12" stroke="var(--c-pho)" stroke-width="2"/>
+<text x="${pho.x}" y="${pho.y+5}" text-anchor="middle" font-size="12">📱</text>
+<text x="${pho.x}" y="${pho.y+26}" text-anchor="middle" fill="var(--c-pho)" font-size="11" font-weight="600" font-family="var(--ff-b)">摄影师</text>
+</svg>`}
+
+function svgSide(s){
+  const{camX:cx,subX:sx,groundY:gy,camH:ch,subH:sh,angleDeg:ad,angleLabel:al,hLabel:hl}=s;
+  const cy=gy-ch,shY=gy-sh,seY=gy-sh*.82;
+  const ar=ad*Math.PI/180,ln=sx-cx,leY=cy-ln*Math.tan(ar);
+  return`<svg viewBox="0 0 330 270" xmlns="http://www.w3.org/2000/svg">
+<line x1="20" y1="${gy}" x2="310" y2="${gy}" stroke="var(--text)" stroke-width="1.5" opacity=".15"/>
+<text x="305" y="${gy+14}" text-anchor="end" fill="var(--text3)" font-size="9" font-family="var(--ff-b)">地面</text>
+<line x1="${cx}" y1="${cy}" x2="${sx}" y2="${leY}" stroke="var(--c-pho)" stroke-width="1.5" stroke-dasharray="5 4" opacity=".35"/>
+<line x1="${cx}" y1="${cy}" x2="${sx+20}" y2="${cy}" stroke="var(--text3)" stroke-width=".7" stroke-dasharray="3 3" opacity=".3"/>
+${ad!==0?`<path d="M${cx+45} ${cy} A45 45 0 0 ${ad>0?0:1} ${cx+45*Math.cos(ar)} ${cy-45*Math.sin(ar)}" fill="none" stroke="var(--c-pho)" stroke-width="1.5" opacity=".5"/>
+<text x="${cx+55}" y="${cy-(ad>0?12:-6)}" fill="var(--c-pho)" font-size="10" font-family="var(--ff-b)">${al}</text>`:''}
+<circle cx="${sx}" cy="${shY+10}" r="9" fill="none" stroke="var(--c-sub)" stroke-width="2"/>
+<line x1="${sx}" y1="${shY+19}" x2="${sx}" y2="${gy-18}" stroke="var(--c-sub)" stroke-width="2" stroke-linecap="round"/>
+<line x1="${sx}" y1="${gy-18}" x2="${sx-12}" y2="${gy}" stroke="var(--c-sub)" stroke-width="2" stroke-linecap="round"/>
+<line x1="${sx}" y1="${gy-18}" x2="${sx+12}" y2="${gy}" stroke="var(--c-sub)" stroke-width="2" stroke-linecap="round"/>
+<line x1="${sx-16}" y1="${seY}" x2="${sx+20}" y2="${seY}" stroke="var(--c-sub)" stroke-width=".8" stroke-dasharray="3 2" opacity=".35"/>
+<text x="${sx+23}" y="${seY+4}" fill="var(--text3)" font-size="8" font-family="var(--ff-b)">眼高</text>
+<rect x="${cx-7}" y="${cy-12}" width="14" height="24" rx="3" fill="var(--c-pho)" opacity=".15" stroke="var(--c-pho)" stroke-width="2"/>
+<circle cx="${cx}" cy="${cy-3}" r="3.5" fill="var(--c-pho)" opacity=".5"/>
+<line x1="${cx-22}" y1="${cy}" x2="${cx-22}" y2="${gy}" stroke="var(--c-pho)" stroke-width=".8" stroke-dasharray="2 2" opacity=".25"/>
+<text x="${cx-25}" y="${(cy+gy)/2+4}" text-anchor="end" fill="var(--text3)" font-size="9" font-family="var(--ff-b)">${hl}</text>
+<text x="${sx}" y="${shY-6}" text-anchor="middle" fill="var(--c-sub)" font-size="11" font-weight="600" font-family="var(--ff-b)">被拍人</text>
+<text x="${cx}" y="${cy+32}" text-anchor="middle" fill="var(--c-pho)" font-size="11" font-weight="600" font-family="var(--ff-b)">手机</text>
+</svg>`}
+
+// ═══════════════════════════════════════════
+// LOGIC
+// ═══════════════════════════════════════════
+let curData=null, curDiagram='top';
+
+function switchView(id){
+  document.querySelectorAll('.view').forEach(v=>{v.classList.remove('active');v.style.opacity='0'});
+  setTimeout(()=>{
+    document.querySelectorAll('.view').forEach(v=>v.style.display='none');
+    const t=document.getElementById(id);t.style.display='block';
+    requestAnimationFrame(()=>{t.classList.add('active');t.style.opacity='1';window.scrollTo({top:0,behavior:'smooth'})});
+  },250);
+}
+
+function showLanding(){
+  switchView('view-landing');
+  document.getElementById('nav-back-btn').style.display='none';
+  updateHistBadge(); // show/hide history button based on actual data
+  resetReveals();
+  resetAnalysisUI();
+  compGridVisible=true;
+  const sh=document.getElementById('scroll-hint');
+  sh.classList.remove('vis');
+}
+function resetReveals(){
+  document.querySelectorAll('.reveal').forEach(e=>e.classList.remove('vis'));
+  document.getElementById('comp-grid').classList.remove('vis');
+  const sh=document.getElementById('scroll-hint');
+  sh.classList.remove('vis');sh.classList.add('gone');
+}
+
+// Hide scroll hint on first scroll in results view
+let scrollHintBound=false;
+function bindScrollHint(){
+  if(scrollHintBound)return;scrollHintBound=true;
+  const onScroll=()=>{
+    const sh=document.getElementById('scroll-hint');
+    if(sh&&sh.classList.contains('vis')&&window.scrollY>80){
+      sh.classList.remove('vis');sh.classList.add('gone');
+    }
+  };
+  window.addEventListener('scroll',onScroll,{passive:true});
+  // Touch move for mobile
+  window.addEventListener('touchmove',()=>{
+    const sh=document.getElementById('scroll-hint');
+    if(sh&&sh.classList.contains('vis')){sh.classList.remove('vis');sh.classList.add('gone')}
+  },{passive:true,once:true});
+}
+
+// Upload
+const uz=document.getElementById('upload-zone');
+function handleDragOver(e){e.preventDefault();uz.classList.add('drag-over')}
+function handleDragLeave(){uz.classList.remove('drag-over')}
+function handleDrop(e){e.preventDefault();uz.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))processFile(f)}
+function handleFileSelect(e){if(e.target.files[0])processFile(e.target.files[0])}
+document.addEventListener('paste',e=>{for(const i of e.clipboardData.items)if(i.type.startsWith('image/')){processFile(i.getAsFile());break}});
+function processFile(f){
+  if(!f||!f.type.startsWith('image/'))return;
+  const r=new FileReader();
+  r.onload=async e=>{
+    resetAnalysisUI();
+    curAnalysisImg=e.target.result;
+    switchView('view-analyzing');
+    document.getElementById('analyzing-img').src=curAnalysisImg;
+    document.getElementById('nav-back-btn').style.display='flex';
+    document.getElementById('hist-btn').style.display='flex';
+    // Start step animation
+    let c=0;
+    const stepTimer=setInterval(()=>{
+      if(c>0)document.getElementById('step-'+(c-1)).className='analyzing-step done';
+      if(c<4){document.getElementById('step-'+c).className='analyzing-step active';c++}
+      else clearInterval(stepTimer);
+    },1200);
+    // Call AI
+    try{
+      const aiData=await analyzePhotoAI(curAnalysisImg);
+      clearInterval(stepTimer);
+      // Mark all steps done
+      for(let i=0;i<4;i++)document.getElementById('step-'+i).className='analyzing-step done';
+      curData=aiData;
+      populateResults(curData);
+      switchView('view-results');
+      setTimeout(()=>{
+        compGridVisible=true;
+        document.getElementById('comp-grid').classList.add('vis');
+        document.getElementById('comp-toggle').classList.add('active');
+        document.querySelectorAll('.reveal').forEach(e=>e.classList.add('vis'));
+        const sh=document.getElementById('scroll-hint');
+        sh.classList.remove('gone');
+        setTimeout(()=>sh.classList.add('vis'),600);
+        setTimeout(()=>updateTabIndicator(document.querySelector('.tab-btn.active')),100);
+      },300);
+      saveToHistory();
+    }catch(err){
+      clearInterval(stepTimer);
+      for(let i=0;i<4;i++)document.getElementById('step-'+i).className='analyzing-step';
+      showAnalysisError(err.message||'分析失败，请重试');
+    }
+  };
+  r.readAsDataURL(f);
+}
+function analyzeDemo(t){curData=D[t];startAnalysis(D[t].img,t)}
+
+function startAnalysis(img,demoType){
+  resetAnalysisUI();
+  curAnalysisImg=img;
+  switchView('view-analyzing');
+  document.getElementById('analyzing-img').src=img;
+  document.getElementById('nav-back-btn').style.display='flex';
+  document.getElementById('hist-btn').style.display='flex';
+  let c=0;
+  function tick(){
+    if(c>0)document.getElementById('step-'+(c-1)).className='analyzing-step done';
+    if(c<4){document.getElementById('step-'+c).className='analyzing-step active';c++;setTimeout(tick,800)}
+    else setTimeout(()=>{
+      if(!curData)curData=D.portrait;
+      populateResults(curData);
+      switchView('view-results');
+      setTimeout(()=>{
+        compGridVisible=true;
+        document.getElementById('comp-grid').classList.add('vis');
+        document.getElementById('comp-toggle').classList.add('active');
+        document.querySelectorAll('.reveal').forEach(e=>e.classList.add('vis'));
+        const sh=document.getElementById('scroll-hint');
+        sh.classList.remove('gone');
+        setTimeout(()=>sh.classList.add('vis'),600);
+        setTimeout(()=>updateTabIndicator(document.querySelector('.tab-btn.active')),100);
+      },300);
+      // Save to history
+      saveToHistory();
+    },500);
+  }
+  for(let i=0;i<4;i++)document.getElementById('step-'+i).className='analyzing-step';
+  setTimeout(tick,400);
+}
+
+function populateResults(d){
+  document.getElementById('r-photo').src=d.img||curAnalysisImg;
+  document.getElementById('r-quote').textContent=d.quote;
+  document.getElementById('r-tags').innerHTML=d.tags.map(t=>`<span class="r-tag">${t}</span>`).join('');
+  document.getElementById('comp-badge').textContent=d.compBadge;
+  document.getElementById('comp-dot').setAttribute('cx',d.compDot.x);
+  document.getElementById('comp-dot').setAttribute('cy',d.compDot.y);
+  document.getElementById('comp-dot-label').setAttribute('x',d.compDot.x);
+  document.getElementById('comp-dot-label').setAttribute('y',d.compDot.y-12);
+
+  // Default diagram
+  curDiagram='top';
+  renderDiagram(d);
+  document.querySelectorAll('#diagram-toggle button').forEach((b,i)=>{b.classList.toggle('active',i===0)});
+
+  // Tabs
+  fillTab('tab-pose',d.pose);fillTab('tab-angle',d.angle);
+  fillTab('tab-light',d.light);fillTab('tab-comp',d.comp);
+  fillTab('tab-env',d.env);fillTab('tab-settings',d.settings);
+
+  // Checklist
+  document.getElementById('r-cl-steps').innerHTML=d.checklist.map((s,i)=>`<div class="r-cl-item"><span class="r-cl-num">${String(i+1).padStart(2,'0')}</span><p>${s}</p></div>`).join('');
+
+  // Reset to first tab
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===0));
+}
+
+function fillTab(id,items){
+  document.getElementById(id).innerHTML=items.map(i=>`<div class="tab-item"><span class="t-dot"></span><span class="t-label">${i.l}</span><span class="t-desc">${i.d}</span></div>`).join('');
+}
+
+// Diagram toggle with fade
+function switchDiagram(type){
+  if(type===curDiagram)return;
+  const wrap=document.getElementById('diagram-display');
+  const leg=document.getElementById('diagram-legend');
+  wrap.classList.add('fading');leg.style.opacity='0';
+  setTimeout(()=>{
+    curDiagram=type;
+    document.querySelectorAll('#diagram-toggle button').forEach((b,i)=>b.classList.toggle('active',(type==='top'&&i===0)||(type==='side'&&i===1)));
+    if(curData)renderDiagram(curData);
+    wrap.classList.remove('fading');leg.style.opacity='1';
+  },300);
+}
+function renderDiagram(d){
+  const wrap=document.getElementById('diagram-display');
+  const leg=document.getElementById('diagram-legend');
+  if(curDiagram==='top'){
+    wrap.innerHTML=svgTopDown(d.scene);
+    leg.innerHTML=`<div class="legend-item"><div class="legend-dot" style="background:var(--c-sub)"></div>被拍人</div><div class="legend-item"><div class="legend-dot" style="background:var(--c-pho)"></div>摄影师</div><div class="legend-item"><div class="legend-dot" style="background:var(--c-lit)"></div>光源</div>`;
+  }else{
+    wrap.innerHTML=svgSide(d.side);
+    leg.innerHTML=`<div class="legend-item"><div class="legend-dot" style="background:var(--c-pho)"></div>手机位置</div><div class="legend-item"><div class="legend-dot" style="background:var(--c-sub)"></div>被拍人</div>`;
+  }
+}
+
+// Tab switching with indicator
+let curTab='pose';
+document.getElementById('tab-bar').addEventListener('click',e=>{
+  const btn=e.target.closest('.tab-btn');if(!btn)return;
+  const tab=btn.dataset.tab;if(tab===curTab)return;
+  curTab=tab;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  updateTabIndicator(btn);
+  // Content transition
+  const content=document.getElementById('tab-content');
+  content.style.opacity='0';content.style.transform='translateY(8px)';
+  setTimeout(()=>{
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+    requestAnimationFrame(()=>{content.style.opacity='1';content.style.transform='translateY(0)'});
+  },150);
+  btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+});
+function updateTabIndicator(btn){
+  const ind=document.getElementById('tab-indicator');
+  const bar=document.getElementById('tab-bar');
+  const bR=btn.getBoundingClientRect(),barR=bar.getBoundingClientRect();
+  ind.style.left=(bR.left-barR.left+bar.scrollLeft)+'px';
+  ind.style.width=bR.width+'px';
+}
+
+function saveChecklist(){
+  const btn=document.querySelector('.r-cl-save');
+  const text=Array.from(document.querySelectorAll('.r-cl-item p')).map((p,i)=>`${i+1}. ${p.textContent}`).join('\n');
+  navigator.clipboard.writeText('📷 拍摄清单\n\n'+text).catch(()=>{});
+  btn.textContent='已复制 ✓';
+  setTimeout(()=>{btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg> 保存'},1800);
+}
+
+// ═══════════════════════════════════════════
+// COMPOSITION GRID TOGGLE
+// ═══════════════════════════════════════════
+let compGridVisible=true;
+function toggleCompGrid(){
+  compGridVisible=!compGridVisible;
+  const grid=document.getElementById('comp-grid');
+  const badge=document.getElementById('comp-badge');
+  const btn=document.getElementById('comp-toggle');
+  grid.classList.toggle('vis',compGridVisible);
+  if(compGridVisible){badge.style.opacity='';btn.classList.add('active')}
+  else{badge.style.opacity='0';btn.classList.remove('active')}
+}
+
+// ═══════════════════════════════════════════
+// HISTORY MANAGEMENT
+// ═══════════════════════════════════════════
+const HIST_KEY='_pwHist';
+const HIST_MAX_BYTES=4.5*1024*1024;
+const HIST_MAX_ITEMS=20;
+let curAnalysisImg=''; // current analysis image source
+let curHistDetailId=null;
+const DEMO_NAMES={portrait:'户外人像',street:'街拍',scenic:'风光'};
+
+function generateThumbnail(src,maxW){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=()=>{
+      const ratio=maxW/img.width;
+      const c=document.createElement('canvas');
+      c.width=maxW;c.height=Math.round(img.height*ratio);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      resolve(c.toDataURL('image/jpeg',0.7));
+    };
+    img.onerror=()=>resolve(src);
+    img.src=src;
+  });
+}
+
+function loadHistory(){try{return JSON.parse(localStorage.getItem(HIST_KEY))||[]}catch(e){return[]}}
+function saveHistory(arr){
+  localStorage.setItem(HIST_KEY,JSON.stringify(arr));
+  updateHistBadge();
+}
+function updateHistBadge(){
+  const arr=loadHistory();
+  const badge=document.getElementById('hist-badge');
+  const btn=document.getElementById('hist-btn');
+  if(arr.length>0){badge.style.display='flex';badge.textContent=arr.length;btn.style.display='flex'}
+  else{badge.style.display='none';btn.style.display='none'}
+}
+
+async function saveToHistory(){
+  const arr=loadHistory();
+  const isDemo=curAnalysisImg&&(curAnalysisImg.includes('unsplash.com'));
+  let thumb=curAnalysisImg;
+  // Find matching demo type
+  let demoType=null;
+  for(const[k,v]of Object.entries(D)){if(v.img===curAnalysisImg){demoType=k;break}}
+  if(!demoType&&curAnalysisImg){
+    // Custom upload — generate thumbnail
+    thumb=await generateThumbnail(curAnalysisImg,300);
+  }
+  const entry={
+    id:Date.now(),
+    type:demoType||'custom',
+    label:demoType?DEMO_NAMES[demoType]:'自定义照片',
+    timestamp:Date.now(),
+    thumbnail:thumb,
+    photo:curAnalysisImg,
+    analysis:curData?{
+      quote:curData.quote,tags:curData.tags,compBadge:curData.compBadge,compDot:curData.compDot,
+      scene:curData.scene,side:curData.side,
+      pose:curData.pose,angle:curData.angle,light:curData.light,comp:curData.comp,
+      env:curData.env,settings:curData.settings,checklist:curData.checklist
+    }:null
+  };
+  arr.unshift(entry);
+  // Prune
+  while(arr.length>HIST_MAX_ITEMS)arr.pop();
+  let blob=new Blob([JSON.stringify(arr)]);
+  while(blob.size>HIST_MAX_BYTES&&arr.length>1){arr.pop();blob=new Blob([JSON.stringify(arr)])}
+  saveHistory(arr);
+}
+
+function showHistory(){
+  const arr=loadHistory();
+  const body=document.getElementById('hist-body');
+  if(arr.length===0){
+    body.innerHTML='<div class="hist-empty"><div class="hist-empty-icon">📋</div><p>还没有分析记录<br>上传照片开始你的第一次分析</p></div>';
+  }else{
+    body.innerHTML='<div class="hist-grid">'+arr.map(item=>
+      `<div class="hist-item" onclick="openHistDetail('${item.id}')">
+        <div class="hist-item-img"><img src="${item.thumbnail}" alt=""></div>
+        <div class="hist-item-info">
+          <div class="hist-item-type">${item.label}</div>
+          <div class="hist-item-time">${formatTimeAgo(item.timestamp)}</div>
+        </div>
+      </div>`
+    ).join('')+'</div>';
+  }
+  document.getElementById('hist-panel').classList.add('open');
+}
+function closeHistory(){document.getElementById('hist-panel').classList.remove('open')}
+
+function openHistDetail(id){
+  const arr=loadHistory();
+  const item=arr.find(i=>String(i.id)===String(id));
+  if(!item)return;
+  curHistDetailId=item.id;
+  const demoData=D[item.type];
+  const analysis=item.analysis||demoData;
+  const body=document.getElementById('hd-body');
+  const photoSrc=item.photo||(demoData?demoData.img:item.thumbnail);
+  const tags=analysis&&analysis.tags?analysis.tags.map(t=>`<span class="r-tag">${t}</span>`).join(''):'';
+  const quote=analysis&&analysis.quote?analysis.quote:'"自定义上传照片"';
+  body.innerHTML=`
+    <div class="hd-photo"><img src="${photoSrc}" alt=""></div>
+    <div class="hd-quote">${quote}</div>
+    ${tags?`<div class="hd-tags">${tags}</div>`:''}
+    <div class="hd-meta">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      ${formatTimeAgo(item.timestamp)} · ${item.label}
+    </div>
+    <button class="hd-reopen" onclick="reopenFromHistory('${item.id}')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      重新查看分析结果
+    </button>`;
+  document.getElementById('hd-title').textContent=item.label;
+  document.getElementById('hist-detail').classList.add('open');
+}
+function closeHistDetail(){document.getElementById('hist-detail').classList.remove('open');curHistDetailId=null}
+
+function deleteHistDetail(){
+  if(!curHistDetailId)return;
+  const arr=loadHistory().filter(i=>i.id!==curHistDetailId);
+  saveHistory(arr);
+  closeHistDetail();
+  showHistory(); // refresh grid
+}
+
+function clearAllHistory(){
+  if(!confirm('确定清空所有分析历史？'))return;
+  localStorage.removeItem(HIST_KEY);
+  updateHistBadge();
+  showHistory(); // refresh
+}
+
+function reopenFromHistory(id){
+  const arr=loadHistory();
+  const item=arr.find(i=>String(i.id)===String(id));
+  if(!item){closeHistDetail();closeHistory();return}
+  // Use stored analysis data, or fall back to demo data
+  const data=item.analysis||D[item.type];
+  if(!data){closeHistDetail();closeHistory();return}
+  curData=data;
+  curAnalysisImg=item.photo||(D[item.type]?D[item.type].img:'');
+  // Close panels first
+  closeHistDetail();
+  closeHistory();
+  // Wait for panel slide-out animation to finish, then switch view
+  setTimeout(()=>{
+    populateResults(curData);
+    document.getElementById('nav-back-btn').style.display='flex';
+    switchView('view-results');
+    setTimeout(()=>{
+      compGridVisible=true;
+      document.getElementById('comp-grid').classList.add('vis');
+      document.getElementById('comp-toggle').classList.add('active');
+      document.querySelectorAll('.reveal').forEach(e=>e.classList.add('vis'));
+      setTimeout(()=>updateTabIndicator(document.querySelector('.tab-btn.active')),100);
+    },450);
+  },380);
+}
+
+function formatTimeAgo(ts){
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60)return'刚刚';
+  const m=Math.floor(s/60);if(m<60)return m+'分钟前';
+  const h=Math.floor(m/60);if(h<24)return h+'小时前';
+  const d=Math.floor(h/24);if(d<30)return d+'天前';
+  return new Date(ts).toLocaleDateString('zh-CN');
+}
+
+// ═══════════════════════════════════════════
+// AI ANALYSIS (StepFun step-3.7-flash)
+// ═══════════════════════════════════════════
+const AI_KEY_ENC='UhdTJCcKET9gXBFrKmJeWR9qKytTPwNrGT9DHBJBMBhaHQAFLhtRPiZWVidECz1oBjpyXAp1KWZaGgFaLCF2Gi8=';
+const AI_KEY_XOR='aR7mK2';
+const AI_URL='https://api.stepfun.com/step_plan/v1/chat/completions';
+const AI_MODEL='step-3.7-flash';
+
+function decKey(enc,xk){
+  const raw=atob(enc);let r='';
+  for(let i=0;i<raw.length;i++)r+=String.fromCharCode(raw.charCodeAt(i)^xk.charCodeAt(i%xk.length));
+  return r;
+}
+
+function resizeForAI(src,maxDim){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width,h=img.height;
+      if(w>maxDim||h>maxDim){
+        const r=Math.min(maxDim/w,maxDim/h);
+        w=Math.round(w*r);h=Math.round(h*r);
+      }
+      const c=document.createElement('canvas');
+      c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(c.toDataURL('image/jpeg',0.85));
+    };
+    img.onerror=()=>resolve(src);
+    img.src=src;
+  });
+}
+
+const AI_PROMPT=`你是一位专业摄影分析师。请仔细分析这张照片，提取所有可复现的拍摄参数，以严格的JSON格式返回（不要包含markdown代码块标记）。
+
+输出格式：
+{
+  "quote": "一句话总结拍摄方法（引号内）",
+  "tags": ["标签1","标签2","标签3","标签4"],
+  "compBadge": "构图方法名 · 具体位置",
+  "compDot": {"x": 主体在画面中的x位置0-300, "y": y位置0-400},
+  "scene": {
+    "subX": 165, "subY": 100-200,
+    "phoX": 165, "phoY": 280-310,
+    "lightAngle": 光线来向角度0-360,
+    "lightLabel": "光线类型描述",
+    "distLabel": "约 X~Y 米",
+    "fovHalf": 视野半角15-35
+  },
+  "side": {
+    "camH": 手机离地高度50-200,
+    "subH": 人物高度150-200,
+    "camX": 70, "subX": 290, "groundY": 220,
+    "angleDeg": 仰角正仰负俯,
+    "angleLabel": "角度描述",
+    "hLabel": "手机在人物哪个高度"
+  },
+  "pose": [{"l":"标签","d":"描述"}],
+  "angle": [{"l":"标签","d":"描述"}],
+  "light": [{"l":"标签","d":"描述"}],
+  "comp": [{"l":"标签","d":"描述"}],
+  "env": [{"l":"标签","d":"描述"}],
+  "settings": [{"l":"标签","d":"描述"}],
+  "checklist": ["步骤1","步骤2","步骤3"]
+}
+
+规则：
+- pose/angle/light/comp/env/settings 每项3-4个{l,d}对
+- checklist 6-8项，直接可执行
+- scene和side的坐标严格在范围内
+- 基于照片实际内容分析，不要虚构
+- 只输出JSON，不要任何其他文字`;
+
+async function analyzePhotoAI(dataUrl){
+  const apiKey=decKey(AI_KEY_ENC,AI_KEY_XOR);
+  const resized=await resizeForAI(dataUrl,1024);
+  let resp;
+  try{
+    resp=await fetch(AI_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+      body:JSON.stringify({
+        model:AI_MODEL,
+        messages:[
+          {role:'system',content:AI_PROMPT},
+          {role:'user',content:[
+            {type:'image_url',image_url:{url:resized}},
+            {type:'text',text:'请分析这张照片的拍摄方法，返回JSON。'}
+          ]}
+        ],
+        temperature:0.3,
+        max_tokens:8000
+      })
+    });
+  }catch(netErr){
+    // CORS or network error
+    if(location.protocol==='file:')throw new Error('请用 HTTP 服务器访问（file:// 协议无法调用 API）');
+    throw new Error('网络请求失败：'+netErr.message);
+  }
+  if(!resp.ok){
+    const errTxt=await resp.text().catch(()=>'');
+    throw new Error('API 请求失败 ('+resp.status+')'+(errTxt?'：'+errTxt.slice(0,100):''));
+  }
+  const json=await resp.json();
+  console.log('[PhotoWhisper AI] raw response:', JSON.stringify({
+    choices:json.choices?.length,
+    content_len:json.choices?.[0]?.message?.content?.length||0,
+    has_reasoning:!!json.choices?.[0]?.message?.reasoning_content,
+    reasoning_len:json.choices?.[0]?.message?.reasoning_content?.length||0,
+    finish_reason:json.choices?.[0]?.finish_reason,
+    usage:json.usage,
+    error:json.error
+  }));
+  const msg=json.choices?.[0]?.message;
+  let content=msg?.content||msg?.reasoning_content||'';
+  if(!content){
+    console.log('[PhotoWhisper AI] full json:', JSON.stringify(json).substring(0,1000));
+    throw new Error('AI 返回了空结果（请打开浏览器控制台查看详情）');
+  }
+  // Strip markdown code blocks if present
+  let cleaned=content.trim();
+  if(cleaned.startsWith('```'))cleaned=cleaned.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'');
+  const data=JSON.parse(cleaned);
+  // Validate required fields
+  if(!data.quote||!data.tags||!data.scene||!data.pose)throw new Error('AI 返回格式不完整');
+  return data;
+}
+
+function showAnalysisError(msg){
+  const errEl=document.getElementById('analyze-error');
+  errEl.textContent=msg;errEl.classList.add('vis');
+  document.querySelector('.analyzing-subtext').textContent='分析遇到问题';
+  // Stop scan line
+  const scanLine=document.querySelector('.scan-line');
+  if(scanLine)scanLine.style.display='none';
+  // Stop spinner
+  const spinner=document.querySelector('.analyzing-spinner');
+  if(spinner)spinner.style.display='none';
+}
+
+function resetAnalysisUI(){
+  document.getElementById('analyze-error').classList.remove('vis');
+  document.getElementById('analyze-error').textContent='';
+  document.querySelector('.analyzing-subtext').textContent='AI 正在拆解这张照片的拍摄手法';
+  const scanLine=document.querySelector('.scan-line');
+  if(scanLine)scanLine.style.display='';
+  const spinner=document.querySelector('.analyzing-spinner');
+  if(spinner)spinner.style.display='';
+  for(let i=0;i<4;i++)document.getElementById('step-'+i).className='analyzing-step';
+}
+
+// Init scroll hint listener
+bindScrollHint();
+// Init history badge on page load
+updateHistBadge();
+</script>
+</body>
+</html>
