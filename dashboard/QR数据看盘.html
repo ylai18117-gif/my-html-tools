@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Scan Max - 数据看盘</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg: #f0f2f5; --surface: #ffffff; --border: #e5e7eb;
+  --text: #1a1a2e; --text2: #6b7280; --text3: #9ca3af;
+  --primary: #4f46e5; --primary-light: #eef2ff;
+  --green: #059669; --green-bg: #ecfdf5;
+  --red: #dc2626; --red-bg: #fef2f2;
+  --orange: #d97706; --orange-bg: #fffbeb;
+  --blue: #2563eb; --blue-bg: #eff6ff;
+  --purple: #7c3aed;
+  --chart1: #4f46e5; --chart2: #06b6d4; --chart3: #f59e0b; --chart4: #ef4444;
+  --chart5: #10b981; --chart6: #8b5cf6; --chart7: #f97316;
+  --radius: 12px; --shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+/* Header */
+.header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; position: sticky; top: 0; z-index: 100; }
+.header h1 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.header h1 span { color: var(--primary); }
+.header-actions { display: flex; gap: 8px; }
+.header-actions button { padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: 13px; cursor: pointer; transition: all .15s; }
+.header-actions button:hover { border-color: var(--primary); color: var(--primary); }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; background: var(--surface); padding: 8px 24px 0; border-bottom: 1px solid var(--border); }
+.tab { padding: 10px 20px; border: none; background: none; color: var(--text2); font-size: 14px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; border-radius: 8px 8px 0 0; }
+.tab:hover { color: var(--text); background: var(--bg); }
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+/* Main */
+.main { padding: 20px 24px; max-width: 1400px; margin: 0 auto; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* KPI Grid */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.kpi-card { background: var(--surface); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+.kpi-label { font-size: 12px; color: var(--text2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.kpi-value { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+.kpi-value.primary { color: var(--primary); }
+.kpi-value.green { color: var(--green); }
+.kpi-value.red { color: var(--red); }
+.kpi-value.orange { color: var(--orange); }
+.kpi-change { font-size: 12px; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+.kpi-change.up { color: var(--green); }
+.kpi-change.down { color: var(--red); }
+.kpi-change.flat { color: var(--text3); }
+.kpi-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+/* Chart Grid */
+.chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.chart-card { background: var(--surface); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+.chart-card.full { grid-column: 1 / -1; }
+.chart-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.chart-subtitle { font-size: 12px; color: var(--text3); margin-bottom: 16px; }
+.chart-wrap { position: relative; height: 280px; }
+.chart-wrap.tall { height: 340px; }
+
+/* Table */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th { text-align: left; padding: 10px 12px; background: var(--bg); color: var(--text2); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border); white-space: nowrap; }
+.data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.data-table tr:hover td { background: var(--primary-light); }
+.data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.data-table .warn { color: var(--red); font-weight: 600; }
+.data-table .good { color: var(--green); font-weight: 600; }
+.data-table .dim { color: var(--text3); }
+.table-wrap { overflow-x: auto; }
+
+/* Funnel */
+.funnel-viz { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 20px 0; }
+.funnel-step { display: flex; align-items: center; gap: 16px; width: 100%; max-width: 700px; }
+.funnel-bar-wrap { flex: 1; position: relative; }
+.funnel-bar { height: 44px; border-radius: 8px; display: flex; align-items: center; padding: 0 16px; color: white; font-weight: 600; font-size: 14px; min-width: 60px; transition: width .4s ease; }
+.funnel-label { width: 100px; text-align: right; font-size: 13px; color: var(--text2); font-weight: 500; }
+.funnel-meta { width: 120px; font-size: 12px; color: var(--text3); }
+.funnel-arrow { text-align: center; color: var(--text3); font-size: 11px; padding: 2px 0; max-width: 700px; width: 100%; }
+.funnel-arrow span { background: var(--bg); padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+.funnel-arrow .bad { color: var(--red); }
+.funnel-arrow .ok { color: var(--orange); }
+.funnel-arrow .good { color: var(--green); }
+
+/* Input Form */
+.form-section { background: var(--surface); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin-bottom: 24px; }
+.form-section h3 { font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.form-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; min-width: 100px; }
+.form-group.wide { min-width: 150px; flex: 1; }
+.form-group label { font-size: 11px; color: var(--text2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+.form-group input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; transition: border-color .15s; }
+.form-group input:focus { border-color: var(--primary); }
+.form-group .hint { font-size: 10px; color: var(--text3); }
+.form-divider { width: 100%; border-top: 1px solid var(--border); margin: 8px 0; }
+.form-actions { display: flex; gap: 8px; margin-top: 8px; }
+.btn { padding: 8px 20px; border-radius: 8px; border: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: #4338ca; }
+.btn-ghost { background: none; color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+.btn-danger { background: none; color: var(--red); border: 1px solid var(--border); }
+.btn-danger:hover { border-color: var(--red); background: var(--red-bg); }
+
+/* Status badge */
+.status-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.status-badge.good { background: var(--green-bg); color: var(--green); }
+.status-badge.warn { background: var(--orange-bg); color: var(--orange); }
+.status-badge.bad { background: var(--red-bg); color: var(--red); }
+
+/* Toast */
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1f2937; color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; z-index: 1000; transform: translateY(80px); opacity: 0; transition: all .3s; }
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* Empty state */
+.empty { text-align: center; padding: 60px 20px; color: var(--text3); }
+.empty p { font-size: 14px; }
+
+/* Editable Table */
+.edit-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.edit-table th { position: sticky; top: 0; z-index: 2; text-align: left; padding: 8px 6px; background: var(--bg); color: var(--text2); font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 2px solid var(--border); white-space: nowrap; }
+.edit-table td { padding: 0; border-bottom: 1px solid var(--border); }
+.edit-table td input { width: 100%; padding: 8px 6px; border: none; background: transparent; font-size: 13px; font-family: inherit; outline: none; text-align: right; font-variant-numeric: tabular-nums; }
+.edit-table td input:focus { background: var(--primary-light); box-shadow: inset 0 0 0 2px var(--primary); border-radius: 4px; }
+.edit-table td input[type="date"] { text-align: left; }
+.edit-table tr:hover td input:not(:focus) { background: #f9fafb; }
+.edit-table .col-date { min-width: 110px; }
+.edit-table .col-num { min-width: 70px; }
+.edit-table .col-action { min-width: 40px; text-align: center; }
+.edit-table .row-new { background: var(--green-bg); }
+.edit-table .row-new td input { font-weight: 500; }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+.toolbar .spacer { flex: 1; }
+.btn-sm { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: 12px; cursor: pointer; transition: all .15s; white-space: nowrap; }
+.btn-sm:hover { border-color: var(--primary); color: var(--primary); }
+.btn-sm.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* Import Preview Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; }
+.modal { background: var(--surface); border-radius: var(--radius); padding: 24px; max-width: 900px; width: 90%; max-height: 80vh; overflow: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+.modal .preview-info { font-size: 13px; color: var(--text2); margin-bottom: 12px; }
+.modal .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+.hidden { display: none !important; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header { padding: 12px 16px; }
+  .main { padding: 16px; }
+  .tabs { padding: 8px 16px 0; overflow-x: auto; }
+  .tab { padding: 8px 14px; font-size: 13px; white-space: nowrap; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .kpi-value { font-size: 22px; }
+  .chart-grid { grid-template-columns: 1fr; }
+  .chart-wrap { height: 240px; }
+  .form-group { min-width: 80px; }
+  .funnel-label { width: 70px; font-size: 12px; }
+  .funnel-meta { width: 80px; }
+}
+</style>
+<!-- Firebase Analytics -->
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import{getAnalytics,logEvent}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
+const app=initializeApp({apiKey:"AIzaSyDT9uNrRj97oLuehLXgOto97Z-mVw12cnk",authDomain:"myhtml-ff6d6.firebaseapp.com",projectId:"myhtml-ff6d6",storageBucket:"myhtml-ff6d6.firebasestorage.app",messagingSenderId:"790702386101",appId:"1:790702386101:web:f4e30fb5ce4771396347fc",measurementId:"G-8FQ9DRDJ6T"});
+const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catch(e){}};
+</script>
+</head>
+<body>
+
+<!-- Password Gate -->
+<div id="_pg" style="position:fixed;inset:0;z-index:99999;background:#f0f2f5;display:flex;align-items:center;justify-content:center">
+  <div style="text-align:center;padding:32px;max-width:340px;width:90%">
+    <div style="font-size:36px;margin-bottom:12px">🔒</div>
+    <h2 style="font-size:17px;font-weight:600;color:#1a1a2e;margin-bottom:6px">需要验证</h2>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:20px;line-height:1.5">此页面包含内部数据，请输入访问密码</p>
+    <input id="_pp" type="password" placeholder="输入密码" autocomplete="off" style="width:100%;padding:12px 16px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;text-align:center;letter-spacing:.06em;font-family:monospace;transition:border-color .2s" onfocus="this.style.borderColor='#4f46e5'" onblur="this.style.borderColor='#e5e7eb'">
+    <div id="_pe" style="font-size:12px;color:#dc2626;margin-top:8px;min-height:18px"></div>
+    <button id="_pb" style="width:100%;margin-top:8px;padding:12px;border:none;border-radius:10px;background:#4f46e5;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#4338ca'" onmouseout="this.style.background='#4f46e5'">验证并进入</button>
+  </div>
+</div>
+<script>
+(function(){
+  var _pg=document.getElementById('_pg'),_pp=document.getElementById('_pp'),_pe=document.getElementById('_pe'),_pb=document.getElementById('_pb');
+  var TH=-551981607,TX='MSQYTkljAEBJYA9I',K='pW9x';
+  function ck(v){var h=0;for(var i=0;i<v.length;i++)h=((h<<5)-h+v.charCodeAt(i))|0;if(h!==TH)return false;var x=[];for(var i=0;i<v.length;i++)x.push(v.charCodeAt(i)^K.charCodeAt(i%K.length));return btoa(String.fromCharCode.apply(null,x))===TX}
+  function ok(){_pg.style.transition='opacity .3s';_pg.style.opacity='0';setTimeout(function(){_pg.style.display='none'},300)}
+  if(sessionStorage.getItem('_v')==='1'){ok()}else{
+    document.body.style.overflow='hidden';
+    function go(){var v=_pp.value;if(!v){_pp.focus();return}if(ck(v)){sessionStorage.setItem('_v','1');ok();document.body.style.overflow=''}else{_pe.textContent='密码错误，请重试';_pp.style.borderColor='#dc2626';_pp.style.animation='none';_pp.offsetHeight;_pp.style.animation='_shk .4s ease';setTimeout(function(){_pp.style.borderColor='#e5e7eb'},800);_pp.select()}}
+    _pb.onclick=go;_pp.onkeydown=function(e){if(e.key==='Enter')go()};
+    var st=document.createElement('style');st.textContent='@keyframes _shk{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}';document.head.appendChild(st);
+  }
+})();
+</script>
+<div class="header">
+  <h1>📊 <span>QR Scan Max</span> 数据看盘</h1>
+  <div class="header-actions">
+    <button onclick="exportCSV()">导出CSV</button>
+    <button onclick="document.getElementById('importFile').click()">导入表格</button>
+    <input type="file" id="importFile" accept=".json,.csv,.xlsx,.xls" style="display:none" onchange="handleFileImport(event)">
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="overview">📈 总览</button>
+  <button class="tab" data-tab="commercial">💰 商业化</button>
+  <button class="tab" data-tab="funnel">🔽 用户漏斗</button>
+  <button class="tab" data-tab="datamanage">📝 数据录入</button>
+</div>
+
+<div class="main">
+
+<!-- ==================== 总览 Tab ==================== -->
+<div id="tab-overview" class="tab-content active">
+  <div class="kpi-grid" id="overview-kpis"></div>
+  <div class="chart-grid">
+    <div class="chart-card full">
+      <div class="chart-title">用户规模与试用趋势</div>
+      <div class="chart-subtitle">新用户数（柱）· 主页渗透率（线）· 试用人数（标记）</div>
+      <div class="chart-wrap tall"><canvas id="chart-overview-1"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">广告收入趋势</div>
+      <div class="chart-subtitle">广告收入（柱）· 广告人均收入（线）</div>
+      <div class="chart-wrap"><canvas id="chart-overview-2"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">每日消耗与CPI</div>
+      <div class="chart-subtitle">消耗（柱）· CPI（线）</div>
+      <div class="chart-wrap"><canvas id="chart-overview-3"></canvas></div>
+    </div>
+  </div>
+  <div class="chart-card full">
+    <div class="chart-title">原始数据表</div>
+    <div class="chart-subtitle">点击「数据录入」Tab 添加新数据</div>
+    <div class="table-wrap" id="overview-table"></div>
+  </div>
+</div>
+
+<!-- ==================== 商业化 Tab ==================== -->
+<div id="tab-commercial" class="tab-content">
+  <div class="kpi-grid" id="commercial-kpis"></div>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">ECPM 与人均展示</div>
+      <div class="chart-subtitle">ECPM（柱）· 人均展示次数（线）</div>
+      <div class="chart-wrap"><canvas id="chart-comm-1"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">回本缺口分析</div>
+      <div class="chart-subtitle">CPI（柱）· 广告人均收入（柱）· 订阅缺口（虚线）</div>
+      <div class="chart-wrap"><canvas id="chart-comm-2"></canvas></div>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-title">回本敏感性矩阵</div>
+      <div class="chart-subtitle">不同（试用率 × 转订阅率）组合下的首日ROI · 基于最新CPI和广告人均</div>
+      <div class="table-wrap" id="sensitivity-table"></div>
+    </div>
+  </div>
+  <div class="chart-card full">
+    <div class="chart-title">商业化详细数据</div>
+    <div class="table-wrap" id="commercial-table"></div>
+  </div>
+</div>
+
+<!-- ==================== 用户漏斗 Tab ==================== -->
+<div id="tab-funnel" class="tab-content">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+    <label style="font-size:13px;color:var(--text2);font-weight:500;">选择日期：</label>
+    <select id="funnel-date" onchange="renderFunnel()" style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;"></select>
+    <label style="font-size:13px;color:var(--text2);font-weight:500;margin-left:12px;">对比日期：</label>
+    <select id="funnel-compare" onchange="renderFunnel()" style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;">
+      <option value="">不对比</option>
+    </select>
+  </div>
+  <div class="chart-grid">
+    <div class="chart-card full">
+      <div class="chart-title">用户漏斗</div>
+      <div class="chart-subtitle">各步骤用户到达数与步骤间转化率</div>
+      <div id="funnel-viz" class="funnel-viz"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">步骤间转化率趋势</div>
+      <div class="chart-subtitle">各环节的日转化率变化</div>
+      <div class="chart-wrap tall"><canvas id="chart-funnel-1"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">渗透率与试用率趋势</div>
+      <div class="chart-subtitle">主页渗透率（线）· 试用率（线）</div>
+      <div class="chart-wrap tall"><canvas id="chart-funnel-2"></canvas></div>
+    </div>
+  </div>
+  <div class="chart-card full">
+    <div class="chart-title">漏斗健康度诊断</div>
+    <div class="table-wrap" id="funnel-health"></div>
+  </div>
+</div>
+
+<!-- ==================== 数据录入 Tab ==================== -->
+<div id="tab-datamanage" class="tab-content">
+  <div class="toolbar">
+    <button class="btn-sm" onclick="addNewRow()">＋ 新增行</button>
+    <button class="btn-sm" onclick="document.getElementById('importFile').click()">📂 导入 CSV/XLSX</button>
+    <button class="btn-sm" onclick="exportCSV()">📥 导出 CSV</button>
+    <button class="btn-sm" onclick="exportJSON()">💾 导出 JSON</button>
+    <button class="btn-sm" onclick="downloadTemplate()">📋 下载导入模板</button>
+    <span class="spacer"></span>
+    <span style="font-size:12px;color:var(--text3);" id="edit-hint">点击单元格直接编辑，按 Enter 或点击其他格自动保存</span>
+  </div>
+
+  <div class="chart-card full" style="padding:0;overflow:hidden;">
+    <div class="table-wrap" style="max-height:70vh;overflow-y:auto;" id="edit-table-wrap">
+      <table class="edit-table" id="edit-table">
+        <thead>
+          <tr>
+            <th class="col-date">日期</th>
+            <th class="col-num">新用户数</th>
+            <th class="col-num">首启订阅页</th>
+            <th class="col-num">语言选择页</th>
+            <th class="col-num">假通知页</th>
+            <th class="col-num">主页展示</th>
+            <th class="col-num">主页扫描</th>
+            <th class="col-num">试用人数</th>
+            <th class="col-num">试用率%</th>
+            <th class="col-num">消耗$</th>
+            <th class="col-num">CPI$</th>
+            <th class="col-num">广告展示数</th>
+            <th class="col-num">ECPM$</th>
+            <th class="col-num">广告首R%</th>
+            <th class="col-action"></th>
+          </tr>
+        </thead>
+        <tbody id="edit-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+    <button class="btn btn-danger" onclick="clearAllData()">清空全部数据</button>
+    <span style="font-size:12px;color:var(--text3);align-self:center;margin-left:8px;">数据自动保存在浏览器本地（localStorage），关闭页面不会丢失。建议定期导出CSV备份。</span>
+  </div>
+</div>
+
+<!-- Import Preview Modal -->
+<div class="modal-overlay hidden" id="import-modal">
+  <div class="modal">
+    <h3>📂 导入数据预览</h3>
+    <div class="preview-info" id="import-info"></div>
+    <div class="table-wrap" style="max-height:400px;overflow:auto;" id="import-preview"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeImportModal()">取消</button>
+      <button class="btn btn-primary" onclick="confirmImport()">确认导入</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== Constants =====
+const WEEKLY_PRICE = 14.99;
+const LT_50 = 5; // lifecycle weeks at 50% renewal
+const LT_60 = 6; // lifecycle weeks at 60% renewal
+
+// ===== Data Store =====
+const STORE_KEY = 'qr_scan_max_dashboard_v1';
+let records = [];
+let charts = {};
+
+function loadData() {
+  const raw = localStorage.getItem(STORE_KEY);
+  if (raw) {
+    try { records = JSON.parse(raw); } catch(e) { records = []; }
+  }
+  if (records.length === 0) loadSeedData();
+  records.sort((a,b) => a.date.localeCompare(b.date));
+}
+
+function saveData() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(records));
+}
+
+function loadSeedData() {
+  records = [
+    { date:'2026-06-25', newUsers:143, subPage:142, langPage:123, notifPage:69, homePage:35, scanUse:22, trialUsers:4, trialRate:9.7, spend:28.72, cpi:0.70, adImpressions:94, ecpm:26.38, adFirstR:8.57 },
+    { date:'2026-06-26', newUsers:100, subPage:98, langPage:91, notifPage:38, homePage:15, scanUse:9, trialUsers:9, trialRate:4.3, spend:169.80, cpi:0.82, adImpressions:543, ecpm:28.50, adFirstR:9.02 },
+    { date:'2026-06-27', newUsers:23, subPage:23, langPage:21, notifPage:9, homePage:5, scanUse:4, trialUsers:0, trialRate:0.0, spend:1.61, cpi:0.81, adImpressions:27, ecpm:30.00, adFirstR:6.67 },
+    { date:'2026-06-28', newUsers:87, subPage:84, langPage:69, notifPage:25, homePage:11, scanUse:9, trialUsers:2, trialRate:3.9, spend:51.19, cpi:1.00, adImpressions:145, ecpm:29.18, adFirstR:7.90 }
+  ];
+  saveData();
+}
+
+// ===== Computed Metrics =====
+function compute(r) {
+  const d = { ...r };
+  d.adRevenue = nn(d.ecpm) * nn(d.adImpressions) / 1000;
+  d.adPerUser = d.newUsers ? d.adRevenue / d.newUsers : 0;
+  d.perCapitaImp = d.newUsers ? nn(d.adImpressions) / d.newUsers : 0;
+  d.homePenetration = d.newUsers ? nn(d.homePage) / d.newUsers : 0;
+  d.calcTrialRate = d.newUsers ? nn(d.trialUsers) / d.newUsers * 100 : 0;
+  d.subGap = nn(d.cpi) - d.adPerUser;
+  const tr = nn(d.trialRate) / 100;
+  d.reqConvRate50 = (tr > 0) ? d.subGap / (tr * WEEKLY_PRICE * LT_50) * 100 : null;
+  d.reqConvRate60 = (tr > 0) ? d.subGap / (tr * WEEKLY_PRICE * LT_60) * 100 : null;
+  d.trialCost = nn(d.trialUsers) > 0 ? nn(d.spend) / d.trialUsers : null;
+  // Funnel step rates
+  d.subPageRate = d.newUsers ? nn(d.subPage) / d.newUsers : 0;
+  d.langRate = d.newUsers ? nn(d.langPage) / d.newUsers : 0;
+  d.langToNotif = nn(d.langPage) > 0 ? nn(d.notifPage) / d.langPage : 0;
+  d.notifToHome = nn(d.notifPage) > 0 ? nn(d.homePage) / d.notifPage : 0;
+  d.homeToScan = nn(d.homePage) > 0 ? nn(d.scanUse) / d.homePage : 0;
+  return d;
+}
+function nn(v) { return (v !== null && v !== undefined && !isNaN(v)) ? Number(v) : 0; }
+
+// ===== UI Helpers =====
+function fmt$(v) { return v == null ? '—' : '$' + v.toFixed(2); }
+function fmtP(v) { return v == null ? '—' : v.toFixed(1) + '%'; }
+function fmtN(v) { return v == null ? '—' : (v >= 1000 ? (v/1000).toFixed(1)+'k' : Math.round(v).toString()); }
+function fmtDate(d) { const p = d.split('-'); return p[1]+'/'+p[2]; }
+function shortDate(d) { const p = d.split('-'); return parseInt(p[1])+'/'+parseInt(p[2]); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function changeIndicator(current, previous) {
+  if (previous == null || current == null) return { cls:'flat', text:'—' };
+  const diff = current - previous;
+  const pct = previous !== 0 ? (diff / Math.abs(previous) * 100) : 0;
+  if (Math.abs(pct) < 1) return { cls:'flat', text:'持平' };
+  const arrow = diff > 0 ? '↑' : '↓';
+  return { cls: diff > 0 ? 'up' : 'down', text: `${arrow} ${Math.abs(pct).toFixed(1)}%` };
+}
+
+function kpiCard(label, value, cls, change, sub) {
+  let html = `<div class="kpi-card"><div class="kpi-label">${label}</div><div class="kpi-value ${cls||''}">${value}</div>`;
+  if (change) html += `<div class="kpi-change ${change.cls}">${change.text}</div>`;
+  if (sub) html += `<div class="kpi-sub">${sub}</div>`;
+  html += '</div>';
+  return html;
+}
+
+// ===== Tab Switching =====
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    // Re-render on tab switch for chart sizing
+    setTimeout(() => renderAll(), 50);
+  });
+});
+
+// ===== Chart Helpers =====
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+const chartDefaults = {
+  responsive: true, maintainAspectRatio: false,
+  interaction: { intersect: false, mode: 'index' },
+  plugins: { legend: { position:'top', labels: { usePointStyle:true, padding:16, font:{size:12} } },
+    tooltip: { backgroundColor:'#1f2937', titleFont:{size:13}, bodyFont:{size:12}, padding:12, cornerRadius:8 } },
+  scales: { x: { grid:{display:false}, ticks:{font:{size:11}} }, y: { grid:{color:'#f0f0f0'}, ticks:{font:{size:11}} } }
+};
+
+function dualAxisConfig(labels, barData, barLabel, barColor, lineData, lineLabel, lineColor, yBarLabel, yLineLabel) {
+  return {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { type:'bar', label:barLabel, data:barData, backgroundColor:barColor+'cc', borderRadius:6, yAxisID:'y', order:2 },
+        { type:'line', label:lineLabel, data:lineData, borderColor:lineColor, backgroundColor:lineColor+'22', pointRadius:4, pointBackgroundColor:lineColor, borderWidth:2, tension:0.3, yAxisID:'y1', order:1, fill:false }
+      ]
+    },
+    options: {
+      ...chartDefaults,
+      scales: {
+        x: { grid:{display:false}, ticks:{font:{size:11}} },
+        y: { position:'left', grid:{color:'#f0f0f0'}, ticks:{font:{size:11}}, title:{display:true,text:yBarLabel,font:{size:11}} },
+        y1: { position:'right', grid:{display:false}, ticks:{font:{size:11}}, title:{display:true,text:yLineLabel,font:{size:11}} }
+      }
+    }
+  };
+}
+
+// ===== Render: Overview =====
+function renderOverview() {
+  const data = records.map(compute);
+  const n = data.length;
+  const latest = data[n-1];
+  const prev = n > 1 ? data[n-2] : null;
+
+  // KPI Cards
+  const kpis = document.getElementById('overview-kpis');
+  const avgUsers = n > 0 ? data.reduce((s,d)=>s+nn(d.newUsers),0)/n : 0;
+  const avgTrialRate = n > 0 ? data.filter(d=>d.trialRate!=null).reduce((s,d)=>s+nn(d.trialRate),0)/Math.max(1,data.filter(d=>d.trialRate!=null).length) : 0;
+  const totalTrials = data.reduce((s,d)=>s+nn(d.trialUsers),0);
+
+  kpis.innerHTML = [
+    kpiCard('最新日新用户', fmtN(latest?.newUsers), 'primary', prev ? changeIndicator(latest?.newUsers, prev?.newUsers) : null, `日均 ${fmtN(avgUsers)}`),
+    kpiCard('主页渗透率', fmtP(latest?.homePenetration*100), latest?.homePenetration < 0.3 ? 'red' : 'green', prev ? changeIndicator(latest?.homePenetration, prev?.homePenetration) : null),
+    kpiCard('广告人均收入', fmt$(latest?.adPerUser), 'primary', prev ? changeIndicator(latest?.adPerUser, prev?.adPerUser) : null),
+    kpiCard('试用人数', latest?.trialUsers ?? '—', totalTrials > 0 ? (latest?.trialUsers > 0 ? 'green' : 'red') : '', prev ? changeIndicator(latest?.trialUsers, prev?.trialUsers) : null, `累计 ${totalTrials} 人`),
+    kpiCard('试用率', latest?.trialRate != null ? fmtP(latest.trialRate) : '—', latest?.trialRate >= 5 ? 'green' : 'orange', prev ? changeIndicator(latest?.trialRate, prev?.trialRate) : null, `均值 ${fmtP(avgTrialRate)}`),
+    kpiCard('CPI', fmt$(latest?.cpi), 'primary', prev ? changeIndicator(latest?.cpi, prev?.cpi) : null, latest?.cpi < 1 ? '低于$1，健康' : '高于$1')
+  ].join('');
+
+  // Chart 1: Users + Penetration + Trials
+  const labels = data.map(d => shortDate(d.date));
+  destroyChart('overview1');
+  charts['overview1'] = new Chart(document.getElementById('chart-overview-1'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { type:'bar', label:'新用户数', data:data.map(d=>d.newUsers), backgroundColor:'#4f46e5aa', borderRadius:6, yAxisID:'y', order:3 },
+        { type:'line', label:'主页渗透率 %', data:data.map(d=>+(d.homePenetration*100).toFixed(1)), borderColor:'#f59e0b', backgroundColor:'#f59e0b22', pointRadius:5, pointBackgroundColor:'#f59e0b', borderWidth:2.5, tension:0.3, yAxisID:'y1', order:1, fill:false },
+        { type:'line', label:'试用人数', data:data.map(d=>d.trialUsers), borderColor:'#10b981', backgroundColor:'#10b98122', pointRadius:6, pointBackgroundColor:'#10b981', borderWidth:2, pointStyle:'rectRot', tension:0.3, yAxisID:'y2', order:2, fill:false, hidden: false }
+      ]
+    },
+    options: {
+      ...chartDefaults,
+      scales: {
+        x: { grid:{display:false} },
+        y: { position:'left', title:{display:true,text:'新用户数'}, grid:{color:'#f0f0f0'} },
+        y1: { position:'right', title:{display:true,text:'渗透率 %'}, grid:{display:false}, min:0, max:100 },
+        y2: { position:'right', title:{display:true,text:'试用人数'}, grid:{display:false}, display:false }
+      }
+    }
+  });
+
+  // Chart 2: Ad Revenue
+  destroyChart('overview2');
+  charts['overview2'] = new Chart(document.getElementById('chart-overview-2'),
+    dualAxisConfig(labels, data.map(d=>+d.adRevenue.toFixed(2)), '广告收入 $', '#4f46e5', data.map(d=>+d.adPerUser.toFixed(3)), '广告人均 $', '#06b6d4', '广告收入', '人均收入')
+  );
+
+  // Chart 3: Spend + CPI
+  destroyChart('overview3');
+  charts['overview3'] = new Chart(document.getElementById('chart-overview-3'),
+    dualAxisConfig(labels, data.map(d=>d.spend), '消耗 $', '#f59e0b', data.map(d=>d.cpi), 'CPI $', '#ef4444', '消耗', 'CPI')
+  );
+
+  // Data Table
+  renderOverviewTable(data);
+}
+
+function renderOverviewTable(data) {
+  let html = '<table class="data-table"><thead><tr>';
+  html += '<th>日期</th><th class="num">新用户</th><th class="num">首启页</th><th class="num">语言页</th><th class="num">假通知</th><th class="num">主页</th><th class="num">扫描</th><th class="num">渗透率</th><th class="num">试用</th><th class="num">试用率</th><th class="num">消耗</th><th class="num">CPI</th><th class="num">ECPM</th><th class="num">广告首R</th>';
+  html += '</tr></thead><tbody>';
+  data.forEach(d => {
+    const penCls = d.homePenetration < 0.3 ? 'warn' : 'good';
+    const trCls = nn(d.trialRate) < 5 ? 'warn' : (nn(d.trialRate) >= 5 ? 'good' : 'dim');
+    html += `<tr>
+      <td>${shortDate(d.date)}</td>
+      <td class="num">${nn(d.newUsers)}</td>
+      <td class="num">${nn(d.subPage)}</td>
+      <td class="num">${nn(d.langPage)}</td>
+      <td class="num">${nn(d.notifPage)}</td>
+      <td class="num">${nn(d.homePage)}</td>
+      <td class="num">${nn(d.scanUse)}</td>
+      <td class="num ${penCls}">${fmtP(d.homePenetration*100)}</td>
+      <td class="num">${nn(d.trialUsers)}</td>
+      <td class="num ${trCls}">${d.trialRate!=null?fmtP(d.trialRate):'—'}</td>
+      <td class="num">${fmt$(d.spend)}</td>
+      <td class="num">${fmt$(d.cpi)}</td>
+      <td class="num">${fmt$(d.ecpm)}</td>
+      <td class="num">${d.adFirstR!=null?fmtP(d.adFirstR):'—'}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('overview-table').innerHTML = html;
+}
+
+// ===== Render: Commercial =====
+function renderCommercial() {
+  const data = records.map(compute);
+  const n = data.length;
+  const latest = data[n-1];
+  const prev = n > 1 ? data[n-2] : null;
+
+  // KPI
+  const kpis = document.getElementById('commercial-kpis');
+  const avgEcpm = n > 0 ? data.reduce((s,d)=>s+nn(d.ecpm),0)/n : 0;
+  const avgCPI = n > 0 ? data.reduce((s,d)=>s+nn(d.cpi),0)/n : 0;
+
+  kpis.innerHTML = [
+    kpiCard('最新CPI', fmt$(latest?.cpi), latest?.cpi < 1 ? 'green' : 'orange', prev ? changeIndicator(latest?.cpi, prev?.cpi) : null, `均值 ${fmt$(avgCPI)}`),
+    kpiCard('广告人均收入', fmt$(latest?.adPerUser), 'primary', prev ? changeIndicator(latest?.adPerUser, prev?.adPerUser) : null),
+    kpiCard('ECPM', fmt$(latest?.ecpm), 'primary', prev ? changeIndicator(latest?.ecpm, prev?.ecpm) : null, `均值 ${fmt$(avgEcpm)}`),
+    kpiCard('订阅缺口', fmt$(latest?.subGap), latest?.subGap > 0.5 ? 'red' : 'green', prev ? changeIndicator(latest?.subGap, prev?.subGap) : null, 'CPI - 广告人均'),
+    kpiCard('试用获取成本', latest?.trialCost != null ? fmt$(latest.trialCost) : '—', latest?.trialCost > 20 ? 'red' : 'primary'),
+    kpiCard('广告首R', latest?.adFirstR != null ? fmtP(latest.adFirstR) : '—', latest?.adFirstR >= 15 ? 'green' : (latest?.adFirstR >= 5 ? 'orange' : 'red'), latest?.adFirstR >= 15 ? '健康' : (latest?.adFirstR >= 5 ? '偏低' : '堪忧'))
+  ].join('');
+
+  // Chart 1: ECPM + per-capita impressions
+  const labels = data.map(d => shortDate(d.date));
+  destroyChart('comm1');
+  charts['comm1'] = new Chart(document.getElementById('chart-comm-1'),
+    dualAxisConfig(labels, data.map(d=>+nn(d.ecpm).toFixed(1)), 'ECPM $', '#4f46e5', data.map(d=>+d.perCapitaImp.toFixed(1)), '人均展示', '#f59e0b', 'ECPM', '展示次数')
+  );
+
+  // Chart 2: Gap Analysis
+  destroyChart('comm2');
+  charts['comm2'] = new Chart(document.getElementById('chart-comm-2'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { type:'bar', label:'CPI $', data:data.map(d=>+nn(d.cpi).toFixed(2)), backgroundColor:'#ef4444aa', borderRadius:6, yAxisID:'y', order:3 },
+        { type:'bar', label:'广告人均 $', data:data.map(d=>+d.adPerUser.toFixed(3)), backgroundColor:'#10b981aa', borderRadius:6, yAxisID:'y', order:2 },
+        { type:'line', label:'订阅缺口 $', data:data.map(d=>+d.subGap.toFixed(3)), borderColor:'#f59e0b', pointRadius:5, pointBackgroundColor:'#f59e0b', borderWidth:2.5, borderDash:[5,5], tension:0.3, yAxisID:'y', order:1, fill:false }
+      ]
+    },
+    options: { ...chartDefaults, scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f0f0'}, title:{display:true,text:'$'}} } }
+  });
+
+  // Sensitivity Matrix
+  renderSensitivityMatrix(latest);
+
+  // Detail Table
+  renderCommercialTable(data);
+}
+
+function renderSensitivityMatrix(latest) {
+  if (!latest) return;
+  const cpi = nn(latest.cpi);
+  const adPU = latest.adPerUser;
+  const gap = cpi - adPU;
+
+  const trialRates = [2, 3, 5, 7, 10, 15];
+  const convRates = [5, 10, 15, 20, 30, 50];
+
+  let html = '<table class="data-table"><thead><tr><th>试用率 ↓ / 转订阅率 →</th>';
+  convRates.forEach(c => html += `<th class="num">${c}%</th>`);
+  html += '</tr></thead><tbody>';
+
+  trialRates.forEach(tr => {
+    html += `<tr><td style="font-weight:600">${tr}%</td>`;
+    convRates.forEach(cr => {
+      const subPerUser = (tr/100) * (cr/100) * WEEKLY_PRICE * LT_60;
+      const totalPerUser = adPU + subPerUser;
+      const roi = cpi > 0 ? ((totalPerUser - cpi) / cpi * 100) : 0;
+      let cls = 'bad'; let badge = '';
+      if (roi >= 0) { cls = 'good'; badge = '✓ 回本'; }
+      else if (roi >= -20) { cls = ''; badge = '≈ 接近'; }
+      else if (roi >= -40) { cls = ''; badge = '△ 缺口'; }
+      else { badge = '✗ 大缺口'; }
+      html += `<td class="num"><span class="status-badge ${cls}">${roi.toFixed(0)}%</span><br><span style="font-size:10px;color:var(--text3)">${badge}</span></td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  html += `<p style="font-size:11px;color:var(--text3);margin-top:8px;">基于 CPI=${fmt$(cpi)}，广告人均=${fmt$(adPU)}，一续率60%（LT=6周），周价格=$14.99</p>`;
+  document.getElementById('sensitivity-table').innerHTML = html;
+}
+
+function renderCommercialTable(data) {
+  let html = '<table class="data-table"><thead><tr>';
+  html += '<th>日期</th><th class="num">消耗</th><th class="num">CPI</th><th class="num">广告收入</th><th class="num">广告人均</th><th class="num">人均展示</th><th class="num">ECPM</th><th class="num">广告首R</th><th class="num">订阅缺口</th><th class="num">试用率</th><th class="num">需转订阅(50%续)</th><th class="num">需转订阅(60%续)</th><th class="num">试用获取成本</th>';
+  html += '</tr></thead><tbody>';
+  data.forEach(d => {
+    html += `<tr>
+      <td>${shortDate(d.date)}</td>
+      <td class="num">${fmt$(d.spend)}</td>
+      <td class="num">${fmt$(d.cpi)}</td>
+      <td class="num">${fmt$(d.adRevenue)}</td>
+      <td class="num">${fmt$(d.adPerUser)}</td>
+      <td class="num">${d.perCapitaImp.toFixed(1)}</td>
+      <td class="num">${fmt$(d.ecpm)}</td>
+      <td class="num">${d.adFirstR!=null?fmtP(d.adFirstR):'—'}</td>
+      <td class="num ${d.subGap>0.5?'warn':'good'}">${fmt$(d.subGap)}</td>
+      <td class="num">${d.trialRate!=null?fmtP(d.trialRate):'—'}</td>
+      <td class="num">${d.reqConvRate50!=null?fmtP(d.reqConvRate50):'—'}</td>
+      <td class="num">${d.reqConvRate60!=null?fmtP(d.reqConvRate60):'—'}</td>
+      <td class="num">${d.trialCost!=null?fmt$(d.trialCost):'—'}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('commercial-table').innerHTML = html;
+}
+
+// ===== Render: Funnel =====
+function renderFunnel() {
+  const data = records.map(compute);
+  const n = data.length;
+
+  // Populate date selectors
+  const sel = document.getElementById('funnel-date');
+  const cmpSel = document.getElementById('funnel-compare');
+  const curVal = sel.value;
+  const curCmp = cmpSel.value;
+  sel.innerHTML = '';
+  cmpSel.innerHTML = '<option value="">不对比</option>';
+  data.forEach((d,i) => {
+    sel.innerHTML += `<option value="${i}" ${i===n-1?'selected':''}>${d.date}</option>`;
+    cmpSel.innerHTML += `<option value="${i}">${d.date}</option>`;
+  });
+  if (curVal) sel.value = curVal;
+  if (curCmp) cmpSel.value = curCmp;
+
+  const idx = parseInt(sel.value) || n-1;
+  const d = data[idx];
+  const cmpIdx = cmpSel.value !== '' ? parseInt(cmpSel.value) : null;
+  const cmp = cmpIdx != null ? data[cmpIdx] : null;
+
+  // Funnel visualization
+  renderFunnelViz(d, cmp);
+
+  // Funnel step conversion trends
+  const labels = data.map(d => shortDate(d.date));
+  destroyChart('funnel1');
+  charts['funnel1'] = new Chart(document.getElementById('chart-funnel-1'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'新用户→首启页', data:data.map(d=>+(d.subPageRate*100).toFixed(1)), borderColor:'#4f46e5', pointRadius:4, borderWidth:2, tension:0.3 },
+        { label:'语言→假通知', data:data.map(d=>+(d.langToNotif*100).toFixed(1)), borderColor:'#f59e0b', pointRadius:4, borderWidth:2, tension:0.3 },
+        { label:'假通知→主页', data:data.map(d=>+(d.notifToHome*100).toFixed(1)), borderColor:'#ef4444', pointRadius:4, borderWidth:2, tension:0.3 },
+        { label:'主页→扫描', data:data.map(d=>+(d.homeToScan*100).toFixed(1)), borderColor:'#10b981', pointRadius:4, borderWidth:2, tension:0.3 }
+      ]
+    },
+    options: {
+      ...chartDefaults,
+      scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f0f0'}, min:0, max:100, title:{display:true,text:'转化率 %'}} }
+    }
+  });
+
+  // Penetration + Trial Rate trend
+  destroyChart('funnel2');
+  charts['funnel2'] = new Chart(document.getElementById('chart-funnel-2'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'主页渗透率', data:data.map(d=>+(d.homePenetration*100).toFixed(1)), borderColor:'#4f46e5', backgroundColor:'#4f46e522', pointRadius:5, pointBackgroundColor:'#4f46e5', borderWidth:2.5, tension:0.3, fill:true },
+        { label:'试用率', data:data.map(d=>d.trialRate!=null?+d.trialRate.toFixed(1):null), borderColor:'#ef4444', backgroundColor:'#ef444422', pointRadius:5, pointBackgroundColor:'#ef4444', borderWidth:2.5, tension:0.3, fill:true },
+        { label:'30%渗透率线', data:data.map(()=>30), borderColor:'#d1d5db', borderDash:[5,5], pointRadius:0, borderWidth:1.5, fill:false },
+        { label:'5%试用率线', data:data.map(()=>5), borderColor:'#d1d5db', borderDash:[5,5], pointRadius:0, borderWidth:1.5, fill:false }
+      ]
+    },
+    options: {
+      ...chartDefaults,
+      scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f0f0'}, min:0, max:100, title:{display:true,text:'%'}} }
+    }
+  });
+
+  // Health diagnosis
+  renderFunnelHealth(data);
+}
+
+function renderFunnelViz(d, cmp) {
+  const steps = [
+    { name:'新用户', val: d.newUsers, cmpVal: cmp?.newUsers, color:'#4f46e5' },
+    { name:'首启订阅页', val: d.subPage, cmpVal: cmp?.subPage, color:'#6366f1' },
+    { name:'语言选择页', val: d.langPage, cmpVal: cmp?.langPage, color:'#818cf8' },
+    { name:'假通知页', val: d.notifPage, cmpVal: cmp?.notifPage, color:'#f59e0b' },
+    { name:'主页展示', val: d.homePage, cmpVal: cmp?.homePage, color:'#ef4444' },
+    { name:'主页扫描', val: d.scanUse, cmpVal: cmp?.scanUse, color:'#06b6d4' },
+    { name:'试用', val: d.trialUsers, cmpVal: cmp?.trialUsers, color:'#10b981' }
+  ];
+  const maxVal = Math.max(...steps.map(s=>nn(s.val)), 1);
+  let html = '';
+  steps.forEach((s, i) => {
+    const width = Math.max(nn(s.val) / maxVal * 100, 8);
+    const cmpWidth = s.cmpVal != null ? Math.max(nn(s.cmpVal) / maxVal * 100, 8) : null;
+    html += `<div class="funnel-step">
+      <div class="funnel-label">${s.name}</div>
+      <div class="funnel-bar-wrap">
+        <div class="funnel-bar" style="width:${width}%;background:${s.color};">${nn(s.val)}${cmpWidth!=null?` <span style="opacity:0.6;font-size:12px;margin-left:8px">(${nn(s.cmpVal)})</span>`:''}</div>
+      </div>
+      <div class="funnel-meta">${d.newUsers ? fmtP(nn(s.val)/nn(d.newUsers)*100) : '—'}</div>
+    </div>`;
+    if (i < steps.length - 1) {
+      const next = steps[i+1];
+      const rate = nn(s.val) > 0 ? nn(next.val) / nn(s.val) * 100 : 0;
+      const rCls = rate < 40 ? 'bad' : (rate < 60 ? 'ok' : 'good');
+      html += `<div class="funnel-arrow"><span class="${rCls}">↓ ${rate.toFixed(1)}% 转化</span></div>`;
+    }
+  });
+  document.getElementById('funnel-viz').innerHTML = html;
+}
+
+function renderFunnelHealth(data) {
+  const latest = data[data.length-1];
+  if (!latest) return;
+  const checks = [
+    { label:'主页渗透率', val: latest.homePenetration*100, warn:'< 30%', warnCheck: latest.homePenetration < 0.3, good:'≥ 30%', goodCheck: latest.homePenetration >= 0.3 },
+    { label:'试用率', val: nn(latest.trialRate), warn:'< 5%', warnCheck: nn(latest.trialRate) < 5, good:'≥ 5%', goodCheck: nn(latest.trialRate) >= 5 },
+    { label:'语言→假通知转化', val: latest.langToNotif*100, warn:'< 40%', warnCheck: latest.langToNotif < 0.4, good:'≥ 60%', goodCheck: latest.langToNotif >= 0.6 },
+    { label:'假通知→主页转化', val: latest.notifToHome*100, warn:'< 40%', warnCheck: latest.notifToHome < 0.4, good:'≥ 50%', goodCheck: latest.notifToHome >= 0.5 },
+    { label:'人均广告展示', val: latest.perCapitaImp, warn:'< 3次', warnCheck: latest.perCapitaImp < 3, good:'≥ 3次', goodCheck: latest.perCapitaImp >= 3 },
+    { label:'ECPM波动(vs均值)', val: null, warn:'> 30%', warnCheck: false, good:'≤ 30%', goodCheck: true }
+  ];
+  // ECPM volatility check
+  if (data.length >= 2) {
+    const avgEcpm = data.reduce((s,d)=>s+nn(d.ecpm),0)/data.length;
+    const latestEcpm = nn(latest.ecpm);
+    const vol = avgEcpm > 0 ? Math.abs(latestEcpm - avgEcpm) / avgEcpm * 100 : 0;
+    checks[5].val = vol;
+    checks[5].warnCheck = vol > 30;
+    checks[5].goodCheck = vol <= 30;
+  }
+
+  let html = '<table class="data-table"><thead><tr><th>指标</th><th class="num">当前值</th><th>状态</th><th>警告线</th><th>健康线</th></tr></thead><tbody>';
+  checks.forEach(c => {
+    const status = c.warnCheck ? '<span class="status-badge bad">⚠ 警告</span>' : (c.goodCheck ? '<span class="status-badge good">✓ 正常</span>' : '<span class="status-badge warn">— 观察</span>');
+    html += `<tr><td style="font-weight:500">${c.label}</td><td class="num">${c.val!=null?c.val.toFixed(1)+(typeof c.val==='number'&&c.label.includes('渗透')||c.label.includes('转化')||c.label.includes('试用率')?'%':''):'—'}</td><td>${status}</td><td class="dim">${c.warn}</td><td class="dim">${c.good}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('funnel-health').innerHTML = html;
+}
+
+// ===== Data Management =====
+
+// Column definitions for editable table
+const EDIT_COLS = [
+  { key:'date', label:'日期', type:'date' },
+  { key:'newUsers', label:'新用户数', type:'number' },
+  { key:'subPage', label:'首启订阅页', type:'number' },
+  { key:'langPage', label:'语言选择页', type:'number' },
+  { key:'notifPage', label:'假通知页', type:'number' },
+  { key:'homePage', label:'主页展示', type:'number' },
+  { key:'scanUse', label:'主页扫描', type:'number' },
+  { key:'trialUsers', label:'试用人数', type:'number' },
+  { key:'trialRate', label:'试用率%', type:'number' },
+  { key:'spend', label:'消耗$', type:'number' },
+  { key:'cpi', label:'CPI$', type:'number' },
+  { key:'adImpressions', label:'广告展示数', type:'number' },
+  { key:'ecpm', label:'ECPM$', type:'number' },
+  { key:'adFirstR', label:'广告首R%', type:'number' }
+];
+
+let pendingImport = [];
+
+function renderEditTable() {
+  const tbody = document.getElementById('edit-tbody');
+  let html = '';
+  records.forEach((r, idx) => {
+    html += `<tr data-idx="${idx}">`;
+    EDIT_COLS.forEach(col => {
+      const val = r[col.key] != null ? r[col.key] : '';
+      const inputType = col.type === 'date' ? 'date' : 'text';
+      const step = col.key === 'cpi' || col.key === 'ecpm' || col.key === 'spend' || col.key === 'adFirstR' || col.key === 'trialRate' ? '0.01' : '1';
+      html += `<td><input type="${inputType}" value="${val}" data-idx="${idx}" data-key="${col.key}" ${col.type==='number'?'step="'+step+'"':''} onchange="cellChanged(this)" onkeydown="cellKeydown(event, this)"></td>`;
+    });
+    html += `<td class="col-action"><button onclick="deleteRow(${idx})" style="border:none;background:none;color:var(--red);cursor:pointer;font-size:14px;" title="删除">✕</button></td>`;
+    html += '</tr>';
+  });
+  // New row at bottom
+  html += `<tr class="row-new">`;
+  EDIT_COLS.forEach(col => {
+    const inputType = col.type === 'date' ? 'date' : 'text';
+    const step = col.key === 'cpi' || col.key === 'ecpm' || col.key === 'spend' || col.key === 'adFirstR' || col.key === 'trialRate' ? '0.01' : '1';
+    html += `<td><input type="${inputType}" placeholder="${col.key==='date'?'选日期':''}" data-key="${col.key}" data-new="1" ${col.type==='number'?'step="'+step+'"':''} onkeydown="newRowKeydown(event, this)"></td>`;
+  });
+  html += `<td class="col-action"></td></tr>`;
+  tbody.innerHTML = html;
+}
+
+function cellChanged(input) {
+  const idx = parseInt(input.dataset.idx);
+  const key = input.dataset.key;
+  let val = input.value;
+  if (key === 'date') {
+    records[idx].date = val;
+  } else {
+    records[idx][key] = val === '' ? null : parseFloat(val);
+  }
+  records.sort((a,b) => a.date.localeCompare(b.date));
+  saveData();
+  renderAll();
+  showToast('已保存');
+}
+
+function cellKeydown(e, input) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    input.blur();
+    // Move to next row same column
+    const tr = input.closest('tr');
+    const nextTr = tr.nextElementSibling;
+    if (nextTr) {
+      const colIdx = Array.from(tr.children).indexOf(input.closest('td'));
+      const nextInput = nextTr.children[colIdx]?.querySelector('input');
+      if (nextInput) nextInput.focus();
+    }
+  }
+}
+
+function newRowKeydown(e, input) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    // Collect all values from the new row
+    const tr = input.closest('tr');
+    const inputs = tr.querySelectorAll('input');
+    const record = {};
+    let hasDate = false;
+    inputs.forEach(inp => {
+      const key = inp.dataset.key;
+      if (key === 'date') {
+        record.date = inp.value;
+        if (inp.value) hasDate = true;
+      } else {
+        record[key] = inp.value === '' ? null : parseFloat(inp.value);
+      }
+    });
+    if (!hasDate) { showToast('请填写日期'); return; }
+    // Check duplicate
+    if (records.find(r => r.date === record.date)) {
+      if (!confirm(`${record.date} 已有记录，是否覆盖？`)) return;
+      records = records.filter(r => r.date !== record.date);
+    }
+    records.push(record);
+    records.sort((a,b) => a.date.localeCompare(b.date));
+    saveData();
+    renderAll();
+    showToast(`${record.date} 已添加`);
+  }
+}
+
+function addNewRow() {
+  // Scroll to bottom and focus the date input in the new row
+  const wrap = document.getElementById('edit-table-wrap');
+  wrap.scrollTop = wrap.scrollHeight;
+  setTimeout(() => {
+    const newRow = document.querySelector('.row-new input[data-key="date"]');
+    if (newRow) newRow.focus();
+  }, 100);
+}
+
+function deleteRow(idx) {
+  const r = records[idx];
+  if (!r) return;
+  if (!confirm(`确定删除 ${r.date} 的记录？`)) return;
+  records.splice(idx, 1);
+  saveData();
+  renderAll();
+  showToast(`${r.date} 已删除`);
+}
+
+function deleteRecord(date) {
+  if (!confirm(`确定删除 ${date} 的记录？`)) return;
+  records = records.filter(r => r.date !== date);
+  saveData();
+  renderAll();
+  showToast(`${date} 已删除`);
+}
+
+function clearAllData() {
+  if (!confirm('确定清空全部数据？此操作不可撤销。')) return;
+  records = [];
+  saveData();
+  renderAll();
+  showToast('数据已清空');
+}
+
+// ===== Export Functions =====
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `qr-scan-max-data-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('JSON 已导出');
+}
+
+function exportCSV() {
+  const headers = EDIT_COLS.map(c => c.label);
+  let csv = '\uFEFF' + headers.join(',') + '\n'; // BOM for Excel compatibility
+  records.forEach(r => {
+    const row = EDIT_COLS.map(c => {
+      const v = r[c.key];
+      return v != null ? v : '';
+    });
+    csv += row.join(',') + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `qr-scan-max-data-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('CSV 已导出');
+}
+
+function downloadTemplate() {
+  const headers = EDIT_COLS.map(c => c.label);
+  const sampleRow = ['2026-07-01', 100, 98, 90, 40, 15, 10, 5, 5.0, 50, 0.8, 300, 28, 8.5];
+  let csv = '\uFEFF' + headers.join(',') + '\n' + sampleRow.join(',') + '\n';
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'QR-Scan-Max-导入模板.csv';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('模板已下载');
+}
+
+// ===== File Import (CSV + XLSX + JSON) =====
+function handleFileImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'json') {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        if (!Array.isArray(imported)) throw new Error('Invalid format');
+        pendingImport = imported;
+        showImportPreview(imported, 'JSON');
+      } catch(err) { showToast('导入失败：JSON 格式错误'); }
+    };
+    reader.readAsText(file);
+  } else if (ext === 'csv') {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        const parsed = parseCSV(ev.target.result);
+        pendingImport = parsed;
+        showImportPreview(parsed, 'CSV');
+      } catch(err) { showToast('导入失败：CSV 解析错误 - ' + err.message); }
+    };
+    reader.readAsText(file, 'utf-8');
+  } else if (ext === 'xlsx' || ext === 'xls') {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        const wb = XLSX.read(ev.target.result, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+        const parsed = mapImportColumns(json);
+        pendingImport = parsed;
+        showImportPreview(parsed, 'XLSX');
+      } catch(err) { showToast('导入失败：XLSX 解析错误 - ' + err.message); }
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    showToast('不支持的文件格式，请使用 CSV/XLSX/JSON');
+  }
+  e.target.value = '';
+}
+
+function parseCSV(text) {
+  // Remove BOM
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) throw new Error('至少需要表头和一行数据');
+  const headers = lines[0].split(',').map(h => h.trim());
+  const records = [];
+  for (let i = 1; i < lines.length; i++) {
+    const vals = lines[i].split(',').map(v => v.trim());
+    if (vals.length < 2) continue;
+    const rec = {};
+    EDIT_COLS.forEach((col, ci) => {
+      const raw = vals[ci] || '';
+      if (col.key === 'date') {
+        rec.date = normalizeDate(raw);
+      } else {
+        rec[col.key] = raw === '' ? null : parseFloat(raw);
+      }
+    });
+    if (rec.date) records.push(rec);
+  }
+  return records;
+}
+
+function normalizeDate(str) {
+  if (!str) return '';
+  // Handle YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  // Handle YYYY/MM/DD
+  if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(str)) {
+    const p = str.split('/');
+    return `${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`;
+  }
+  // Handle MM/DD or M/D (assume current year)
+  if (/^\d{1,2}\/\d{1,2}$/.test(str)) {
+    const p = str.split('/');
+    return `2026-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+  }
+  // Handle Excel serial number (number)
+  const num = parseFloat(str);
+  if (!isNaN(num) && num > 40000 && num < 50000) {
+    const d = new Date((num - 25569) * 86400 * 1000);
+    return d.toISOString().slice(0, 10);
+  }
+  return str;
+}
+
+function mapImportColumns(jsonRows) {
+  // Map Chinese/English headers to our keys
+  const colMap = {
+    '日期':'date', 'date':'date',
+    '新用户数':'newUsers', '新用户':'newUsers', 'newUsers':'newUsers', 'new_users':'newUsers',
+    '首启订阅页':'subPage', '首启订阅页展示':'subPage', 'subPage':'subPage',
+    '语言选择页':'langPage', '语言页':'langPage', 'langPage':'langPage',
+    '假通知页':'notifPage', '假通知':'notifPage', 'notifPage':'notifPage',
+    '主页展示':'homePage', '主页':'homePage', 'homePage':'homePage',
+    '主页扫描使用':'scanUse', '主页扫描':'scanUse', '扫描使用':'scanUse', 'scanUse':'scanUse',
+    '试用人数':'trialUsers', '试用':'trialUsers', 'trialUsers':'trialUsers',
+    '试用率':'trialRate', '试用率%':'trialRate', 'trialRate':'trialRate',
+    '消耗':'spend', 'spend':'spend',
+    'cpi':'cpi', 'CPI':'cpi', 'Cpi':'cpi',
+    '广告展示数':'adImpressions', '广告展示':'adImpressions', 'adImpressions':'adImpressions',
+    'ecpm':'ecpm', 'ECPM':'ecpm', 'Ecpm':'ecpm',
+    '广告首R':'adFirstR', '广告首R%':'adFirstR', 'adFirstR':'adFirstR'
+  };
+
+  return jsonRows.map(row => {
+    const rec = {};
+    Object.keys(row).forEach(header => {
+      const key = colMap[header] || colMap[header.trim()];
+      if (key) {
+        if (key === 'date') {
+          rec.date = normalizeDate(String(row[header]));
+        } else {
+          const v = row[header];
+          rec[key] = (v === '' || v == null) ? null : parseFloat(v);
+        }
+      }
+    });
+    return rec;
+  }).filter(r => r.date);
+}
+
+function showImportPreview(data, format) {
+  const modal = document.getElementById('import-modal');
+  const info = document.getElementById('import-info');
+  const preview = document.getElementById('import-preview');
+
+  info.innerHTML = `格式：${format} · 识别到 <strong>${data.length}</strong> 条记录`;
+
+  let html = '<table class="data-table"><thead><tr>';
+  EDIT_COLS.forEach(c => html += `<th>${c.label}</th>`);
+  html += '</tr></thead><tbody>';
+  data.slice(0, 20).forEach(r => {
+    html += '<tr>';
+    EDIT_COLS.forEach(c => {
+      const v = r[c.key];
+      html += `<td class="num">${v != null ? v : '<span class="dim">—</span>'}</td>`;
+    });
+    html += '</tr>';
+  });
+  if (data.length > 20) html += `<tr><td colspan="${EDIT_COLS.length}" style="text-align:center;color:var(--text3);">... 还有 ${data.length-20} 条</td></tr>`;
+  html += '</tbody></table>';
+  preview.innerHTML = html;
+
+  modal.classList.remove('hidden');
+}
+
+function closeImportModal() {
+  document.getElementById('import-modal').classList.add('hidden');
+  pendingImport = [];
+}
+
+function confirmImport() {
+  if (pendingImport.length === 0) return;
+  let added = 0, updated = 0;
+  pendingImport.forEach(r => {
+    if (!r.date) return;
+    const existIdx = records.findIndex(x => x.date === r.date);
+    if (existIdx >= 0) {
+      records[existIdx] = { ...records[existIdx], ...r };
+      updated++;
+    } else {
+      records.push(r);
+      added++;
+    }
+  });
+  records.sort((a,b) => a.date.localeCompare(b.date));
+  saveData();
+  closeImportModal();
+  renderAll();
+  showToast(`导入完成：新增 ${added} 条，更新 ${updated} 条`);
+}
+
+function renderRecordsTable() {
+  // This function is now handled by renderEditTable()
+  renderEditTable();
+}
+
+// ===== Master Render =====
+function renderAll() {
+  renderOverview();
+  renderCommercial();
+  renderFunnel();
+  renderRecordsTable();
+}
+
+// ===== Init =====
+loadData();
+renderAll();
+</script>
+</body>
+</html>

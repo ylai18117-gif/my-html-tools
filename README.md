@@ -44,6 +44,19 @@
 
 `qr/qr_home.html`
 
+---
+
+### 数据看盘 — QR 业务数据看板
+
+> 本地数据可视化看板，支持每日数据录入和趋势分析
+
+- 三 Tab 布局：总览 / 商业化 / 用户漏斗
+- Chart.js 图表可视化
+- 数据导入导出（CSV/Excel）
+- 密码保护
+
+`dashboard/QR数据看盘.html`
+
 ## 技术栈
 
 | 层 | 选型 | 说明 |
@@ -80,6 +93,11 @@ npx serve .
 ├── qr/
 │   ├── qr_home.html        ← QR 广告落地页
 │   └── img/                ← 广告页图片资源
+├── dashboard/
+│   ├── QR数据看盘.html      ← 数据看板（密码保护）
+│   ├── QR数据分析与商业化探索.md
+│   ├── QR用户漏斗.xlsx
+│   └── 混变商业化模型-公式手册.md
 ├── .gitignore
 └── README.md
 ```

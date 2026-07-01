@@ -42,7 +42,7 @@
 
     .hero {
       position: relative;
-      min-height: 520px;
+      min-height: 490px;
       padding: 22px 24px 28px;
       overflow: hidden;
       color: white;
@@ -349,14 +349,11 @@
     .dl-btn svg { width: 20px; height: 20px; fill: currentColor; flex-shrink: 0; }
 
     .hero-dl {
-      position: relative;
-      z-index: 2;
-      margin-top: 24px;
-      text-align: center;
+      margin-top: 22px;
     }
     .hero-dl .dl-btn {
-      font-size: 15px;
-      padding: 14px 32px;
+      font-size: 14px;
+      padding: 12px 26px;
       box-shadow: 0 6px 24px rgba(15,142,116,.4);
     }
 
@@ -442,17 +439,16 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
           <span>History</span>
           <span>Creator</span>
         </div>
+        <div class="hero-dl">
+          <a class="dl-btn" onclick="if(typeof trackEvent!=='undefined')trackEvent('qr_download_click',{section:'hero'})" href="https://play.google.com/store/apps/details?id=com.qrscanfast.qr&pcampaignid=web_share" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24"><path d="M3.61 1.814L13.793 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .61-.92zm10.893 9.476l2.56-2.56 3.48 2.005c.63.363.63.967 0 1.33l-3.48 2.005-2.56-2.56-.22-.11.22-.11zM5.15.894l8.553 8.553-2.47 2.47L5.15.894zm0 22.212l6.083-7.023 2.47 2.47L5.15 23.106z"/></svg>
+            Get it on Google Play
+          </a>
+        </div>
       </div>
 
       <div class="hero-phone">
         <img src="img/scanner-active.png" alt="Fast QR Scan active QR scanning screen" />
-      </div>
-
-      <div class="hero-dl">
-        <a class="dl-btn" onclick="if(typeof trackEvent!=='undefined')trackEvent('qr_download_click',{section:'hero'})" href="https://play.google.com/store/apps/details?id=com.qrscanfast.qr&pcampaignid=web_share" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24"><path d="M3.61 1.814L13.793 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .61-.92zm10.893 9.476l2.56-2.56 3.48 2.005c.63.363.63.967 0 1.33l-3.48 2.005-2.56-2.56-.22-.11.22-.11zM5.15.894l8.553 8.553-2.47 2.47L5.15.894zm0 22.212l6.083-7.023 2.47 2.47L5.15 23.106z"/></svg>
-          Get it on Google Play
-        </a>
       </div>
     </section>
 
