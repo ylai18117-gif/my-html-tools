@@ -42,8 +42,8 @@
 
     .hero {
       position: relative;
-      min-height: 470px;
-      padding: 22px 24px 0;
+      min-height: 520px;
+      padding: 22px 24px 28px;
       overflow: hidden;
       color: white;
       background:
@@ -67,8 +67,7 @@
 
     .brand-row,
     .hero-copy,
-    .hero-phone,
-    .trust-strip {
+    .hero-phone {
       position: relative;
       z-index: 1;
     }
@@ -149,33 +148,6 @@
       display: block;
       width: 100%;
       border-radius: 21px;
-    }
-
-    .trust-strip {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      width: calc(100% - 232px);
-      background: rgba(255, 255, 255, 0.2);
-      border-top-right-radius: 18px;
-      overflow: hidden;
-    }
-
-    .trust-strip div {
-      min-height: 58px;
-      display: grid;
-      place-items: center;
-      padding: 8px 7px;
-      background: rgba(255, 255, 255, 0.92);
-      color: var(--night);
-      font-size: 10px;
-      line-height: 1.1;
-      text-align: center;
-      font-weight: 900;
     }
 
     .section-title {
@@ -377,12 +349,15 @@
     .dl-btn svg { width: 20px; height: 20px; fill: currentColor; flex-shrink: 0; }
 
     .hero-dl {
-      margin-top: 16px;
+      position: relative;
+      z-index: 2;
+      margin-top: 24px;
       text-align: center;
     }
     .hero-dl .dl-btn {
-      font-size: 14px;
-      padding: 10px 24px;
+      font-size: 15px;
+      padding: 14px 32px;
+      box-shadow: 0 6px 24px rgba(15,142,116,.4);
     }
 
     .footer {
@@ -396,7 +371,7 @@
 
     @media (max-width: 430px) {
       .hero {
-        min-height: 450px;
+        min-height: 500px;
         padding-left: 20px;
         padding-right: 20px;
       }
@@ -416,10 +391,6 @@
       .hero-phone {
         right: 12px;
         width: 172px;
-      }
-
-      .trust-strip {
-        width: calc(100% - 198px);
       }
 
       .profile {
@@ -475,12 +446,6 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 
       <div class="hero-phone">
         <img src="img/scanner-active.png" alt="Fast QR Scan active QR scanning screen" />
-      </div>
-
-      <div class="trust-strip">
-        <div>On-device<br />scan</div>
-        <div>Instant<br />results</div>
-        <div>Clean<br />tools</div>
       </div>
 
       <div class="hero-dl">
@@ -561,8 +526,6 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 
     <footer class="footer">ylai18117@gmail.com</footer>
   </main>
-</body>
-</html>
 <script>
 (function(){
   var fired={};
@@ -574,3 +537,5 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
   },{passive:true});
 })();
 </script>
+</body>
+</html>
