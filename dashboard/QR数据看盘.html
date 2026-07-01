@@ -173,6 +173,7 @@ import{getAnalytics,logEvent}from"https://www.gstatic.com/firebasejs/12.15.0/fir
 const app=initializeApp({apiKey:"AIzaSyDT9uNrRj97oLuehLXgOto97Z-mVw12cnk",authDomain:"myhtml-ff6d6.firebaseapp.com",projectId:"myhtml-ff6d6",storageBucket:"myhtml-ff6d6.firebasestorage.app",messagingSenderId:"790702386101",appId:"1:790702386101:web:f4e30fb5ce4771396347fc",measurementId:"G-8FQ9DRDJ6T"});
 const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catch(e){}};
 </script>
+<script src="/i18n.js"></script>
 </head>
 <body>
 
@@ -180,11 +181,11 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 <div id="_pg" style="position:fixed;inset:0;z-index:99999;background:#f0f2f5;display:flex;align-items:center;justify-content:center">
   <div style="text-align:center;padding:32px;max-width:340px;width:90%">
     <div style="font-size:36px;margin-bottom:12px">🔒</div>
-    <h2 style="font-size:17px;font-weight:600;color:#1a1a2e;margin-bottom:6px">需要验证</h2>
-    <p style="font-size:13px;color:#6b7280;margin-bottom:20px;line-height:1.5">此页面包含内部数据，请输入访问密码</p>
-    <input id="_pp" type="password" placeholder="输入密码" autocomplete="off" style="width:100%;padding:12px 16px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;text-align:center;letter-spacing:.06em;font-family:monospace;transition:border-color .2s" onfocus="this.style.borderColor='#4f46e5'" onblur="this.style.borderColor='#e5e7eb'">
-    <div id="_pe" style="font-size:12px;color:#dc2626;margin-top:8px;min-height:18px"></div>
-    <button id="_pb" style="width:100%;margin-top:8px;padding:12px;border:none;border-radius:10px;background:#4f46e5;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#4338ca'" onmouseout="this.style.background='#4f46e5'">验证并进入</button>
+    <h2 style="font-size:17px;font-weight:600;color:#1a1a2e;margin-bottom:6px" data-i18n="pg.title">需要验证</h2>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:20px;line-height:1.5" data-i18n="pg.desc">此页面包含内部数据，请输入访问密码</p>
+    <input id="_pp" type="password" placeholder="输入密码" data-i18n-attr="placeholder:pg.placeholder" autocomplete="off" style="width:100%;padding:12px 16px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;text-align:center;letter-spacing:.06em;font-family:monospace;transition:border-color .2s" onfocus="this.style.borderColor='#4f46e5'" onblur="this.style.borderColor='#e5e7eb'">
+    <div id="_pe" style="font-size:12px;color:#dc2626;margin-top:8px;min-height:18px" data-i18n="pg.error"></div>
+    <button id="_pb" style="width:100%;margin-top:8px;padding:12px;border:none;border-radius:10px;background:#4f46e5;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#4338ca'" onmouseout="this.style.background='#4f46e5'" data-i18n="pg.btn">验证并进入</button>
   </div>
 </div>
 <script>
@@ -195,26 +196,27 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
   function ok(){_pg.style.transition='opacity .3s';_pg.style.opacity='0';setTimeout(function(){_pg.style.display='none'},300)}
   if(sessionStorage.getItem('_v')==='1'){ok()}else{
     document.body.style.overflow='hidden';
-    function go(){var v=_pp.value;if(!v){_pp.focus();return}if(ck(v)){sessionStorage.setItem('_v','1');ok();document.body.style.overflow=''}else{_pe.textContent='密码错误，请重试';_pp.style.borderColor='#dc2626';_pp.style.animation='none';_pp.offsetHeight;_pp.style.animation='_shk .4s ease';setTimeout(function(){_pp.style.borderColor='#e5e7eb'},800);_pp.select()}}
+    function go(){var v=_pp.value;if(!v){_pp.focus();return}if(ck(v)){sessionStorage.setItem('_v','1');ok();document.body.style.overflow=''}else{_pe.textContent=typeof I18n!=='undefined'?I18n.t('pg.error.wrong'):'密码错误，请重试';_pp.style.borderColor='#dc2626';_pp.style.animation='none';_pp.offsetHeight;_pp.style.animation='_shk .4s ease';setTimeout(function(){_pp.style.borderColor='#e5e7eb'},800);_pp.select()}}
     _pb.onclick=go;_pp.onkeydown=function(e){if(e.key==='Enter')go()};
     var st=document.createElement('style');st.textContent='@keyframes _shk{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}';document.head.appendChild(st);
   }
 })();
 </script>
 <div class="header">
-  <h1>📊 <span>QR Scan Max</span> 数据看盘</h1>
+  <h1>📊 <span>QR Scan Max</span> <span data-i18n="hdr.title">数据看盘</span></h1>
+  <div id="lang-selector"></div>
   <div class="header-actions">
-    <button onclick="exportCSV()">导出CSV</button>
-    <button onclick="document.getElementById('importFile').click()">导入表格</button>
+    <button onclick="exportCSV()" data-i18n="hdr.exportCsv">导出CSV</button>
+    <button onclick="document.getElementById('importFile').click()" data-i18n="hdr.importTable">导入表格</button>
     <input type="file" id="importFile" accept=".json,.csv,.xlsx,.xls" style="display:none" onchange="handleFileImport(event)">
   </div>
 </div>
 
 <div class="tabs">
-  <button class="tab active" data-tab="overview">📈 总览</button>
-  <button class="tab" data-tab="commercial">💰 商业化</button>
-  <button class="tab" data-tab="funnel">🔽 用户漏斗</button>
-  <button class="tab" data-tab="datamanage">📝 数据录入</button>
+  <button class="tab active" data-tab="overview" data-i18n="tab.overview">📈 总览</button>
+  <button class="tab" data-tab="commercial" data-i18n="tab.commercial">💰 商业化</button>
+  <button class="tab" data-tab="funnel" data-i18n="tab.funnel">🔽 用户漏斗</button>
+  <button class="tab" data-tab="datamanage" data-i18n="tab.datamanage">📝 数据录入</button>
 </div>
 
 <div class="main">
@@ -224,24 +226,24 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
   <div class="kpi-grid" id="overview-kpis"></div>
   <div class="chart-grid">
     <div class="chart-card full">
-      <div class="chart-title">用户规模与试用趋势</div>
-      <div class="chart-subtitle">新用户数（柱）· 主页渗透率（线）· 试用人数（标记）</div>
+      <div class="chart-title" data-i18n="ovt.chart1.title">用户规模与试用趋势</div>
+      <div class="chart-subtitle" data-i18n="ovt.chart1.subtitle">新用户数（柱）· 主页渗透率（线）· 试用人数（标记）</div>
       <div class="chart-wrap tall"><canvas id="chart-overview-1"></canvas></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">广告收入趋势</div>
-      <div class="chart-subtitle">广告收入（柱）· 广告人均收入（线）</div>
+      <div class="chart-title" data-i18n="ovt.chart2.title">广告收入趋势</div>
+      <div class="chart-subtitle" data-i18n="ovt.chart2.subtitle">广告收入（柱）· 广告人均收入（线）</div>
       <div class="chart-wrap"><canvas id="chart-overview-2"></canvas></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">每日消耗与CPI</div>
-      <div class="chart-subtitle">消耗（柱）· CPI（线）</div>
+      <div class="chart-title" data-i18n="ovt.chart3.title">每日消耗与CPI</div>
+      <div class="chart-subtitle" data-i18n="ovt.chart3.subtitle">消耗（柱）· CPI（线）</div>
       <div class="chart-wrap"><canvas id="chart-overview-3"></canvas></div>
     </div>
   </div>
   <div class="chart-card full">
-    <div class="chart-title">原始数据表</div>
-    <div class="chart-subtitle">点击「数据录入」Tab 添加新数据</div>
+    <div class="chart-title" data-i18n="ovt.table.title">原始数据表</div>
+    <div class="chart-subtitle" data-i18n="ovt.table.subtitle">点击「数据录入」Tab 添加新数据</div>
     <div class="table-wrap" id="overview-table"></div>
   </div>
 </div>
@@ -251,23 +253,23 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
   <div class="kpi-grid" id="commercial-kpis"></div>
   <div class="chart-grid">
     <div class="chart-card">
-      <div class="chart-title">ECPM 与人均展示</div>
-      <div class="chart-subtitle">ECPM（柱）· 人均展示次数（线）</div>
+      <div class="chart-title" data-i18n="com.chart1.title">ECPM 与人均展示</div>
+      <div class="chart-subtitle" data-i18n="com.chart1.subtitle">ECPM（柱）· 人均展示次数（线）</div>
       <div class="chart-wrap"><canvas id="chart-comm-1"></canvas></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">回本缺口分析</div>
-      <div class="chart-subtitle">CPI（柱）· 广告人均收入（柱）· 订阅缺口（虚线）</div>
+      <div class="chart-title" data-i18n="com.chart2.title">回本缺口分析</div>
+      <div class="chart-subtitle" data-i18n="com.chart2.subtitle">CPI（柱）· 广告人均收入（柱）· 订阅缺口（虚线）</div>
       <div class="chart-wrap"><canvas id="chart-comm-2"></canvas></div>
     </div>
     <div class="chart-card full">
-      <div class="chart-title">回本敏感性矩阵</div>
-      <div class="chart-subtitle">不同（试用率 × 转订阅率）组合下的首日ROI · 基于最新CPI和广告人均</div>
+      <div class="chart-title" data-i18n="com.sens.title">回本敏感性矩阵</div>
+      <div class="chart-subtitle" data-i18n="com.sens.subtitle">不同（试用率 × 转订阅率）组合下的首日ROI · 基于最新CPI和广告人均</div>
       <div class="table-wrap" id="sensitivity-table"></div>
     </div>
   </div>
   <div class="chart-card full">
-    <div class="chart-title">商业化详细数据</div>
+    <div class="chart-title" data-i18n="com.detail.title">商业化详细数据</div>
     <div class="table-wrap" id="commercial-table"></div>
   </div>
 </div>
@@ -275,32 +277,32 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 <!-- ==================== 用户漏斗 Tab ==================== -->
 <div id="tab-funnel" class="tab-content">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
-    <label style="font-size:13px;color:var(--text2);font-weight:500;">选择日期：</label>
+    <label style="font-size:13px;color:var(--text2);font-weight:500;" data-i18n="fnl.selectDate">选择日期：</label>
     <select id="funnel-date" onchange="renderFunnel()" style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;"></select>
-    <label style="font-size:13px;color:var(--text2);font-weight:500;margin-left:12px;">对比日期：</label>
+    <label style="font-size:13px;color:var(--text2);font-weight:500;margin-left:12px;" data-i18n="fnl.compareDate">对比日期：</label>
     <select id="funnel-compare" onchange="renderFunnel()" style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;">
-      <option value="">不对比</option>
+      <option value="" data-i18n="fnl.noCompare">不对比</option>
     </select>
   </div>
   <div class="chart-grid">
     <div class="chart-card full">
-      <div class="chart-title">用户漏斗</div>
-      <div class="chart-subtitle">各步骤用户到达数与步骤间转化率</div>
+      <div class="chart-title" data-i18n="fnl.funnel.title">用户漏斗</div>
+      <div class="chart-subtitle" data-i18n="fnl.funnel.subtitle">各步骤用户到达数与步骤间转化率</div>
       <div id="funnel-viz" class="funnel-viz"></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">步骤间转化率趋势</div>
-      <div class="chart-subtitle">各环节的日转化率变化</div>
+      <div class="chart-title" data-i18n="fnl.convTrend.title">步骤间转化率趋势</div>
+      <div class="chart-subtitle" data-i18n="fnl.convTrend.subtitle">各环节的日转化率变化</div>
       <div class="chart-wrap tall"><canvas id="chart-funnel-1"></canvas></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">渗透率与试用率趋势</div>
-      <div class="chart-subtitle">主页渗透率（线）· 试用率（线）</div>
+      <div class="chart-title" data-i18n="fnl.penTrend.title">渗透率与试用率趋势</div>
+      <div class="chart-subtitle" data-i18n="fnl.penTrend.subtitle">主页渗透率（线）· 试用率（线）</div>
       <div class="chart-wrap tall"><canvas id="chart-funnel-2"></canvas></div>
     </div>
   </div>
   <div class="chart-card full">
-    <div class="chart-title">漏斗健康度诊断</div>
+    <div class="chart-title" data-i18n="fnl.health.title">漏斗健康度诊断</div>
     <div class="table-wrap" id="funnel-health"></div>
   </div>
 </div>
@@ -308,13 +310,13 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 <!-- ==================== 数据录入 Tab ==================== -->
 <div id="tab-datamanage" class="tab-content">
   <div class="toolbar">
-    <button class="btn-sm" onclick="addNewRow()">＋ 新增行</button>
-    <button class="btn-sm" onclick="document.getElementById('importFile').click()">📂 导入 CSV/XLSX</button>
-    <button class="btn-sm" onclick="exportCSV()">📥 导出 CSV</button>
-    <button class="btn-sm" onclick="exportJSON()">💾 导出 JSON</button>
-    <button class="btn-sm" onclick="downloadTemplate()">📋 下载导入模板</button>
+    <button class="btn-sm" onclick="addNewRow()" data-i18n="dm.addRow">＋ 新增行</button>
+    <button class="btn-sm" onclick="document.getElementById('importFile').click()" data-i18n="dm.import">📂 导入 CSV/XLSX</button>
+    <button class="btn-sm" onclick="exportCSV()" data-i18n="dm.exportCsv">📥 导出 CSV</button>
+    <button class="btn-sm" onclick="exportJSON()" data-i18n="dm.exportJson">💾 导出 JSON</button>
+    <button class="btn-sm" onclick="downloadTemplate()" data-i18n="dm.downloadTpl">📋 下载导入模板</button>
     <span class="spacer"></span>
-    <span style="font-size:12px;color:var(--text3);" id="edit-hint">点击单元格直接编辑，按 Enter 或点击其他格自动保存</span>
+    <span style="font-size:12px;color:var(--text3);" id="edit-hint" data-i18n="dm.editHint">点击单元格直接编辑，按 Enter 或点击其他格自动保存</span>
   </div>
 
   <div class="chart-card full" style="padding:0;overflow:hidden;">
@@ -322,20 +324,20 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
       <table class="edit-table" id="edit-table">
         <thead>
           <tr>
-            <th class="col-date">日期</th>
-            <th class="col-num">新用户数</th>
-            <th class="col-num">首启订阅页</th>
-            <th class="col-num">语言选择页</th>
-            <th class="col-num">假通知页</th>
-            <th class="col-num">主页展示</th>
-            <th class="col-num">主页扫描</th>
-            <th class="col-num">试用人数</th>
-            <th class="col-num">试用率%</th>
-            <th class="col-num">消耗$</th>
-            <th class="col-num">CPI$</th>
-            <th class="col-num">广告展示数</th>
-            <th class="col-num">ECPM$</th>
-            <th class="col-num">广告首R%</th>
+            <th class="col-date" data-i18n="dm.col.date">日期</th>
+            <th class="col-num" data-i18n="dm.col.newUsers">新用户数</th>
+            <th class="col-num" data-i18n="dm.col.subPage">首启订阅页</th>
+            <th class="col-num" data-i18n="dm.col.langPage">语言选择页</th>
+            <th class="col-num" data-i18n="dm.col.notifPage">假通知页</th>
+            <th class="col-num" data-i18n="dm.col.homePage">主页展示</th>
+            <th class="col-num" data-i18n="dm.col.scanUse">主页扫描</th>
+            <th class="col-num" data-i18n="dm.col.trialUsers">试用人数</th>
+            <th class="col-num" data-i18n="dm.col.trialRate">试用率%</th>
+            <th class="col-num" data-i18n="dm.col.spend">消耗$</th>
+            <th class="col-num" data-i18n="dm.col.cpi">CPI$</th>
+            <th class="col-num" data-i18n="dm.col.adImpressions">广告展示数</th>
+            <th class="col-num" data-i18n="dm.col.ecpm">ECPM$</th>
+            <th class="col-num" data-i18n="dm.col.adFirstR">广告首R%</th>
             <th class="col-action"></th>
           </tr>
         </thead>
@@ -345,20 +347,20 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
   </div>
 
   <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
-    <button class="btn btn-danger" onclick="clearAllData()">清空全部数据</button>
-    <span style="font-size:12px;color:var(--text3);align-self:center;margin-left:8px;">数据自动保存在浏览器本地（localStorage），关闭页面不会丢失。建议定期导出CSV备份。</span>
+    <button class="btn btn-danger" onclick="clearAllData()" data-i18n="dm.clearAll">清空全部数据</button>
+    <span style="font-size:12px;color:var(--text3);align-self:center;margin-left:8px;" data-i18n="dm.autoSaveHint">数据自动保存在浏览器本地（localStorage），关闭页面不会丢失。建议定期导出CSV备份。</span>
   </div>
 </div>
 
 <!-- Import Preview Modal -->
 <div class="modal-overlay hidden" id="import-modal">
   <div class="modal">
-    <h3>📂 导入数据预览</h3>
+    <h3 data-i18n="imp.title">📂 导入数据预览</h3>
     <div class="preview-info" id="import-info"></div>
     <div class="table-wrap" style="max-height:400px;overflow:auto;" id="import-preview"></div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeImportModal()">取消</button>
-      <button class="btn btn-primary" onclick="confirmImport()">确认导入</button>
+      <button class="btn btn-ghost" onclick="closeImportModal()" data-i18n="imp.cancel">取消</button>
+      <button class="btn btn-primary" onclick="confirmImport()" data-i18n="imp.confirm">确认导入</button>
     </div>
   </div>
 </div>
@@ -368,6 +370,357 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 <div class="toast" id="toast"></div>
 
 <script>
+const TRANSLATIONS = {
+  'zh-CN': {
+    'pg.title':'需要验证','pg.desc':'此页面包含内部数据，请输入访问密码',
+    'pg.placeholder':'输入密码','pg.btn':'验证并进入','pg.error.wrong':'密码错误，请重试',
+    'hdr.title':'数据看盘','hdr.exportCsv':'导出CSV','hdr.importTable':'导入表格',
+    'tab.overview':'📈 总览','tab.commercial':'💰 商业化','tab.funnel':'🔽 用户漏斗','tab.datamanage':'📝 数据录入',
+    'ovt.chart1.title':'用户规模与试用趋势','ovt.chart1.subtitle':'新用户数（柱）· 主页渗透率（线）· 试用人数（标记）',
+    'ovt.chart2.title':'广告收入趋势','ovt.chart2.subtitle':'广告收入（柱）· 广告人均收入（线）',
+    'ovt.chart3.title':'每日消耗与CPI','ovt.chart3.subtitle':'消耗（柱）· CPI（线）',
+    'ovt.table.title':'原始数据表','ovt.table.subtitle':'点击「数据录入」Tab 添加新数据',
+    'com.chart1.title':'ECPM 与人均展示','com.chart1.subtitle':'ECPM（柱）· 人均展示次数（线）',
+    'com.chart2.title':'回本缺口分析','com.chart2.subtitle':'CPI（柱）· 广告人均收入（柱）· 订阅缺口（虚线）',
+    'com.sens.title':'回本敏感性矩阵','com.sens.subtitle':'不同（试用率 × 转订阅率）组合下的首日ROI · 基于最新CPI和广告人均',
+    'com.detail.title':'商业化详细数据',
+    'fnl.selectDate':'选择日期：','fnl.compareDate':'对比日期：','fnl.noCompare':'不对比',
+    'fnl.funnel.title':'用户漏斗','fnl.funnel.subtitle':'各步骤用户到达数与步骤间转化率',
+    'fnl.convTrend.title':'步骤间转化率趋势','fnl.convTrend.subtitle':'各环节的日转化率变化',
+    'fnl.penTrend.title':'渗透率与试用率趋势','fnl.penTrend.subtitle':'主页渗透率（线）· 试用率（线）',
+    'fnl.health.title':'漏斗健康度诊断',
+    'dm.addRow':'＋ 新增行','dm.import':'📂 导入 CSV/XLSX','dm.exportCsv':'📥 导出 CSV',
+    'dm.exportJson':'💾 导出 JSON','dm.downloadTpl':'📋 下载导入模板',
+    'dm.editHint':'点击单元格直接编辑，按 Enter 或点击其他格自动保存',
+    'dm.col.date':'日期','dm.col.newUsers':'新用户数','dm.col.subPage':'首启订阅页',
+    'dm.col.langPage':'语言选择页','dm.col.notifPage':'假通知页','dm.col.homePage':'主页展示',
+    'dm.col.scanUse':'主页扫描','dm.col.trialUsers':'试用人数','dm.col.trialRate':'试用率%',
+    'dm.col.spend':'消耗$','dm.col.cpi':'CPI$','dm.col.adImpressions':'广告展示数',
+    'dm.col.ecpm':'ECPM$','dm.col.adFirstR':'广告首R%',
+    'dm.clearAll':'清空全部数据',
+    'dm.autoSaveHint':'数据自动保存在浏览器本地（localStorage），关闭页面不会丢失。建议定期导出CSV备份。',
+    'imp.title':'📂 导入数据预览','imp.cancel':'取消','imp.confirm':'确认导入',
+    'kpi.latestNewUsers':'最新日新用户','kpi.homePenetration':'主页渗透率',
+    'kpi.adPerUser':'广告人均收入','kpi.trialUsers':'试用人数',
+    'kpi.trialRate':'试用率','kpi.cpi':'CPI',
+    'kpi.latestCpi':'最新CPI','kpi.ecpm':'ECPM','kpi.subGap':'订阅缺口',
+    'kpi.trialCost':'试用获取成本','kpi.adFirstR':'广告首R',
+    'kpi.sub.avg':'日均','kpi.sub.cumulative':'累计','kpi.sub.person':'人',
+    'kpi.sub.avgVal':'均值','kpi.sub.healthy':'低于$1，健康','kpi.sub.above1':'高于$1',
+    'kpi.sub.cpiMinusAd':'CPI - 广告人均',
+    'kpi.status.healthy':'健康','kpi.status.low':'偏低','kpi.status.worrying':'堪忧',
+    'chart.newUsers':'新用户数','chart.homePenPct':'主页渗透率 %','chart.trialUsers':'试用人数',
+    'chart.axis.newUsers':'新用户数','chart.axis.penPct':'渗透率 %','chart.axis.trialUsers':'试用人数',
+    'chart.adRevenue':'广告收入 $','chart.adPerCapita':'广告人均 $',
+    'chart.axis.adRevenue':'广告收入','chart.axis.perCapitaRev':'人均收入',
+    'chart.spend':'消耗 $','chart.cpi':'CPI $',
+    'chart.axis.spend':'消耗','chart.axis.cpi':'CPI',
+    'chart.ecpm':'ECPM $','chart.perCapitaImp':'人均展示',
+    'chart.axis.ecpm':'ECPM','chart.axis.impCount':'展示次数',
+    'chart.cpiBar':'CPI $','chart.adPerUserBar':'广告人均 $','chart.subGapLine':'订阅缺口 $',
+    'chart.convRatePct':'转化率 %',
+    'chart.homePen':'主页渗透率','chart.trialRateLine':'试用率',
+    'chart.pen30line':'30%渗透率线','chart.trial5line':'5%试用率线',
+    'funnel.newUsers':'新用户','funnel.subPage':'首启订阅页','funnel.langPage':'语言选择页',
+    'funnel.notifPage':'假通知页','funnel.homePage':'主页展示','funnel.scanUse':'主页扫描','funnel.trial':'试用',
+    'funnel.convLabel':'转化',
+    'funnel.conv.newToSub':'新用户→首启页','funnel.conv.langToNotif':'语言→假通知',
+    'funnel.conv.notifToHome':'假通知→主页','funnel.conv.homeToScan':'主页→扫描',
+    'health.penLabel':'主页渗透率','health.trialRate':'试用率',
+    'health.langToNotif':'语言→假通知转化','health.notifToHome':'假通知→主页转化',
+    'health.perCapitaAd':'人均广告展示','health.ecpmVol':'ECPM波动(vs均值)',
+    'health.col.metric':'指标','health.col.current':'当前值','health.col.status':'状态',
+    'health.col.warn':'警告线','health.col.healthy':'健康线',
+    'health.status.warn':'⚠ 警告','health.status.good':'✓ 正常','health.status.watch':'— 观察',
+    'sens.header':'试用率 ↓ / 转订阅率 →',
+    'sens.breakeven':'✓ 回本','sens.close':'≈ 接近','sens.gap':'△ 缺口','sens.bigGap':'✗ 大缺口',
+    'sens.note':'基于 CPI={0}，广告人均={1}，一续率60%（LT=6周），周价格=$14.99',
+    'ovt.th.date':'日期','ovt.th.newUsers':'新用户','ovt.th.subPage':'首启页',
+    'ovt.th.langPage':'语言页','ovt.th.notifPage':'假通知','ovt.th.homePage':'主页',
+    'ovt.th.scan':'扫描','ovt.th.penetration':'渗透率','ovt.th.trial':'试用',
+    'ovt.th.trialRate':'试用率','ovt.th.spend':'消耗','ovt.th.cpi':'CPI',
+    'ovt.th.ecpm':'ECPM','ovt.th.adFirstR':'广告首R',
+    'com.th.date':'日期','com.th.spend':'消耗','com.th.cpi':'CPI','com.th.adRevenue':'广告收入',
+    'com.th.adPerUser':'广告人均','com.th.perCapitaImp':'人均展示','com.th.ecpm':'ECPM',
+    'com.th.adFirstR':'广告首R','com.th.subGap':'订阅缺口','com.th.trialRate':'试用率',
+    'com.th.reqConv50':'需转订阅(50%续)','com.th.reqConv60':'需转订阅(60%续)','com.th.trialCost':'试用获取成本',
+    'change.flat':'持平',
+    'toast.saved':'已保存','toast.fillDate':'请填写日期',
+    'toast.dateExists':'{0} 已有记录，是否覆盖？',
+    'toast.added':'{0} 已添加','toast.confirmDelete':'确定删除 {0} 的记录？',
+    'toast.deleted':'{0} 已删除','toast.confirmClear':'确定清空全部数据？此操作不可撤销。',
+    'toast.cleared':'数据已清空','toast.jsonExported':'JSON 已导出','toast.csvExported':'CSV 已导出',
+    'toast.tplDownloaded':'模板已下载',
+    'toast.importFailJson':'导入失败：JSON 格式错误',
+    'toast.importFailCsv':'导入失败：CSV 解析错误 - ','toast.importFailXlsx':'导入失败：XLSX 解析错误 - ',
+    'toast.unsupportedFormat':'不支持的文件格式，请使用 CSV/XLSX/JSON',
+    'toast.importDone':'导入完成：新增 {0} 条，更新 {1} 条',
+    'imp.formatInfo':'格式：{0} · 识别到 <strong>{1}</strong> 条记录','imp.moreRecords':'... 还有 {0} 条',
+    'dm.newRowDatePlaceholder':'选日期','dm.deleteTitle':'删除'
+  },
+  'en': {
+    'pg.title':'Verification Required','pg.desc':'This page contains internal data. Please enter the access password.',
+    'pg.placeholder':'Enter password','pg.btn':'Verify & Enter','pg.error.wrong':'Incorrect password, please try again',
+    'hdr.title':'Dashboard','hdr.exportCsv':'Export CSV','hdr.importTable':'Import Table',
+    'tab.overview':'📈 Overview','tab.commercial':'💰 Monetization','tab.funnel':'🔽 User Funnel','tab.datamanage':'📝 Data Entry',
+    'ovt.chart1.title':'User Scale & Trial Trends','ovt.chart1.subtitle':'New Users (bar) · Homepage Penetration (line) · Trial Users (marker)',
+    'ovt.chart2.title':'Ad Revenue Trends','ovt.chart2.subtitle':'Ad Revenue (bar) · Ad Revenue Per User (line)',
+    'ovt.chart3.title':'Daily Spend & CPI','ovt.chart3.subtitle':'Spend (bar) · CPI (line)',
+    'ovt.table.title':'Raw Data Table','ovt.table.subtitle':'Click "Data Entry" tab to add new data',
+    'com.chart1.title':'ECPM & Per-Capita Impressions','com.chart1.subtitle':'ECPM (bar) · Impressions Per User (line)',
+    'com.chart2.title':'Break-even Gap Analysis','com.chart2.subtitle':'CPI (bar) · Ad Revenue Per User (bar) · Subscription Gap (dashed)',
+    'com.sens.title':'Break-even Sensitivity Matrix','com.sens.subtitle':'Day-1 ROI under different (Trial Rate × Sub Conv Rate) combos · Based on latest CPI & Ad Per User',
+    'com.detail.title':'Monetization Detailed Data',
+    'fnl.selectDate':'Select Date:','fnl.compareDate':'Compare Date:','fnl.noCompare':'No Comparison',
+    'fnl.funnel.title':'User Funnel','fnl.funnel.subtitle':'User counts at each step and inter-step conversion rates',
+    'fnl.convTrend.title':'Step Conversion Rate Trends','fnl.convTrend.subtitle':'Daily conversion rate changes per step',
+    'fnl.penTrend.title':'Penetration & Trial Rate Trends','fnl.penTrend.subtitle':'Homepage Penetration (line) · Trial Rate (line)',
+    'fnl.health.title':'Funnel Health Diagnosis',
+    'dm.addRow':'＋ Add Row','dm.import':'📂 Import CSV/XLSX','dm.exportCsv':'📥 Export CSV',
+    'dm.exportJson':'💾 Export JSON','dm.downloadTpl':'📋 Download Template',
+    'dm.editHint':'Click a cell to edit. Press Enter or click elsewhere to auto-save.',
+    'dm.col.date':'Date','dm.col.newUsers':'New Users','dm.col.subPage':'Sub Page',
+    'dm.col.langPage':'Lang Page','dm.col.notifPage':'Notif Page','dm.col.homePage':'Homepage',
+    'dm.col.scanUse':'HP Scan','dm.col.trialUsers':'Trials','dm.col.trialRate':'Trial%',
+    'dm.col.spend':'Spend$','dm.col.cpi':'CPI$','dm.col.adImpressions':'Ad Impressions',
+    'dm.col.ecpm':'ECPM$','dm.col.adFirstR':'Ad 1stR%',
+    'dm.clearAll':'Clear All Data',
+    'dm.autoSaveHint':'Data is auto-saved in browser localStorage. It persists after closing. Export CSV regularly for backup.',
+    'imp.title':'📂 Import Data Preview','imp.cancel':'Cancel','imp.confirm':'Confirm Import',
+    'kpi.latestNewUsers':'Latest Daily New Users','kpi.homePenetration':'Homepage Penetration',
+    'kpi.adPerUser':'Ad Revenue/User','kpi.trialUsers':'Trial Users',
+    'kpi.trialRate':'Trial Rate','kpi.cpi':'CPI',
+    'kpi.latestCpi':'Latest CPI','kpi.ecpm':'ECPM','kpi.subGap':'Subscription Gap',
+    'kpi.trialCost':'Trial Acq. Cost','kpi.adFirstR':'Ad First R',
+    'kpi.sub.avg':'Avg','kpi.sub.cumulative':'Total','kpi.sub.person':'users',
+    'kpi.sub.avgVal':'Average','kpi.sub.healthy':'Under $1, healthy','kpi.sub.above1':'Above $1',
+    'kpi.sub.cpiMinusAd':'CPI - Ad Per User',
+    'kpi.status.healthy':'Healthy','kpi.status.low':'Low','kpi.status.worrying':'Worrying',
+    'chart.newUsers':'New Users','chart.homePenPct':'Homepage Penetration %','chart.trialUsers':'Trial Users',
+    'chart.axis.newUsers':'New Users','chart.axis.penPct':'Penetration %','chart.axis.trialUsers':'Trial Users',
+    'chart.adRevenue':'Ad Revenue $','chart.adPerCapita':'Ad Per Capita $',
+    'chart.axis.adRevenue':'Ad Revenue','chart.axis.perCapitaRev':'Per Capita Rev',
+    'chart.spend':'Spend $','chart.cpi':'CPI $',
+    'chart.axis.spend':'Spend','chart.axis.cpi':'CPI',
+    'chart.ecpm':'ECPM $','chart.perCapitaImp':'Per Capita Imp',
+    'chart.axis.ecpm':'ECPM','chart.axis.impCount':'Impression Count',
+    'chart.cpiBar':'CPI $','chart.adPerUserBar':'Ad Per User $','chart.subGapLine':'Sub Gap $',
+    'chart.convRatePct':'Conversion Rate %',
+    'chart.homePen':'Homepage Penetration','chart.trialRateLine':'Trial Rate',
+    'chart.pen30line':'30% Penetration Line','chart.trial5line':'5% Trial Rate Line',
+    'funnel.newUsers':'New Users','funnel.subPage':'Sub Page','funnel.langPage':'Lang Page',
+    'funnel.notifPage':'Notif Page','funnel.homePage':'Homepage','funnel.scanUse':'HP Scan','funnel.trial':'Trial',
+    'funnel.convLabel':'conv',
+    'funnel.conv.newToSub':'New Users→Sub Page','funnel.conv.langToNotif':'Lang→Notif',
+    'funnel.conv.notifToHome':'Notif→Homepage','funnel.conv.homeToScan':'Homepage→Scan',
+    'health.penLabel':'Homepage Penetration','health.trialRate':'Trial Rate',
+    'health.langToNotif':'Lang→Notif Conversion','health.notifToHome':'Notif→Homepage Conversion',
+    'health.perCapitaAd':'Per Capita Ad Impressions','health.ecpmVol':'ECPM Volatility (vs avg)',
+    'health.col.metric':'Metric','health.col.current':'Current','health.col.status':'Status',
+    'health.col.warn':'Warning','health.col.healthy':'Healthy',
+    'health.status.warn':'⚠ Warning','health.status.good':'✓ Normal','health.status.watch':'— Watch',
+    'sens.header':'Trial Rate ↓ / Sub Conv Rate →',
+    'sens.breakeven':'✓ Break-even','sens.close':'≈ Close','sens.gap':'△ Gap','sens.bigGap':'✗ Big Gap',
+    'sens.note':'Based on CPI={0}, Ad Per User={1}, 60% renewal (LT=6 weeks), weekly=$14.99',
+    'ovt.th.date':'Date','ovt.th.newUsers':'New Users','ovt.th.subPage':'Sub Page',
+    'ovt.th.langPage':'Lang Page','ovt.th.notifPage':'Notif','ovt.th.homePage':'Homepage',
+    'ovt.th.scan':'Scan','ovt.th.penetration':'Penetration','ovt.th.trial':'Trial',
+    'ovt.th.trialRate':'Trial Rate','ovt.th.spend':'Spend','ovt.th.cpi':'CPI',
+    'ovt.th.ecpm':'ECPM','ovt.th.adFirstR':'Ad 1stR',
+    'com.th.date':'Date','com.th.spend':'Spend','com.th.cpi':'CPI','com.th.adRevenue':'Ad Revenue',
+    'com.th.adPerUser':'Ad/User','com.th.perCapitaImp':'Imp/User','com.th.ecpm':'ECPM',
+    'com.th.adFirstR':'Ad 1stR','com.th.subGap':'Sub Gap','com.th.trialRate':'Trial Rate',
+    'com.th.reqConv50':'Req Sub Conv(50%)','com.th.reqConv60':'Req Sub Conv(60%)','com.th.trialCost':'Trial Acq Cost',
+    'change.flat':'Flat',
+    'toast.saved':'Saved','toast.fillDate':'Please fill in the date',
+    'toast.dateExists':'{0} already has a record. Overwrite?',
+    'toast.added':'{0} added','toast.confirmDelete':'Delete record for {0}?',
+    'toast.deleted':'{0} deleted','toast.confirmClear':'Clear all data? This cannot be undone.',
+    'toast.cleared':'Data cleared','toast.jsonExported':'JSON exported','toast.csvExported':'CSV exported',
+    'toast.tplDownloaded':'Template downloaded',
+    'toast.importFailJson':'Import failed: Invalid JSON format',
+    'toast.importFailCsv':'Import failed: CSV parse error - ','toast.importFailXlsx':'Import failed: XLSX parse error - ',
+    'toast.unsupportedFormat':'Unsupported format. Please use CSV/XLSX/JSON',
+    'toast.importDone':'Import done: {0} added, {1} updated',
+    'imp.formatInfo':'Format: {0} · Found <strong>{1}</strong> records','imp.moreRecords':'... and {0} more',
+    'dm.newRowDatePlaceholder':'Select date','dm.deleteTitle':'Delete'
+  },
+  'ja': {
+    'pg.title':'認証が必要です','pg.desc':'このページは内部データを含みます。アクセスパスワードを入力してください。',
+    'pg.placeholder':'パスワードを入力','pg.btn':'認証して進む','pg.error.wrong':'パスワードが違います。もう一度お試しください',
+    'hdr.title':'データダッシュボード','hdr.exportCsv':'CSVエクスポート','hdr.importTable':'テーブルインポート',
+    'tab.overview':'📈 概要','tab.commercial':'💰 マネタイズ','tab.funnel':'🔽 ユーザーファネル','tab.datamanage':'📝 データ入力',
+    'ovt.chart1.title':'ユーザー規模とトライアル動向','ovt.chart1.subtitle':'新規ユーザー（棒）· ホームページ浸透率（線）· トライアルユーザー（マーカー）',
+    'ovt.chart2.title':'広告収入動向','ovt.chart2.subtitle':'広告収入（棒）· 広告ユーザー単価（線）',
+    'ovt.chart3.title':'日次コストとCPI','ovt.chart3.subtitle':'コスト（棒）· CPI（線）',
+    'ovt.table.title':'生データ表','ovt.table.subtitle':'「データ入力」タブで新規データを追加',
+    'com.chart1.title':'ECPMと人均インプレッション','com.chart1.subtitle':'ECPM（棒）· 人均表示回数（線）',
+    'com.chart2.title':'損益分岐ギャップ分析','com.chart2.subtitle':'CPI（棒）· 広告ユーザー単価（棒）· サブスクギャップ（破線）',
+    'com.sens.title':'損益分岐感度マトリクス','com.sens.subtitle':'様々な（トライアル率×サブスク転換率）の初日ROI · 最新CPIと広告単価ベース',
+    'com.detail.title':'マネタイズ詳細データ',
+    'fnl.selectDate':'日付選択：','fnl.compareDate':'比較日付：','fnl.noCompare':'比較なし',
+    'fnl.funnel.title':'ユーザーファネル','fnl.funnel.subtitle':'各ステップのユーザー到達数とステップ間転換率',
+    'fnl.convTrend.title':'ステップ間転換率動向','fnl.convTrend.subtitle':'各ステップの日次転換率変化',
+    'fnl.penTrend.title':'浸透率とトライアル率動向','fnl.penTrend.subtitle':'ホームページ浸透率（線）· トライアル率（線）',
+    'fnl.health.title':'ファネル健全度診断',
+    'dm.addRow':'＋ 行追加','dm.import':'📂 CSV/XLSXインポート','dm.exportCsv':'📥 CSVエクスポート',
+    'dm.exportJson':'💾 JSONエクスポート','dm.downloadTpl':'📋 テンプレートDL',
+    'dm.editHint':'セルをクリックして編集。Enterまたは他セルクリックで自動保存。',
+    'dm.col.date':'日付','dm.col.newUsers':'新規ユーザー','dm.col.subPage':'サブスクページ',
+    'dm.col.langPage':'言語ページ','dm.col.notifPage':'通知ページ','dm.col.homePage':'ホーム表示',
+    'dm.col.scanUse':'ホームスキャン','dm.col.trialUsers':'トライアル','dm.col.trialRate':'トライアル率%',
+    'dm.col.spend':'コスト$','dm.col.cpi':'CPI$','dm.col.adImpressions':'広告表示数',
+    'dm.col.ecpm':'ECPM$','dm.col.adFirstR':'広告初R%',
+    'dm.clearAll':'全データ削除',
+    'dm.autoSaveHint':'データはブラウザのlocalStorageに自動保存されます。ページを閉じても消えません。定期的にCSVバックアップを推奨。',
+    'imp.title':'📂 インポートプレビュー','imp.cancel':'キャンセル','imp.confirm':'インポート確認',
+    'kpi.latestNewUsers':'最新日次新規ユーザー','kpi.homePenetration':'ホーム浸透率',
+    'kpi.adPerUser':'広告ユーザー単価','kpi.trialUsers':'トライアル数',
+    'kpi.trialRate':'トライアル率','kpi.cpi':'CPI',
+    'kpi.latestCpi':'最新CPI','kpi.ecpm':'ECPM','kpi.subGap':'サブスクギャップ',
+    'kpi.trialCost':'トライアル獲得コスト','kpi.adFirstR':'広告初R',
+    'kpi.sub.avg':'平均','kpi.sub.cumulative':'累計','kpi.sub.person':'人',
+    'kpi.sub.avgVal':'平均値','kpi.sub.healthy':'$1未満、健全','kpi.sub.above1':'$1超',
+    'kpi.sub.cpiMinusAd':'CPI - 広告単価',
+    'kpi.status.healthy':'健全','kpi.status.low':'低い','kpi.status.worrying':'懸念',
+    'chart.newUsers':'新規ユーザー','chart.homePenPct':'ホーム浸透率 %','chart.trialUsers':'トライアル数',
+    'chart.axis.newUsers':'新規ユーザー','chart.axis.penPct':'浸透率 %','chart.axis.trialUsers':'トライアル数',
+    'chart.adRevenue':'広告収入 $','chart.adPerCapita':'広告人均 $',
+    'chart.axis.adRevenue':'広告収入','chart.axis.perCapitaRev':'人均収入',
+    'chart.spend':'コスト $','chart.cpi':'CPI $',
+    'chart.axis.spend':'コスト','chart.axis.cpi':'CPI',
+    'chart.ecpm':'ECPM $','chart.perCapitaImp':'人均表示',
+    'chart.axis.ecpm':'ECPM','chart.axis.impCount':'表示回数',
+    'chart.cpiBar':'CPI $','chart.adPerUserBar':'広告人均 $','chart.subGapLine':'サブスクギャップ $',
+    'chart.convRatePct':'転換率 %',
+    'chart.homePen':'ホーム浸透率','chart.trialRateLine':'トライアル率',
+    'chart.pen30line':'30%浸透率ライン','chart.trial5line':'5%トライアル率ライン',
+    'funnel.newUsers':'新規ユーザー','funnel.subPage':'サブスクページ','funnel.langPage':'言語ページ',
+    'funnel.notifPage':'通知ページ','funnel.homePage':'ホーム表示','funnel.scanUse':'ホームスキャン','funnel.trial':'トライアル',
+    'funnel.convLabel':'転換',
+    'funnel.conv.newToSub':'新規→サブスク','funnel.conv.langToNotif':'言語→通知',
+    'funnel.conv.notifToHome':'通知→ホーム','funnel.conv.homeToScan':'ホーム→スキャン',
+    'health.penLabel':'ホーム浸透率','health.trialRate':'トライアル率',
+    'health.langToNotif':'言語→通知転換','health.notifToHome':'通知→ホーム転換',
+    'health.perCapitaAd':'人均広告表示','health.ecpmVol':'ECPM変動(平均比)',
+    'health.col.metric':'指標','health.col.current':'現在値','health.col.status':'状態',
+    'health.col.warn':'警告線','health.col.healthy':'健全線',
+    'health.status.warn':'⚠ 警告','health.status.good':'✓ 正常','health.status.watch':'— 観察',
+    'sens.header':'トライアル率 ↓ / サブスク転換率 →',
+    'sens.breakeven':'✓ 回収','sens.close':'≈ 接近','sens.gap':'△ ギャップ','sens.bigGap':'✗ 大ギャップ',
+    'sens.note':'CPI={0}、広告単価={1}、継続率60%（LT=6週）、週額=$14.99ベース',
+    'ovt.th.date':'日付','ovt.th.newUsers':'新規','ovt.th.subPage':'サブスク',
+    'ovt.th.langPage':'言語','ovt.th.notifPage':'通知','ovt.th.homePage':'ホーム',
+    'ovt.th.scan':'スキャン','ovt.th.penetration':'浸透率','ovt.th.trial':'トライアル',
+    'ovt.th.trialRate':'トライアル率','ovt.th.spend':'コスト','ovt.th.cpi':'CPI',
+    'ovt.th.ecpm':'ECPM','ovt.th.adFirstR':'広告初R',
+    'com.th.date':'日付','com.th.spend':'コスト','com.th.cpi':'CPI','com.th.adRevenue':'広告収入',
+    'com.th.adPerUser':'広告人均','com.th.perCapitaImp':'人均表示','com.th.ecpm':'ECPM',
+    'com.th.adFirstR':'広告初R','com.th.subGap':'サブスクギャップ','com.th.trialRate':'トライアル率',
+    'com.th.reqConv50':'要サブスク転換(50%)','com.th.reqConv60':'要サブスク転換(60%)','com.th.trialCost':'トライアル獲得コスト',
+    'change.flat':'横ばい',
+    'toast.saved':'保存しました','toast.fillDate':'日付を入力してください',
+    'toast.dateExists':'{0}は既に記録があります。上書きしますか？',
+    'toast.added':'{0}を追加しました','toast.confirmDelete':'{0}の記録を削除しますか？',
+    'toast.deleted':'{0}を削除しました','toast.confirmClear':'全データを削除しますか？この操作は取り消せません。',
+    'toast.cleared':'データを削除しました','toast.jsonExported':'JSONをエクスポートしました','toast.csvExported':'CSVをエクスポートしました',
+    'toast.tplDownloaded':'テンプレートをDLしました',
+    'toast.importFailJson':'インポート失敗：JSON形式エラー',
+    'toast.importFailCsv':'インポート失敗：CSV解析エラー - ','toast.importFailXlsx':'インポート失敗：XLSX解析エラー - ',
+    'toast.unsupportedFormat':'未対応形式です。CSV/XLSX/JSONをご利用ください',
+    'toast.importDone':'インポート完了：{0}件追加、{1}件更新',
+    'imp.formatInfo':'形式：{0} · <strong>{1}</strong>件のレコードを検出','imp.moreRecords':'... 他{0}件',
+    'dm.newRowDatePlaceholder':'日付選択','dm.deleteTitle':'削除'
+  },
+  'ko': {
+    'pg.title':'인증 필요','pg.desc':'이 페이지는 내부 데이터를 포함합니다. 접근 비밀번호를 입력하세요.',
+    'pg.placeholder':'비밀번호 입력','pg.btn':'인증 후 진입','pg.error.wrong':'비밀번호가 틀렸습니다. 다시 시도하세요',
+    'hdr.title':'데이터 대시보드','hdr.exportCsv':'CSV 내보내기','hdr.importTable':'테이블 가져오기',
+    'tab.overview':'📈 개요','tab.commercial':'💰 수익화','tab.funnel':'🔽 사용자 퍼널','tab.datamanage':'📝 데이터 입력',
+    'ovt.chart1.title':'사용자 규모 및 체험 동향','ovt.chart1.subtitle':'신규 사용자(막대) · 홈페이지 침투율(선) · 체험 사용자(마커)',
+    'ovt.chart2.title':'광고 수익 동향','ovt.chart2.subtitle':'광고 수익(막대) · 광고 1인당 수익(선)',
+    'ovt.chart3.title':'일일 지출 및 CPI','ovt.chart3.subtitle':'지출(막대) · CPI(선)',
+    'ovt.table.title':'원본 데이터 테이블','ovt.table.subtitle':'"데이터 입력" 탭에서 새 데이터 추가',
+    'com.chart1.title':'ECPM 및 1인당 노출','com.chart1.subtitle':'ECPM(막대) · 1인당 노출 횟수(선)',
+    'com.chart2.title':'손익분기 갭 분석','com.chart2.subtitle':'CPI(막대) · 광고 1인당 수익(막대) · 구독 갭(점선)',
+    'com.sens.title':'손익분기 민감도 매트릭스','com.sens.subtitle':'다양한(체험률×전환율) 조합의 첫날 ROI · 최신 CPI 및 광고 1인당 기준',
+    'com.detail.title':'수익화 상세 데이터',
+    'fnl.selectDate':'날짜 선택:','fnl.compareDate':'비교 날짜:','fnl.noCompare':'비교 없음',
+    'fnl.funnel.title':'사용자 퍼널','fnl.funnel.subtitle':'각 단계의 사용자 도달 수 및 단계 간 전환율',
+    'fnl.convTrend.title':'단계 간 전환율 동향','fnl.convTrend.subtitle':'각 단계의 일별 전환율 변화',
+    'fnl.penTrend.title':'침투율 및 체험률 동향','fnl.penTrend.subtitle':'홈페이지 침투율(선) · 체험률(선)',
+    'fnl.health.title':'퍼널 건강도 진단',
+    'dm.addRow':'＋ 행 추가','dm.import':'📂 CSV/XLSX 가져오기','dm.exportCsv':'📥 CSV 내보내기',
+    'dm.exportJson':'💾 JSON 내보내기','dm.downloadTpl':'📋 템플릿 다운로드',
+    'dm.editHint':'셀을 클릭하여 편집. Enter 또는 다른 셀 클릭으로 자동 저장.',
+    'dm.col.date':'날짜','dm.col.newUsers':'신규 사용자','dm.col.subPage':'구독 페이지',
+    'dm.col.langPage':'언어 페이지','dm.col.notifPage':'알림 페이지','dm.col.homePage':'홈페이지 표시',
+    'dm.col.scanUse':'홈 스캔','dm.col.trialUsers':'체험 사용자','dm.col.trialRate':'체험률%',
+    'dm.col.spend':'지출$','dm.col.cpi':'CPI$','dm.col.adImpressions':'광고 노출수',
+    'dm.col.ecpm':'ECPM$','dm.col.adFirstR':'광고 첫R%',
+    'dm.clearAll':'전체 데이터 삭제',
+    'dm.autoSaveHint':'데이터는 브라우저 localStorage에 자동 저장됩니다. 페이지를 닫아도 유지됩니다. 정기적으로 CSV 백업을 권장합니다.',
+    'imp.title':'📂 가져오기 미리보기','imp.cancel':'취소','imp.confirm':'가져오기 확인',
+    'kpi.latestNewUsers':'최신 일일 신규 사용자','kpi.homePenetration':'홈페이지 침투율',
+    'kpi.adPerUser':'광고 1인당 수익','kpi.trialUsers':'체험 사용자',
+    'kpi.trialRate':'체험률','kpi.cpi':'CPI',
+    'kpi.latestCpi':'최신 CPI','kpi.ecpm':'ECPM','kpi.subGap':'구독 갭',
+    'kpi.trialCost':'체험 획득 비용','kpi.adFirstR':'광고 첫R',
+    'kpi.sub.avg':'평균','kpi.sub.cumulative':'누적','kpi.sub.person':'명',
+    'kpi.sub.avgVal':'평균값','kpi.sub.healthy':'$1 미만, 건전','kpi.sub.above1':'$1 초과',
+    'kpi.sub.cpiMinusAd':'CPI - 광고 1인당',
+    'kpi.status.healthy':'건전','kpi.status.low':'낮음','kpi.status.worrying':'우려',
+    'chart.newUsers':'신규 사용자','chart.homePenPct':'홈페이지 침투율 %','chart.trialUsers':'체험 사용자',
+    'chart.axis.newUsers':'신규 사용자','chart.axis.penPct':'침투율 %','chart.axis.trialUsers':'체험 사용자',
+    'chart.adRevenue':'광고 수익 $','chart.adPerCapita':'광고 1인당 $',
+    'chart.axis.adRevenue':'광고 수익','chart.axis.perCapitaRev':'1인당 수익',
+    'chart.spend':'지출 $','chart.cpi':'CPI $',
+    'chart.axis.spend':'지출','chart.axis.cpi':'CPI',
+    'chart.ecpm':'ECPM $','chart.perCapitaImp':'1인당 노출',
+    'chart.axis.ecpm':'ECPM','chart.axis.impCount':'노출 횟수',
+    'chart.cpiBar':'CPI $','chart.adPerUserBar':'광고 1인당 $','chart.subGapLine':'구독 갭 $',
+    'chart.convRatePct':'전환율 %',
+    'chart.homePen':'홈페이지 침투율','chart.trialRateLine':'체험률',
+    'chart.pen30line':'30% 침투율 기준선','chart.trial5line':'5% 체험률 기준선',
+    'funnel.newUsers':'신규 사용자','funnel.subPage':'구독 페이지','funnel.langPage':'언어 페이지',
+    'funnel.notifPage':'알림 페이지','funnel.homePage':'홈페이지 표시','funnel.scanUse':'홈 스캔','funnel.trial':'체험',
+    'funnel.convLabel':'전환',
+    'funnel.conv.newToSub':'신규→구독','funnel.conv.langToNotif':'언어→알림',
+    'funnel.conv.notifToHome':'알림→홈페이지','funnel.conv.homeToScan':'홈페이지→스캔',
+    'health.penLabel':'홈페이지 침투율','health.trialRate':'체험률',
+    'health.langToNotif':'언어→알림 전환','health.notifToHome':'알림→홈페이지 전환',
+    'health.perCapitaAd':'1인당 광고 노출','health.ecpmVol':'ECPM 변동(평균 대비)',
+    'health.col.metric':'지표','health.col.current':'현재값','health.col.status':'상태',
+    'health.col.warn':'경고선','health.col.healthy':'건강선',
+    'health.status.warn':'⚠ 경고','health.status.good':'✓ 정상','health.status.watch':'— 관찰',
+    'sens.header':'체험률 ↓ / 전환율 →',
+    'sens.breakeven':'✓ 회수','sens.close':'≈ 근접','sens.gap':'△ 갭','sens.bigGap':'✗ 큰 갭',
+    'sens.note':'CPI={0}, 광고 1인당={1}, 60% 갱신(LT=6주), 주간=$14.99 기준',
+    'ovt.th.date':'날짜','ovt.th.newUsers':'신규','ovt.th.subPage':'구독',
+    'ovt.th.langPage':'언어','ovt.th.notifPage':'알림','ovt.th.homePage':'홈페이지',
+    'ovt.th.scan':'스캔','ovt.th.penetration':'침투율','ovt.th.trial':'체험',
+    'ovt.th.trialRate':'체험률','ovt.th.spend':'지출','ovt.th.cpi':'CPI',
+    'ovt.th.ecpm':'ECPM','ovt.th.adFirstR':'광고 첫R',
+    'com.th.date':'날짜','com.th.spend':'지출','com.th.cpi':'CPI','com.th.adRevenue':'광고 수익',
+    'com.th.adPerUser':'광고 1인당','com.th.perCapitaImp':'1인당 노출','com.th.ecpm':'ECPM',
+    'com.th.adFirstR':'광고 첫R','com.th.subGap':'구독 갭','com.th.trialRate':'체험률',
+    'com.th.reqConv50':'필요 전환(50%)','com.th.reqConv60':'필요 전환(60%)','com.th.trialCost':'체험 획득 비용',
+    'change.flat':'보합',
+    'toast.saved':'저장됨','toast.fillDate':'날짜를 입력하세요',
+    'toast.dateExists':'{0}에 이미 기록이 있습니다. 덮어쓰시겠습니까?',
+    'toast.added':'{0} 추가됨','toast.confirmDelete':'{0}의 기록을 삭제하시겠습니까?',
+    'toast.deleted':'{0} 삭제됨','toast.confirmClear':'전체 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
+    'toast.cleared':'데이터가 삭제됨','toast.jsonExported':'JSON 내보내기 완료','toast.csvExported':'CSV 내보내기 완료',
+    'toast.tplDownloaded':'템플릿 다운로드됨',
+    'toast.importFailJson':'가져오기 실패: JSON 형식 오류',
+    'toast.importFailCsv':'가져오기 실패: CSV 파싱 오류 - ','toast.importFailXlsx':'가져오기 실패: XLSX 파싱 오류 - ',
+    'toast.unsupportedFormat':'지원하지 않는 형식입니다. CSV/XLSX/JSON을 사용하세요',
+    'toast.importDone':'가져오기 완료: {0}건 추가, {1}건 업데이트',
+    'imp.formatInfo':'형식: {0} · <strong>{1}</strong>건의 레코드 확인','imp.moreRecords':'... 외 {0}건',
+    'dm.newRowDatePlaceholder':'날짜 선택','dm.deleteTitle':'삭제'
+  }
+};
+
 // ===== Constants =====
 const WEEKLY_PRICE = 14.99;
 const LT_50 = 5; // lifecycle weeks at 50% renewal
@@ -441,7 +794,7 @@ function changeIndicator(current, previous) {
   if (previous == null || current == null) return { cls:'flat', text:'—' };
   const diff = current - previous;
   const pct = previous !== 0 ? (diff / Math.abs(previous) * 100) : 0;
-  if (Math.abs(pct) < 1) return { cls:'flat', text:'持平' };
+  if (Math.abs(pct) < 1) return { cls:'flat', text: I18n.t('change.flat') };
   const arrow = diff > 0 ? '↑' : '↓';
   return { cls: diff > 0 ? 'up' : 'down', text: `${arrow} ${Math.abs(pct).toFixed(1)}%` };
 }
@@ -514,12 +867,12 @@ function renderOverview() {
   const totalTrials = data.reduce((s,d)=>s+nn(d.trialUsers),0);
 
   kpis.innerHTML = [
-    kpiCard('最新日新用户', fmtN(latest?.newUsers), 'primary', prev ? changeIndicator(latest?.newUsers, prev?.newUsers) : null, `日均 ${fmtN(avgUsers)}`),
-    kpiCard('主页渗透率', fmtP(latest?.homePenetration*100), latest?.homePenetration < 0.3 ? 'red' : 'green', prev ? changeIndicator(latest?.homePenetration, prev?.homePenetration) : null),
-    kpiCard('广告人均收入', fmt$(latest?.adPerUser), 'primary', prev ? changeIndicator(latest?.adPerUser, prev?.adPerUser) : null),
-    kpiCard('试用人数', latest?.trialUsers ?? '—', totalTrials > 0 ? (latest?.trialUsers > 0 ? 'green' : 'red') : '', prev ? changeIndicator(latest?.trialUsers, prev?.trialUsers) : null, `累计 ${totalTrials} 人`),
-    kpiCard('试用率', latest?.trialRate != null ? fmtP(latest.trialRate) : '—', latest?.trialRate >= 5 ? 'green' : 'orange', prev ? changeIndicator(latest?.trialRate, prev?.trialRate) : null, `均值 ${fmtP(avgTrialRate)}`),
-    kpiCard('CPI', fmt$(latest?.cpi), 'primary', prev ? changeIndicator(latest?.cpi, prev?.cpi) : null, latest?.cpi < 1 ? '低于$1，健康' : '高于$1')
+    kpiCard(I18n.t('kpi.latestNewUsers'), fmtN(latest?.newUsers), 'primary', prev ? changeIndicator(latest?.newUsers, prev?.newUsers) : null, `${I18n.t('kpi.sub.avg')} ${fmtN(avgUsers)}`),
+    kpiCard(I18n.t('kpi.homePenetration'), fmtP(latest?.homePenetration*100), latest?.homePenetration < 0.3 ? 'red' : 'green', prev ? changeIndicator(latest?.homePenetration, prev?.homePenetration) : null),
+    kpiCard(I18n.t('kpi.adPerUser'), fmt$(latest?.adPerUser), 'primary', prev ? changeIndicator(latest?.adPerUser, prev?.adPerUser) : null),
+    kpiCard(I18n.t('kpi.trialUsers'), latest?.trialUsers ?? '—', totalTrials > 0 ? (latest?.trialUsers > 0 ? 'green' : 'red') : '', prev ? changeIndicator(latest?.trialUsers, prev?.trialUsers) : null, `${I18n.t('kpi.sub.cumulative')} ${totalTrials} ${I18n.t('kpi.sub.person')}`),
+    kpiCard(I18n.t('kpi.trialRate'), latest?.trialRate != null ? fmtP(latest.trialRate) : '—', latest?.trialRate >= 5 ? 'green' : 'orange', prev ? changeIndicator(latest?.trialRate, prev?.trialRate) : null, `${I18n.t('kpi.sub.avgVal')} ${fmtP(avgTrialRate)}`),
+    kpiCard(I18n.t('kpi.cpi'), fmt$(latest?.cpi), 'primary', prev ? changeIndicator(latest?.cpi, prev?.cpi) : null, latest?.cpi < 1 ? I18n.t('kpi.sub.healthy') : I18n.t('kpi.sub.above1'))
   ].join('');
 
   // Chart 1: Users + Penetration + Trials
@@ -530,18 +883,18 @@ function renderOverview() {
     data: {
       labels,
       datasets: [
-        { type:'bar', label:'新用户数', data:data.map(d=>d.newUsers), backgroundColor:'#4f46e5aa', borderRadius:6, yAxisID:'y', order:3 },
-        { type:'line', label:'主页渗透率 %', data:data.map(d=>+(d.homePenetration*100).toFixed(1)), borderColor:'#f59e0b', backgroundColor:'#f59e0b22', pointRadius:5, pointBackgroundColor:'#f59e0b', borderWidth:2.5, tension:0.3, yAxisID:'y1', order:1, fill:false },
-        { type:'line', label:'试用人数', data:data.map(d=>d.trialUsers), borderColor:'#10b981', backgroundColor:'#10b98122', pointRadius:6, pointBackgroundColor:'#10b981', borderWidth:2, pointStyle:'rectRot', tension:0.3, yAxisID:'y2', order:2, fill:false, hidden: false }
+        { type:'bar', label: I18n.t('chart.newUsers'), data:data.map(d=>d.newUsers), backgroundColor:'#4f46e5aa', borderRadius:6, yAxisID:'y', order:3 },
+        { type:'line', label: I18n.t('chart.homePenPct'), data:data.map(d=>+(d.homePenetration*100).toFixed(1)), borderColor:'#f59e0b', backgroundColor:'#f59e0b22', pointRadius:5, pointBackgroundColor:'#f59e0b', borderWidth:2.5, tension:0.3, yAxisID:'y1', order:1, fill:false },
+        { type:'line', label: I18n.t('chart.trialUsers'), data:data.map(d=>d.trialUsers), borderColor:'#10b981', backgroundColor:'#10b98122', pointRadius:6, pointBackgroundColor:'#10b981', borderWidth:2, pointStyle:'rectRot', tension:0.3, yAxisID:'y2', order:2, fill:false, hidden: false }
       ]
     },
     options: {
       ...chartDefaults,
       scales: {
         x: { grid:{display:false} },
-        y: { position:'left', title:{display:true,text:'新用户数'}, grid:{color:'#f0f0f0'} },
-        y1: { position:'right', title:{display:true,text:'渗透率 %'}, grid:{display:false}, min:0, max:100 },
-        y2: { position:'right', title:{display:true,text:'试用人数'}, grid:{display:false}, display:false }
+        y: { position:'left', title:{display:true,text: I18n.t('chart.axis.newUsers')}, grid:{color:'#f0f0f0'} },
+        y1: { position:'right', title:{display:true,text: I18n.t('chart.axis.penPct')}, grid:{display:false}, min:0, max:100 },
+        y2: { position:'right', title:{display:true,text: I18n.t('chart.axis.trialUsers')}, grid:{display:false}, display:false }
       }
     }
   });
@@ -549,13 +902,13 @@ function renderOverview() {
   // Chart 2: Ad Revenue
   destroyChart('overview2');
   charts['overview2'] = new Chart(document.getElementById('chart-overview-2'),
-    dualAxisConfig(labels, data.map(d=>+d.adRevenue.toFixed(2)), '广告收入 $', '#4f46e5', data.map(d=>+d.adPerUser.toFixed(3)), '广告人均 $', '#06b6d4', '广告收入', '人均收入')
+    dualAxisConfig(labels, data.map(d=>+d.adRevenue.toFixed(2)), I18n.t('chart.adRevenue'), '#4f46e5', data.map(d=>+d.adPerUser.toFixed(3)), I18n.t('chart.adPerCapita'), '#06b6d4', I18n.t('chart.axis.adRevenue'), I18n.t('chart.axis.perCapitaRev'))
   );
 
   // Chart 3: Spend + CPI
   destroyChart('overview3');
   charts['overview3'] = new Chart(document.getElementById('chart-overview-3'),
-    dualAxisConfig(labels, data.map(d=>d.spend), '消耗 $', '#f59e0b', data.map(d=>d.cpi), 'CPI $', '#ef4444', '消耗', 'CPI')
+    dualAxisConfig(labels, data.map(d=>d.spend), I18n.t('chart.spend'), '#f59e0b', data.map(d=>d.cpi), I18n.t('chart.cpi'), '#ef4444', I18n.t('chart.axis.spend'), I18n.t('chart.axis.cpi'))
   );
 
   // Data Table
@@ -564,7 +917,7 @@ function renderOverview() {
 
 function renderOverviewTable(data) {
   let html = '<table class="data-table"><thead><tr>';
-  html += '<th>日期</th><th class="num">新用户</th><th class="num">首启页</th><th class="num">语言页</th><th class="num">假通知</th><th class="num">主页</th><th class="num">扫描</th><th class="num">渗透率</th><th class="num">试用</th><th class="num">试用率</th><th class="num">消耗</th><th class="num">CPI</th><th class="num">ECPM</th><th class="num">广告首R</th>';
+  html += `<th>${I18n.t('ovt.th.date')}</th><th class="num">${I18n.t('ovt.th.newUsers')}</th><th class="num">${I18n.t('ovt.th.subPage')}</th><th class="num">${I18n.t('ovt.th.langPage')}</th><th class="num">${I18n.t('ovt.th.notifPage')}</th><th class="num">${I18n.t('ovt.th.homePage')}</th><th class="num">${I18n.t('ovt.th.scan')}</th><th class="num">${I18n.t('ovt.th.penetration')}</th><th class="num">${I18n.t('ovt.th.trial')}</th><th class="num">${I18n.t('ovt.th.trialRate')}</th><th class="num">${I18n.t('ovt.th.spend')}</th><th class="num">${I18n.t('ovt.th.cpi')}</th><th class="num">${I18n.t('ovt.th.ecpm')}</th><th class="num">${I18n.t('ovt.th.adFirstR')}</th>`;
   html += '</tr></thead><tbody>';
   data.forEach(d => {
     const penCls = d.homePenetration < 0.3 ? 'warn' : 'good';
@@ -603,19 +956,19 @@ function renderCommercial() {
   const avgCPI = n > 0 ? data.reduce((s,d)=>s+nn(d.cpi),0)/n : 0;
 
   kpis.innerHTML = [
-    kpiCard('最新CPI', fmt$(latest?.cpi), latest?.cpi < 1 ? 'green' : 'orange', prev ? changeIndicator(latest?.cpi, prev?.cpi) : null, `均值 ${fmt$(avgCPI)}`),
-    kpiCard('广告人均收入', fmt$(latest?.adPerUser), 'primary', prev ? changeIndicator(latest?.adPerUser, prev?.adPerUser) : null),
-    kpiCard('ECPM', fmt$(latest?.ecpm), 'primary', prev ? changeIndicator(latest?.ecpm, prev?.ecpm) : null, `均值 ${fmt$(avgEcpm)}`),
-    kpiCard('订阅缺口', fmt$(latest?.subGap), latest?.subGap > 0.5 ? 'red' : 'green', prev ? changeIndicator(latest?.subGap, prev?.subGap) : null, 'CPI - 广告人均'),
-    kpiCard('试用获取成本', latest?.trialCost != null ? fmt$(latest.trialCost) : '—', latest?.trialCost > 20 ? 'red' : 'primary'),
-    kpiCard('广告首R', latest?.adFirstR != null ? fmtP(latest.adFirstR) : '—', latest?.adFirstR >= 15 ? 'green' : (latest?.adFirstR >= 5 ? 'orange' : 'red'), latest?.adFirstR >= 15 ? '健康' : (latest?.adFirstR >= 5 ? '偏低' : '堪忧'))
+    kpiCard(I18n.t('kpi.latestCpi'), fmt$(latest?.cpi), latest?.cpi < 1 ? 'green' : 'orange', prev ? changeIndicator(latest?.cpi, prev?.cpi) : null, `${I18n.t('kpi.sub.avgVal')} ${fmt$(avgCPI)}`),
+    kpiCard(I18n.t('kpi.adPerUser'), fmt$(latest?.adPerUser), 'primary', prev ? changeIndicator(latest?.adPerUser, prev?.adPerUser) : null),
+    kpiCard(I18n.t('kpi.ecpm'), fmt$(latest?.ecpm), 'primary', prev ? changeIndicator(latest?.ecpm, prev?.ecpm) : null, `${I18n.t('kpi.sub.avgVal')} ${fmt$(avgEcpm)}`),
+    kpiCard(I18n.t('kpi.subGap'), fmt$(latest?.subGap), latest?.subGap > 0.5 ? 'red' : 'green', prev ? changeIndicator(latest?.subGap, prev?.subGap) : null, I18n.t('kpi.sub.cpiMinusAd')),
+    kpiCard(I18n.t('kpi.trialCost'), latest?.trialCost != null ? fmt$(latest.trialCost) : '—', latest?.trialCost > 20 ? 'red' : 'primary'),
+    kpiCard(I18n.t('kpi.adFirstR'), latest?.adFirstR != null ? fmtP(latest.adFirstR) : '—', latest?.adFirstR >= 15 ? 'green' : (latest?.adFirstR >= 5 ? 'orange' : 'red'), latest?.adFirstR >= 15 ? I18n.t('kpi.status.healthy') : (latest?.adFirstR >= 5 ? I18n.t('kpi.status.low') : I18n.t('kpi.status.worrying')))
   ].join('');
 
   // Chart 1: ECPM + per-capita impressions
   const labels = data.map(d => shortDate(d.date));
   destroyChart('comm1');
   charts['comm1'] = new Chart(document.getElementById('chart-comm-1'),
-    dualAxisConfig(labels, data.map(d=>+nn(d.ecpm).toFixed(1)), 'ECPM $', '#4f46e5', data.map(d=>+d.perCapitaImp.toFixed(1)), '人均展示', '#f59e0b', 'ECPM', '展示次数')
+    dualAxisConfig(labels, data.map(d=>+nn(d.ecpm).toFixed(1)), I18n.t('chart.ecpm'), '#4f46e5', data.map(d=>+d.perCapitaImp.toFixed(1)), I18n.t('chart.perCapitaImp'), '#f59e0b', I18n.t('chart.axis.ecpm'), I18n.t('chart.axis.impCount'))
   );
 
   // Chart 2: Gap Analysis
@@ -625,9 +978,9 @@ function renderCommercial() {
     data: {
       labels,
       datasets: [
-        { type:'bar', label:'CPI $', data:data.map(d=>+nn(d.cpi).toFixed(2)), backgroundColor:'#ef4444aa', borderRadius:6, yAxisID:'y', order:3 },
-        { type:'bar', label:'广告人均 $', data:data.map(d=>+d.adPerUser.toFixed(3)), backgroundColor:'#10b981aa', borderRadius:6, yAxisID:'y', order:2 },
-        { type:'line', label:'订阅缺口 $', data:data.map(d=>+d.subGap.toFixed(3)), borderColor:'#f59e0b', pointRadius:5, pointBackgroundColor:'#f59e0b', borderWidth:2.5, borderDash:[5,5], tension:0.3, yAxisID:'y', order:1, fill:false }
+        { type:'bar', label: I18n.t('chart.cpiBar'), data:data.map(d=>+nn(d.cpi).toFixed(2)), backgroundColor:'#ef4444aa', borderRadius:6, yAxisID:'y', order:3 },
+        { type:'bar', label: I18n.t('chart.adPerUserBar'), data:data.map(d=>+d.adPerUser.toFixed(3)), backgroundColor:'#10b981aa', borderRadius:6, yAxisID:'y', order:2 },
+        { type:'line', label: I18n.t('chart.subGapLine'), data:data.map(d=>+d.subGap.toFixed(3)), borderColor:'#f59e0b', pointRadius:5, pointBackgroundColor:'#f59e0b', borderWidth:2.5, borderDash:[5,5], tension:0.3, yAxisID:'y', order:1, fill:false }
       ]
     },
     options: { ...chartDefaults, scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f0f0'}, title:{display:true,text:'$'}} } }
@@ -649,7 +1002,7 @@ function renderSensitivityMatrix(latest) {
   const trialRates = [2, 3, 5, 7, 10, 15];
   const convRates = [5, 10, 15, 20, 30, 50];
 
-  let html = '<table class="data-table"><thead><tr><th>试用率 ↓ / 转订阅率 →</th>';
+  let html = `<table class="data-table"><thead><tr><th>${I18n.t('sens.header')}</th>`;
   convRates.forEach(c => html += `<th class="num">${c}%</th>`);
   html += '</tr></thead><tbody>';
 
@@ -660,22 +1013,22 @@ function renderSensitivityMatrix(latest) {
       const totalPerUser = adPU + subPerUser;
       const roi = cpi > 0 ? ((totalPerUser - cpi) / cpi * 100) : 0;
       let cls = 'bad'; let badge = '';
-      if (roi >= 0) { cls = 'good'; badge = '✓ 回本'; }
-      else if (roi >= -20) { cls = ''; badge = '≈ 接近'; }
-      else if (roi >= -40) { cls = ''; badge = '△ 缺口'; }
-      else { badge = '✗ 大缺口'; }
+      if (roi >= 0) { cls = 'good'; badge = I18n.t('sens.breakeven'); }
+      else if (roi >= -20) { cls = ''; badge = I18n.t('sens.close'); }
+      else if (roi >= -40) { cls = ''; badge = I18n.t('sens.gap'); }
+      else { badge = I18n.t('sens.bigGap'); }
       html += `<td class="num"><span class="status-badge ${cls}">${roi.toFixed(0)}%</span><br><span style="font-size:10px;color:var(--text3)">${badge}</span></td>`;
     });
     html += '</tr>';
   });
   html += '</tbody></table>';
-  html += `<p style="font-size:11px;color:var(--text3);margin-top:8px;">基于 CPI=${fmt$(cpi)}，广告人均=${fmt$(adPU)}，一续率60%（LT=6周），周价格=$14.99</p>`;
+  html += `<p style="font-size:11px;color:var(--text3);margin-top:8px;">${I18n.t('sens.note').replace('{0}',fmt$(cpi)).replace('{1}',fmt$(adPU))}</p>`;
   document.getElementById('sensitivity-table').innerHTML = html;
 }
 
 function renderCommercialTable(data) {
   let html = '<table class="data-table"><thead><tr>';
-  html += '<th>日期</th><th class="num">消耗</th><th class="num">CPI</th><th class="num">广告收入</th><th class="num">广告人均</th><th class="num">人均展示</th><th class="num">ECPM</th><th class="num">广告首R</th><th class="num">订阅缺口</th><th class="num">试用率</th><th class="num">需转订阅(50%续)</th><th class="num">需转订阅(60%续)</th><th class="num">试用获取成本</th>';
+  html += `<th>${I18n.t('com.th.date')}</th><th class="num">${I18n.t('com.th.spend')}</th><th class="num">${I18n.t('com.th.cpi')}</th><th class="num">${I18n.t('com.th.adRevenue')}</th><th class="num">${I18n.t('com.th.adPerUser')}</th><th class="num">${I18n.t('com.th.perCapitaImp')}</th><th class="num">${I18n.t('com.th.ecpm')}</th><th class="num">${I18n.t('com.th.adFirstR')}</th><th class="num">${I18n.t('com.th.subGap')}</th><th class="num">${I18n.t('com.th.trialRate')}</th><th class="num">${I18n.t('com.th.reqConv50')}</th><th class="num">${I18n.t('com.th.reqConv60')}</th><th class="num">${I18n.t('com.th.trialCost')}</th>`;
   html += '</tr></thead><tbody>';
   data.forEach(d => {
     html += `<tr>
@@ -709,7 +1062,7 @@ function renderFunnel() {
   const curVal = sel.value;
   const curCmp = cmpSel.value;
   sel.innerHTML = '';
-  cmpSel.innerHTML = '<option value="">不对比</option>';
+  cmpSel.innerHTML = `<option value="">${I18n.t('fnl.noCompare')}</option>`;
   data.forEach((d,i) => {
     sel.innerHTML += `<option value="${i}" ${i===n-1?'selected':''}>${d.date}</option>`;
     cmpSel.innerHTML += `<option value="${i}">${d.date}</option>`;
@@ -733,15 +1086,15 @@ function renderFunnel() {
     data: {
       labels,
       datasets: [
-        { label:'新用户→首启页', data:data.map(d=>+(d.subPageRate*100).toFixed(1)), borderColor:'#4f46e5', pointRadius:4, borderWidth:2, tension:0.3 },
-        { label:'语言→假通知', data:data.map(d=>+(d.langToNotif*100).toFixed(1)), borderColor:'#f59e0b', pointRadius:4, borderWidth:2, tension:0.3 },
-        { label:'假通知→主页', data:data.map(d=>+(d.notifToHome*100).toFixed(1)), borderColor:'#ef4444', pointRadius:4, borderWidth:2, tension:0.3 },
-        { label:'主页→扫描', data:data.map(d=>+(d.homeToScan*100).toFixed(1)), borderColor:'#10b981', pointRadius:4, borderWidth:2, tension:0.3 }
+        { label: I18n.t('funnel.conv.newToSub'), data:data.map(d=>+(d.subPageRate*100).toFixed(1)), borderColor:'#4f46e5', pointRadius:4, borderWidth:2, tension:0.3 },
+        { label: I18n.t('funnel.conv.langToNotif'), data:data.map(d=>+(d.langToNotif*100).toFixed(1)), borderColor:'#f59e0b', pointRadius:4, borderWidth:2, tension:0.3 },
+        { label: I18n.t('funnel.conv.notifToHome'), data:data.map(d=>+(d.notifToHome*100).toFixed(1)), borderColor:'#ef4444', pointRadius:4, borderWidth:2, tension:0.3 },
+        { label: I18n.t('funnel.conv.homeToScan'), data:data.map(d=>+(d.homeToScan*100).toFixed(1)), borderColor:'#10b981', pointRadius:4, borderWidth:2, tension:0.3 }
       ]
     },
     options: {
       ...chartDefaults,
-      scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f0f0'}, min:0, max:100, title:{display:true,text:'转化率 %'}} }
+      scales: { x:{grid:{display:false}}, y:{grid:{color:'#f0f0f0'}, min:0, max:100, title:{display:true,text: I18n.t('chart.convRatePct')}} }
     }
   });
 
@@ -752,10 +1105,10 @@ function renderFunnel() {
     data: {
       labels,
       datasets: [
-        { label:'主页渗透率', data:data.map(d=>+(d.homePenetration*100).toFixed(1)), borderColor:'#4f46e5', backgroundColor:'#4f46e522', pointRadius:5, pointBackgroundColor:'#4f46e5', borderWidth:2.5, tension:0.3, fill:true },
-        { label:'试用率', data:data.map(d=>d.trialRate!=null?+d.trialRate.toFixed(1):null), borderColor:'#ef4444', backgroundColor:'#ef444422', pointRadius:5, pointBackgroundColor:'#ef4444', borderWidth:2.5, tension:0.3, fill:true },
-        { label:'30%渗透率线', data:data.map(()=>30), borderColor:'#d1d5db', borderDash:[5,5], pointRadius:0, borderWidth:1.5, fill:false },
-        { label:'5%试用率线', data:data.map(()=>5), borderColor:'#d1d5db', borderDash:[5,5], pointRadius:0, borderWidth:1.5, fill:false }
+        { label: I18n.t('chart.homePen'), data:data.map(d=>+(d.homePenetration*100).toFixed(1)), borderColor:'#4f46e5', backgroundColor:'#4f46e522', pointRadius:5, pointBackgroundColor:'#4f46e5', borderWidth:2.5, tension:0.3, fill:true },
+        { label: I18n.t('chart.trialRateLine'), data:data.map(d=>d.trialRate!=null?+d.trialRate.toFixed(1):null), borderColor:'#ef4444', backgroundColor:'#ef444422', pointRadius:5, pointBackgroundColor:'#ef4444', borderWidth:2.5, tension:0.3, fill:true },
+        { label: I18n.t('chart.pen30line'), data:data.map(()=>30), borderColor:'#d1d5db', borderDash:[5,5], pointRadius:0, borderWidth:1.5, fill:false },
+        { label: I18n.t('chart.trial5line'), data:data.map(()=>5), borderColor:'#d1d5db', borderDash:[5,5], pointRadius:0, borderWidth:1.5, fill:false }
       ]
     },
     options: {
@@ -770,13 +1123,13 @@ function renderFunnel() {
 
 function renderFunnelViz(d, cmp) {
   const steps = [
-    { name:'新用户', val: d.newUsers, cmpVal: cmp?.newUsers, color:'#4f46e5' },
-    { name:'首启订阅页', val: d.subPage, cmpVal: cmp?.subPage, color:'#6366f1' },
-    { name:'语言选择页', val: d.langPage, cmpVal: cmp?.langPage, color:'#818cf8' },
-    { name:'假通知页', val: d.notifPage, cmpVal: cmp?.notifPage, color:'#f59e0b' },
-    { name:'主页展示', val: d.homePage, cmpVal: cmp?.homePage, color:'#ef4444' },
-    { name:'主页扫描', val: d.scanUse, cmpVal: cmp?.scanUse, color:'#06b6d4' },
-    { name:'试用', val: d.trialUsers, cmpVal: cmp?.trialUsers, color:'#10b981' }
+    { name: I18n.t('funnel.newUsers'), val: d.newUsers, cmpVal: cmp?.newUsers, color:'#4f46e5' },
+    { name: I18n.t('funnel.subPage'), val: d.subPage, cmpVal: cmp?.subPage, color:'#6366f1' },
+    { name: I18n.t('funnel.langPage'), val: d.langPage, cmpVal: cmp?.langPage, color:'#818cf8' },
+    { name: I18n.t('funnel.notifPage'), val: d.notifPage, cmpVal: cmp?.notifPage, color:'#f59e0b' },
+    { name: I18n.t('funnel.homePage'), val: d.homePage, cmpVal: cmp?.homePage, color:'#ef4444' },
+    { name: I18n.t('funnel.scanUse'), val: d.scanUse, cmpVal: cmp?.scanUse, color:'#06b6d4' },
+    { name: I18n.t('funnel.trial'), val: d.trialUsers, cmpVal: cmp?.trialUsers, color:'#10b981' }
   ];
   const maxVal = Math.max(...steps.map(s=>nn(s.val)), 1);
   let html = '';
@@ -794,7 +1147,7 @@ function renderFunnelViz(d, cmp) {
       const next = steps[i+1];
       const rate = nn(s.val) > 0 ? nn(next.val) / nn(s.val) * 100 : 0;
       const rCls = rate < 40 ? 'bad' : (rate < 60 ? 'ok' : 'good');
-      html += `<div class="funnel-arrow"><span class="${rCls}">↓ ${rate.toFixed(1)}% 转化</span></div>`;
+      html += `<div class="funnel-arrow"><span class="${rCls}">↓ ${rate.toFixed(1)}% ${I18n.t('funnel.convLabel')}</span></div>`;
     }
   });
   document.getElementById('funnel-viz').innerHTML = html;
@@ -804,12 +1157,12 @@ function renderFunnelHealth(data) {
   const latest = data[data.length-1];
   if (!latest) return;
   const checks = [
-    { label:'主页渗透率', val: latest.homePenetration*100, warn:'< 30%', warnCheck: latest.homePenetration < 0.3, good:'≥ 30%', goodCheck: latest.homePenetration >= 0.3 },
-    { label:'试用率', val: nn(latest.trialRate), warn:'< 5%', warnCheck: nn(latest.trialRate) < 5, good:'≥ 5%', goodCheck: nn(latest.trialRate) >= 5 },
-    { label:'语言→假通知转化', val: latest.langToNotif*100, warn:'< 40%', warnCheck: latest.langToNotif < 0.4, good:'≥ 60%', goodCheck: latest.langToNotif >= 0.6 },
-    { label:'假通知→主页转化', val: latest.notifToHome*100, warn:'< 40%', warnCheck: latest.notifToHome < 0.4, good:'≥ 50%', goodCheck: latest.notifToHome >= 0.5 },
-    { label:'人均广告展示', val: latest.perCapitaImp, warn:'< 3次', warnCheck: latest.perCapitaImp < 3, good:'≥ 3次', goodCheck: latest.perCapitaImp >= 3 },
-    { label:'ECPM波动(vs均值)', val: null, warn:'> 30%', warnCheck: false, good:'≤ 30%', goodCheck: true }
+    { label: I18n.t('health.penLabel'), val: latest.homePenetration*100, isPct:true, warn:'< 30%', warnCheck: latest.homePenetration < 0.3, good:'≥ 30%', goodCheck: latest.homePenetration >= 0.3 },
+    { label: I18n.t('health.trialRate'), val: nn(latest.trialRate), isPct:true, warn:'< 5%', warnCheck: nn(latest.trialRate) < 5, good:'≥ 5%', goodCheck: nn(latest.trialRate) >= 5 },
+    { label: I18n.t('health.langToNotif'), val: latest.langToNotif*100, isPct:true, warn:'< 40%', warnCheck: latest.langToNotif < 0.4, good:'≥ 60%', goodCheck: latest.langToNotif >= 0.6 },
+    { label: I18n.t('health.notifToHome'), val: latest.notifToHome*100, isPct:true, warn:'< 40%', warnCheck: latest.notifToHome < 0.4, good:'≥ 50%', goodCheck: latest.notifToHome >= 0.5 },
+    { label: I18n.t('health.perCapitaAd'), val: latest.perCapitaImp, isPct:false, warn:'< 3次', warnCheck: latest.perCapitaImp < 3, good:'≥ 3次', goodCheck: latest.perCapitaImp >= 3 },
+    { label: I18n.t('health.ecpmVol'), val: null, isPct:true, warn:'> 30%', warnCheck: false, good:'≤ 30%', goodCheck: true }
   ];
   // ECPM volatility check
   if (data.length >= 2) {
@@ -821,10 +1174,10 @@ function renderFunnelHealth(data) {
     checks[5].goodCheck = vol <= 30;
   }
 
-  let html = '<table class="data-table"><thead><tr><th>指标</th><th class="num">当前值</th><th>状态</th><th>警告线</th><th>健康线</th></tr></thead><tbody>';
+  let html = `<table class="data-table"><thead><tr><th>${I18n.t('health.col.metric')}</th><th class="num">${I18n.t('health.col.current')}</th><th>${I18n.t('health.col.status')}</th><th>${I18n.t('health.col.warn')}</th><th>${I18n.t('health.col.healthy')}</th></tr></thead><tbody>';
   checks.forEach(c => {
-    const status = c.warnCheck ? '<span class="status-badge bad">⚠ 警告</span>' : (c.goodCheck ? '<span class="status-badge good">✓ 正常</span>' : '<span class="status-badge warn">— 观察</span>');
-    html += `<tr><td style="font-weight:500">${c.label}</td><td class="num">${c.val!=null?c.val.toFixed(1)+(typeof c.val==='number'&&c.label.includes('渗透')||c.label.includes('转化')||c.label.includes('试用率')?'%':''):'—'}</td><td>${status}</td><td class="dim">${c.warn}</td><td class="dim">${c.good}</td></tr>`;
+    const status = c.warnCheck ? `<span class="status-badge bad">${I18n.t('health.status.warn')}</span>` : (c.goodCheck ? `<span class="status-badge good">${I18n.t('health.status.good')}</span>` : `<span class="status-badge warn">${I18n.t('health.status.watch')}</span>`);
+    html += `<tr><td style="font-weight:500">${c.label}</td><td class="num">${c.val!=null?c.val.toFixed(1)+(c.isPct?'%':''):'—'}</td><td>${status}</td><td class="dim">${c.warn}</td><td class="dim">${c.good}</td></tr>`;
   });
   html += '</tbody></table>';
   document.getElementById('funnel-health').innerHTML = html;
@@ -863,7 +1216,7 @@ function renderEditTable() {
       const step = col.key === 'cpi' || col.key === 'ecpm' || col.key === 'spend' || col.key === 'adFirstR' || col.key === 'trialRate' ? '0.01' : '1';
       html += `<td><input type="${inputType}" value="${val}" data-idx="${idx}" data-key="${col.key}" ${col.type==='number'?'step="'+step+'"':''} onchange="cellChanged(this)" onkeydown="cellKeydown(event, this)"></td>`;
     });
-    html += `<td class="col-action"><button onclick="deleteRow(${idx})" style="border:none;background:none;color:var(--red);cursor:pointer;font-size:14px;" title="删除">✕</button></td>`;
+    html += `<td class="col-action"><button onclick="deleteRow(${idx})" style="border:none;background:none;color:var(--red);cursor:pointer;font-size:14px;" title="${I18n.t('dm.deleteTitle')}">✕</button></td>`;
     html += '</tr>';
   });
   // New row at bottom
@@ -871,7 +1224,7 @@ function renderEditTable() {
   EDIT_COLS.forEach(col => {
     const inputType = col.type === 'date' ? 'date' : 'text';
     const step = col.key === 'cpi' || col.key === 'ecpm' || col.key === 'spend' || col.key === 'adFirstR' || col.key === 'trialRate' ? '0.01' : '1';
-    html += `<td><input type="${inputType}" placeholder="${col.key==='date'?'选日期':''}" data-key="${col.key}" data-new="1" ${col.type==='number'?'step="'+step+'"':''} onkeydown="newRowKeydown(event, this)"></td>`;
+    html += `<td><input type="${inputType}" placeholder="${col.key==='date'?I18n.t('dm.newRowDatePlaceholder'):''}" data-key="${col.key}" data-new="1" ${col.type==='number'?'step="'+step+'"':''} onkeydown="newRowKeydown(event, this)"></td>`;
   });
   html += `<td class="col-action"></td></tr>`;
   tbody.innerHTML = html;
@@ -889,7 +1242,7 @@ function cellChanged(input) {
   records.sort((a,b) => a.date.localeCompare(b.date));
   saveData();
   renderAll();
-  showToast('已保存');
+  showToast(I18n.t('toast.saved'));
 }
 
 function cellKeydown(e, input) {
@@ -924,17 +1277,17 @@ function newRowKeydown(e, input) {
         record[key] = inp.value === '' ? null : parseFloat(inp.value);
       }
     });
-    if (!hasDate) { showToast('请填写日期'); return; }
+    if (!hasDate) { showToast(I18n.t('toast.fillDate')); return; }
     // Check duplicate
     if (records.find(r => r.date === record.date)) {
-      if (!confirm(`${record.date} 已有记录，是否覆盖？`)) return;
+      if (!confirm(I18n.t('toast.dateExists').replace('{0}',record.date))) return;
       records = records.filter(r => r.date !== record.date);
     }
     records.push(record);
     records.sort((a,b) => a.date.localeCompare(b.date));
     saveData();
     renderAll();
-    showToast(`${record.date} 已添加`);
+    showToast(I18n.t('toast.added').replace('{0}',record.date));
   }
 }
 
@@ -951,27 +1304,27 @@ function addNewRow() {
 function deleteRow(idx) {
   const r = records[idx];
   if (!r) return;
-  if (!confirm(`确定删除 ${r.date} 的记录？`)) return;
+  if (!confirm(I18n.t('toast.confirmDelete').replace('{0}',r.date))) return;
   records.splice(idx, 1);
   saveData();
   renderAll();
-  showToast(`${r.date} 已删除`);
+  showToast(I18n.t('toast.deleted').replace('{0}',r.date));
 }
 
 function deleteRecord(date) {
-  if (!confirm(`确定删除 ${date} 的记录？`)) return;
+  if (!confirm(I18n.t('toast.confirmDelete').replace('{0}',date))) return;
   records = records.filter(r => r.date !== date);
   saveData();
   renderAll();
-  showToast(`${date} 已删除`);
+  showToast(I18n.t('toast.deleted').replace('{0}',date));
 }
 
 function clearAllData() {
-  if (!confirm('确定清空全部数据？此操作不可撤销。')) return;
+  if (!confirm(I18n.t('toast.confirmClear'))) return;
   records = [];
   saveData();
   renderAll();
-  showToast('数据已清空');
+  showToast(I18n.t('toast.cleared'));
 }
 
 // ===== Export Functions =====
@@ -981,7 +1334,7 @@ function exportJSON() {
   const a = document.createElement('a');
   a.href = url; a.download = `qr-scan-max-data-${new Date().toISOString().slice(0,10)}.json`;
   a.click(); URL.revokeObjectURL(url);
-  showToast('JSON 已导出');
+  showToast(I18n.t('toast.jsonExported'));
 }
 
 function exportCSV() {
@@ -999,7 +1352,7 @@ function exportCSV() {
   const a = document.createElement('a');
   a.href = url; a.download = `qr-scan-max-data-${new Date().toISOString().slice(0,10)}.csv`;
   a.click(); URL.revokeObjectURL(url);
-  showToast('CSV 已导出');
+  showToast(I18n.t('toast.csvExported'));
 }
 
 function downloadTemplate() {
@@ -1011,7 +1364,7 @@ function downloadTemplate() {
   const a = document.createElement('a');
   a.href = url; a.download = 'QR-Scan-Max-导入模板.csv';
   a.click(); URL.revokeObjectURL(url);
-  showToast('模板已下载');
+  showToast(I18n.t('toast.tplDownloaded'));
 }
 
 // ===== File Import (CSV + XLSX + JSON) =====
@@ -1028,7 +1381,7 @@ function handleFileImport(e) {
         if (!Array.isArray(imported)) throw new Error('Invalid format');
         pendingImport = imported;
         showImportPreview(imported, 'JSON');
-      } catch(err) { showToast('导入失败：JSON 格式错误'); }
+      } catch(err) { showToast(I18n.t('toast.importFailJson')); }
     };
     reader.readAsText(file);
   } else if (ext === 'csv') {
@@ -1038,7 +1391,7 @@ function handleFileImport(e) {
         const parsed = parseCSV(ev.target.result);
         pendingImport = parsed;
         showImportPreview(parsed, 'CSV');
-      } catch(err) { showToast('导入失败：CSV 解析错误 - ' + err.message); }
+      } catch(err) { showToast(I18n.t('toast.importFailCsv') + err.message); }
     };
     reader.readAsText(file, 'utf-8');
   } else if (ext === 'xlsx' || ext === 'xls') {
@@ -1051,11 +1404,11 @@ function handleFileImport(e) {
         const parsed = mapImportColumns(json);
         pendingImport = parsed;
         showImportPreview(parsed, 'XLSX');
-      } catch(err) { showToast('导入失败：XLSX 解析错误 - ' + err.message); }
+      } catch(err) { showToast(I18n.t('toast.importFailXlsx') + err.message); }
     };
     reader.readAsArrayBuffer(file);
   } else {
-    showToast('不支持的文件格式，请使用 CSV/XLSX/JSON');
+    showToast(I18n.t('toast.unsupportedFormat'));
   }
   e.target.value = '';
 }
@@ -1148,10 +1501,10 @@ function showImportPreview(data, format) {
   const info = document.getElementById('import-info');
   const preview = document.getElementById('import-preview');
 
-  info.innerHTML = `格式：${format} · 识别到 <strong>${data.length}</strong> 条记录`;
+  info.innerHTML = I18n.t('imp.formatInfo').replace('{0}',format).replace('{1}',data.length);
 
   let html = '<table class="data-table"><thead><tr>';
-  EDIT_COLS.forEach(c => html += `<th>${c.label}</th>`);
+  EDIT_COLS.forEach(c => html += `<th>${I18n.t('dm.col.'+c.key)}</th>`);
   html += '</tr></thead><tbody>';
   data.slice(0, 20).forEach(r => {
     html += '<tr>';
@@ -1161,7 +1514,7 @@ function showImportPreview(data, format) {
     });
     html += '</tr>';
   });
-  if (data.length > 20) html += `<tr><td colspan="${EDIT_COLS.length}" style="text-align:center;color:var(--text3);">... 还有 ${data.length-20} 条</td></tr>`;
+  if (data.length > 20) html += `<tr><td colspan="${EDIT_COLS.length}" style="text-align:center;color:var(--text3);">${I18n.t('imp.moreRecords').replace('{0}',data.length-20)}</td></tr>`;
   html += '</tbody></table>';
   preview.innerHTML = html;
 
@@ -1191,7 +1544,7 @@ function confirmImport() {
   saveData();
   closeImportModal();
   renderAll();
-  showToast(`导入完成：新增 ${added} 条，更新 ${updated} 条`);
+  showToast(I18n.t('toast.importDone').replace('{0}',added).replace('{1}',updated));
 }
 
 function renderRecordsTable() {
@@ -1208,6 +1561,8 @@ function renderAll() {
 }
 
 // ===== Init =====
+I18n.init(TRANSLATIONS, function() { renderAll(); });
+I18n.renderSelector('lang-selector');
 loadData();
 renderAll();
 </script>

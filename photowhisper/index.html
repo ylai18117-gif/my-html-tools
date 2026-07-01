@@ -30,6 +30,7 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:
 .nav-logo{font-family:var(--ff-d);font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
 .nav-logo .dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
 .nav-back{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--text2);background:none;border:none;cursor:pointer;font-family:var(--ff-b);font-weight:500;padding:6px 0}
+#lang-selector{margin-left:12px}
 
 /* ─── VIEWS ─── */
 .view{display:none;opacity:0;transition:opacity .4s var(--ease)}.view.active{display:block;opacity:1}
@@ -292,15 +293,19 @@ import{getAnalytics,logEvent}from"https://www.gstatic.com/firebasejs/12.15.0/fir
 const app=initializeApp({apiKey:"AIzaSyDT9uNrRj97oLuehLXgOto97Z-mVw12cnk",authDomain:"myhtml-ff6d6.firebaseapp.com",projectId:"myhtml-ff6d6",storageBucket:"myhtml-ff6d6.firebasestorage.app",messagingSenderId:"790702386101",appId:"1:790702386101:web:f4e30fb5ce4771396347fc",measurementId:"G-8FQ9DRDJ6T"});
 const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catch(e){}};
 </script>
+<script src="/i18n.js"></script>
 </head>
 <body>
 
 <!-- NAV -->
 <nav class="nav" id="nav">
-  <div class="nav-logo" id="nav-home" onclick="showLanding()" style="cursor:pointer"><span class="dot"></span>PhotoWhisper</div>
+  <div style="display:flex;align-items:center">
+    <div class="nav-logo" id="nav-home" onclick="showLanding()" style="cursor:pointer"><span class="dot"></span>PhotoWhisper</div>
+    <div id="lang-selector"></div>
+  </div>
   <button class="nav-back" id="nav-back-btn" style="display:none" onclick="showLanding()">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-    换一张
+    <span data-i18n="nav_back">换一张</span>
   </button>
   <button class="hist-btn" id="hist-btn" onclick="showHistory()" style="display:none">
     <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -311,40 +316,40 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 <!-- ═══ LANDING ═══ -->
 <div class="view active" id="view-landing">
   <section class="hero">
-    <div class="hero-badge"><span class="ld"></span>AI 拍摄拆解工具</div>
-    <h1>看懂好照片<br>背后的<em>秘密</em></h1>
-    <p class="hero-sub">上传一张参考照片，AI 帮你拆解姿势、机位、光线——给你可直接执行的拍摄指南。</p>
+    <div class="hero-badge" data-i18n="hero_badge"><span class="ld"></span>AI 拍摄拆解工具</div>
+    <h1 data-i18n-html="hero_title">看懂好照片<br>背后的<em>秘密</em></h1>
+    <p class="hero-sub" data-i18n="hero_sub">上传一张参考照片，AI 帮你拆解姿势、机位、光线——给你可直接执行的拍摄指南。</p>
     <div class="upload-zone" id="upload-zone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onclick="document.getElementById('file-input').click()">
       <div class="upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-      <div class="upload-title">拖放或点击上传照片</div>
-      <div class="upload-hint">也可以 Ctrl+V 粘贴</div>
+      <div class="upload-title" data-i18n="upload_title">拖放或点击上传照片</div>
+      <div class="upload-hint" data-i18n="upload_hint">也可以 Ctrl+V 粘贴</div>
       <div class="upload-formats"><span>JPG</span><span>PNG</span><span>WebP</span></div>
     </div>
     <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)">
     <div class="examples">
-      <div class="examples-label">试试示例照片</div>
+      <div class="examples-label" data-i18n="examples_label">试试示例照片</div>
       <div class="examples-grid">
-        <div class="example-thumb" onclick="analyzeDemo('portrait')"><img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&h=400&fit=crop&q=80" alt=""><div class="overlay"><span>户外人像</span></div></div>
-        <div class="example-thumb" onclick="analyzeDemo('street')"><img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=400&fit=crop&q=80" alt=""><div class="overlay"><span>街拍</span></div></div>
-        <div class="example-thumb" onclick="analyzeDemo('scenic')"><img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=400&fit=crop&q=80" alt=""><div class="overlay"><span>风光</span></div></div>
+        <div class="example-thumb" onclick="analyzeDemo('portrait')"><img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&h=400&fit=crop&q=80" alt=""><div class="overlay"><span data-i18n="example_portrait">户外人像</span></div></div>
+        <div class="example-thumb" onclick="analyzeDemo('street')"><img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=400&fit=crop&q=80" alt=""><div class="overlay"><span data-i18n="example_street">街拍</span></div></div>
+        <div class="example-thumb" onclick="analyzeDemo('scenic')"><img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=400&fit=crop&q=80" alt=""><div class="overlay"><span data-i18n="example_scenic">风光</span></div></div>
       </div>
     </div>
   </section>
   <section class="features-section">
     <div class="container">
-      <div class="section-label">核心能力</div>
-      <div class="section-title">六个维度，完整还原拍摄过程</div>
+      <div class="section-label" data-i18n="feat_label">核心能力</div>
+      <div class="section-title" data-i18n="feat_title">六个维度，完整还原拍摄过程</div>
       <div class="features-grid">
-        <div class="feature-card"><div class="feature-icon">🧍</div><h3>被拍人指南</h3><p>姿势、朝向、表情和手部摆放</p></div>
-        <div class="feature-card"><div class="feature-icon">📸</div><h3>摄影师指南</h3><p>距离、角度和手机持握方式</p></div>
-        <div class="feature-card"><div class="feature-icon">☀️</div><h3>光线与时机</h3><p>光线类型、方向和最佳拍摄时段</p></div>
-        <div class="feature-card"><div class="feature-icon">📐</div><h3>构图技巧</h3><p>三分法、引导线、对称等构图法则</p></div>
-        <div class="feature-card"><div class="feature-icon">🌿</div><h3>拍摄条件</h3><p>场景类型、天气环境等外部条件</p></div>
-        <div class="feature-card"><div class="feature-icon">⚙️</div><h3>手机设置</h3><p>拍摄模式、HDR、曝光补偿等参数</p></div>
+        <div class="feature-card"><div class="feature-icon">🧍</div><h3 data-i18n="feat_pose_title">被拍人指南</h3><p data-i18n="feat_pose_desc">姿势、朝向、表情和手部摆放</p></div>
+        <div class="feature-card"><div class="feature-icon">📸</div><h3 data-i18n="feat_angle_title">摄影师指南</h3><p data-i18n="feat_angle_desc">距离、角度和手机持握方式</p></div>
+        <div class="feature-card"><div class="feature-icon">☀️</div><h3 data-i18n="feat_light_title">光线与时机</h3><p data-i18n="feat_light_desc">光线类型、方向和最佳拍摄时段</p></div>
+        <div class="feature-card"><div class="feature-icon">📐</div><h3 data-i18n="feat_comp_title">构图技巧</h3><p data-i18n="feat_comp_desc">三分法、引导线、对称等构图法则</p></div>
+        <div class="feature-card"><div class="feature-icon">🌿</div><h3 data-i18n="feat_env_title">拍摄条件</h3><p data-i18n="feat_env_desc">场景类型、天气环境等外部条件</p></div>
+        <div class="feature-card"><div class="feature-icon">⚙️</div><h3 data-i18n="feat_settings_title">手机设置</h3><p data-i18n="feat_settings_desc">拍摄模式、HDR、曝光补偿等参数</p></div>
       </div>
     </div>
   </section>
-  <footer class="footer">PhotoWhisper &mdash; 拆解每一张好照片</footer>
+  <footer class="footer" data-i18n="footer_text">PhotoWhisper &mdash; 拆解每一张好照片</footer>
 </div>
 
 <!-- ═══ ANALYZING ═══ -->
@@ -352,13 +357,13 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
   <div class="analyzing-view">
     <div class="analyzing-photo"><img src="" id="analyzing-img"><div class="scan-line"></div></div>
     <div class="analyzing-spinner"></div>
-    <div class="analyzing-text">正在分析...</div>
-    <div class="analyzing-subtext">AI 正在拆解这张照片的拍摄手法</div>
+    <div class="analyzing-text" data-i18n="analyzing_text">正在分析...</div>
+    <div class="analyzing-subtext" data-i18n="analyzing_subtext">AI 正在拆解这张照片的拍摄手法</div>
     <div class="analyzing-steps">
-      <div class="analyzing-step" id="step-0"><span class="step-dot"></span><span>姿势分析</span></div>
-      <div class="analyzing-step" id="step-1"><span class="step-dot"></span><span>机位判断</span></div>
-      <div class="analyzing-step" id="step-2"><span class="step-dot"></span><span>光线识别</span></div>
-      <div class="analyzing-step" id="step-3"><span class="step-dot"></span><span>生成指南</span></div>
+      <div class="analyzing-step" id="step-0"><span class="step-dot"></span><span data-i18n="step_pose">姿势分析</span></div>
+      <div class="analyzing-step" id="step-1"><span class="step-dot"></span><span data-i18n="step_angle">机位判断</span></div>
+      <div class="analyzing-step" id="step-2"><span class="step-dot"></span><span data-i18n="step_light">光线识别</span></div>
+      <div class="analyzing-step" id="step-3"><span class="step-dot"></span><span data-i18n="step_guide">生成指南</span></div>
     </div>
     <div class="analyzing-error" id="analyze-error"></div>
   </div>
@@ -380,7 +385,7 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
       <div class="comp-badge" id="comp-badge"></div>
       <button class="comp-toggle" id="comp-toggle" onclick="toggleCompGrid()">
         <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
-        构图线
+        <span data-i18n="comp_toggle">构图线</span>
       </button>
     </div>
 
@@ -392,18 +397,18 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 
     <!-- SCROLL HINT -->
     <div class="scroll-hint-bar" id="scroll-hint">
-      <div class="sh-text">向下滑动查看拍摄拆解</div>
+      <div class="sh-text" data-i18n="scroll_hint">向下滑动查看拍摄拆解</div>
       <div class="sh-arrow"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
     </div>
 
     <!-- 3. SCENE DIAGRAMS -->
     <div class="r-scene reveal" style="transition-delay:.1s">
-      <div class="sec-head"><span class="sec-label">场景还原</span></div>
-      <div class="sec-desc">以下示意图还原拍摄现场——谁站哪、光从哪来、手机怎么拿</div>
+      <div class="sec-head"><span class="sec-label" data-i18n="scene_label">场景还原</span></div>
+      <div class="sec-desc" data-i18n="scene_desc">以下示意图还原拍摄现场——谁站哪、光从哪来、手机怎么拿</div>
 
       <div class="diagram-toggle" id="diagram-toggle">
-        <button class="active" onclick="switchDiagram('top')">俯视图 · 位置关系</button>
-        <button onclick="switchDiagram('side')">侧视图 · 拍摄角度</button>
+        <button class="active" onclick="switchDiagram('top')" data-i18n="diagram_top">俯视图 · 位置关系</button>
+        <button onclick="switchDiagram('side')" data-i18n="diagram_side">侧视图 · 拍摄角度</button>
       </div>
 
       <div class="diagram-container">
@@ -414,15 +419,15 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 
     <!-- 4. ANALYSIS TABS -->
     <div class="r-tabs reveal" style="transition-delay:.2s">
-      <div class="sec-head"><span class="sec-label">拍摄拆解</span></div>
+      <div class="sec-head"><span class="sec-label" data-i18n="analysis_label">拍摄拆解</span></div>
       <div class="tab-bar" id="tab-bar">
         <div class="tab-indicator" id="tab-indicator"></div>
-        <button class="tab-btn active" data-tab="pose">🧍 被拍人</button>
-        <button class="tab-btn" data-tab="angle">📸 摄影师</button>
-        <button class="tab-btn" data-tab="light">☀️ 光线</button>
-        <button class="tab-btn" data-tab="comp">📐 构图</button>
-        <button class="tab-btn" data-tab="env">🌿 条件</button>
-        <button class="tab-btn" data-tab="settings">⚙️ 设置</button>
+        <button class="tab-btn active" data-tab="pose" data-i18n="tab_pose">🧍 被拍人</button>
+        <button class="tab-btn" data-tab="angle" data-i18n="tab_angle">📸 摄影师</button>
+        <button class="tab-btn" data-tab="light" data-i18n="tab_light">☀️ 光线</button>
+        <button class="tab-btn" data-tab="comp" data-i18n="tab_comp">📐 构图</button>
+        <button class="tab-btn" data-tab="env" data-i18n="tab_env">🌿 条件</button>
+        <button class="tab-btn" data-tab="settings" data-i18n="tab_settings">⚙️ 设置</button>
       </div>
       <div class="tab-content" id="tab-content">
         <div class="tab-panel active" id="tab-pose"></div>
@@ -437,10 +442,10 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
     <!-- 5. CHECKLIST -->
     <div class="r-checklist reveal" style="transition-delay:.3s" id="r-checklist">
       <div class="r-cl-head">
-        <h3>拍摄清单</h3>
+        <h3 data-i18n="checklist_title">拍摄清单</h3>
         <button class="r-cl-save" onclick="saveChecklist()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>
-          保存
+          <span data-i18n="checklist_save">保存</span>
         </button>
       </div>
       <div id="r-cl-steps"></div>
@@ -450,7 +455,7 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
     <div class="r-cta reveal" style="transition-delay:.4s">
       <button onclick="showLanding()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        分析另一张
+        <span data-i18n="cta_another">分析另一张</span>
       </button>
     </div>
 
@@ -461,7 +466,7 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 <!-- ═══ HISTORY PANEL ═══ -->
 <div class="hist-panel" id="hist-panel">
   <div class="hist-head">
-    <h2>分析历史</h2>
+    <h2 data-i18n="hist_title">分析历史</h2>
     <div class="hist-actions">
       <button class="hist-clear" onclick="clearAllHistory()" title="清空">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -480,7 +485,7 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
     <button class="hd-back" onclick="closeHistDetail()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <span class="hd-title" id="hd-title">分析详情</span>
+    <span class="hd-title" id="hd-title" data-i18n="hist_detail_title">分析详情</span>
     <button class="hd-del" onclick="deleteHistDetail()">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
     </button>
@@ -489,6 +494,340 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 </div>
 
 <script>
+// ═══════════════════════════════════════════
+// I18N TRANSLATIONS
+// ═══════════════════════════════════════════
+const TRANSLATIONS={
+'zh-CN':{
+  nav_back:'换一张',
+  hero_badge:'AI 拍摄拆解工具',
+  hero_title:'看懂好照片<br>背后的<em>秘密</em>',
+  hero_sub:'上传一张参考照片，AI 帮你拆解姿势、机位、光线——给你可直接执行的拍摄指南。',
+  upload_title:'拖放或点击上传照片',
+  upload_hint:'也可以 Ctrl+V 粘贴',
+  examples_label:'试试示例照片',
+  example_portrait:'户外人像',
+  example_street:'街拍',
+  example_scenic:'风光',
+  feat_label:'核心能力',
+  feat_title:'六个维度，完整还原拍摄过程',
+  feat_pose_title:'被拍人指南',
+  feat_pose_desc:'姿势、朝向、表情和手部摆放',
+  feat_angle_title:'摄影师指南',
+  feat_angle_desc:'距离、角度和手机持握方式',
+  feat_light_title:'光线与时机',
+  feat_light_desc:'光线类型、方向和最佳拍摄时段',
+  feat_comp_title:'构图技巧',
+  feat_comp_desc:'三分法、引导线、对称等构图法则',
+  feat_env_title:'拍摄条件',
+  feat_env_desc:'场景类型、天气环境等外部条件',
+  feat_settings_title:'手机设置',
+  feat_settings_desc:'拍摄模式、HDR、曝光补偿等参数',
+  footer_text:'PhotoWhisper \u2014 拆解每一张好照片',
+  analyzing_text:'正在分析...',
+  analyzing_subtext:'AI 正在拆解这张照片的拍摄手法',
+  analyzing_error_sub:'分析遇到问题',
+  step_pose:'姿势分析',
+  step_angle:'机位判断',
+  step_light:'光线识别',
+  step_guide:'生成指南',
+  comp_toggle:'构图线',
+  scroll_hint:'向下滑动查看拍摄拆解',
+  scene_label:'场景还原',
+  scene_desc:'以下示意图还原拍摄现场——谁站哪、光从哪来、手机怎么拿',
+  diagram_top:'俯视图 · 位置关系',
+  diagram_side:'侧视图 · 拍摄角度',
+  analysis_label:'拍摄拆解',
+  tab_pose:'\u{1F9CD} 被拍人',
+  tab_angle:'\u{1F4F8} 摄影师',
+  tab_light:'\u2600\uFE0F 光线',
+  tab_comp:'\u{1F4D0} 构图',
+  tab_env:'\u{1F33F} 条件',
+  tab_settings:'\u2699\uFE0F 设置',
+  checklist_title:'拍摄清单',
+  checklist_save:'保存',
+  checklist_copied:'已复制 \u2713',
+  checklist_header:'\u{1F4F7} 拍摄清单',
+  cta_another:'分析另一张',
+  hist_title:'分析历史',
+  hist_detail_title:'分析详情',
+  hist_empty_icon:'\u{1F4CB}',
+  hist_empty_text:'还没有分析记录<br>上传照片开始你的第一次分析',
+  hist_analyzing:'分析中...',
+  hist_error:'失败',
+  hist_reopen:'重新查看分析结果',
+  hist_clear_confirm:'确定清空所有分析历史？',
+  hist_custom:'自定义照片',
+  demo_portrait:'户外人像',
+  demo_street:'街拍',
+  demo_scenic:'风光',
+  time_just_now:'刚刚',
+  time_min_ago:'分钟前',
+  time_hour_ago:'小时前',
+  time_day_ago:'天前',
+  toast_analyzing:'分析任务正在后台进行，可在历史记录中查看结果',
+  error_analysis_failed:'分析失败，请重试',
+  error_file_protocol:'请用 HTTP 服务器访问（file:// 协议无法调用 API）',
+  error_network:'网络请求失败',
+  error_api_failed:'API 请求失败',
+  error_empty_result:'AI 返回了空结果（请打开浏览器控制台查看详情）',
+  error_incomplete:'AI 返回格式不完整',
+  svg_subject:'被拍人',
+  svg_photographer:'摄影师',
+  svg_phone:'手机',
+  svg_light_source:'光源',
+  svg_phone_pos:'手机位置',
+  svg_ground:'地面',
+  svg_eye_height:'眼高'
+},
+'en':{
+  nav_back:'New Photo',
+  hero_badge:'AI Photography Analyzer',
+  hero_title:'Unlock the <em>Secrets</em><br>Behind Great Photos',
+  hero_sub:'Upload a reference photo and let AI break down poses, angles, and lighting into actionable shooting guides.',
+  upload_title:'Drop or click to upload a photo',
+  upload_hint:'Or press Ctrl+V to paste',
+  examples_label:'Try sample photos',
+  example_portrait:'Outdoor Portrait',
+  example_street:'Street',
+  example_scenic:'Landscape',
+  feat_label:'Core Features',
+  feat_title:'Six dimensions to fully recreate the shoot',
+  feat_pose_title:'Subject Guide',
+  feat_pose_desc:'Pose, direction, expression and hand placement',
+  feat_angle_title:'Photographer Guide',
+  feat_angle_desc:'Distance, angle and phone grip',
+  feat_light_title:'Light & Timing',
+  feat_light_desc:'Light type, direction and optimal shooting time',
+  feat_comp_title:'Composition',
+  feat_comp_desc:'Rule of thirds, leading lines, symmetry and more',
+  feat_env_title:'Conditions',
+  feat_env_desc:'Scene type, weather and environmental factors',
+  feat_settings_title:'Phone Settings',
+  feat_settings_desc:'Shooting mode, HDR, exposure compensation',
+  footer_text:'PhotoWhisper \u2014 Deconstruct every great photo',
+  analyzing_text:'Analyzing...',
+  analyzing_subtext:'AI is breaking down the photography techniques',
+  analyzing_error_sub:'Analysis encountered an error',
+  step_pose:'Pose Analysis',
+  step_angle:'Angle Detection',
+  step_light:'Light Recognition',
+  step_guide:'Generating Guide',
+  comp_toggle:'Grid',
+  scroll_hint:'Scroll down for photo breakdown',
+  scene_label:'Scene Recreation',
+  scene_desc:'These diagrams recreate the shoot \u2014 who stands where, light direction, phone position',
+  diagram_top:'Top View \u00b7 Positions',
+  diagram_side:'Side View \u00b7 Angles',
+  analysis_label:'Photo Breakdown',
+  tab_pose:'\u{1F9CD} Subject',
+  tab_angle:'\u{1F4F8} Photographer',
+  tab_light:'\u2600\uFE0F Light',
+  tab_comp:'\u{1F4D0} Composition',
+  tab_env:'\u{1F33F} Conditions',
+  tab_settings:'\u2699\uFE0F Settings',
+  checklist_title:'Shooting Checklist',
+  checklist_save:'Save',
+  checklist_copied:'Copied \u2713',
+  checklist_header:'\u{1F4F7} Shooting Checklist',
+  cta_another:'Analyze Another',
+  hist_title:'History',
+  hist_detail_title:'Analysis Detail',
+  hist_empty_icon:'\u{1F4CB}',
+  hist_empty_text:'No analysis records yet<br>Upload a photo to start your first analysis',
+  hist_analyzing:'Analyzing...',
+  hist_error:'Failed',
+  hist_reopen:'View Analysis Results',
+  hist_clear_confirm:'Clear all analysis history?',
+  hist_custom:'Custom Photo',
+  demo_portrait:'Outdoor Portrait',
+  demo_street:'Street',
+  demo_scenic:'Landscape',
+  time_just_now:'Just now',
+  time_min_ago:'min ago',
+  time_hour_ago:'hours ago',
+  time_day_ago:'days ago',
+  toast_analyzing:'Analysis is running in the background. Check results in history.',
+  error_analysis_failed:'Analysis failed, please retry',
+  error_file_protocol:'Please use an HTTP server (file:// protocol cannot call the API)',
+  error_network:'Network request failed',
+  error_api_failed:'API request failed',
+  error_empty_result:'AI returned empty result (check browser console)',
+  error_incomplete:'AI response format incomplete',
+  svg_subject:'Subject',
+  svg_photographer:'Photographer',
+  svg_phone:'Phone',
+  svg_light_source:'Light',
+  svg_phone_pos:'Phone Position',
+  svg_ground:'Ground',
+  svg_eye_height:'Eye Level'
+},
+'ja':{
+  nav_back:'別の写真',
+  hero_badge:'AI撮影分析ツール',
+  hero_title:'良い写真の<br><em>秘密</em>を読み解く',
+  hero_sub:'参考写真をアップロードすると、AIがポーズ・アングル・光線を分解し、すぐに実行できる撮影ガイドをお届けします。',
+  upload_title:'ドラッグ&ドロップまたはクリックでアップロード',
+  upload_hint:'Ctrl+V で貼り付けも可能',
+  examples_label:'サンプル写真を試す',
+  example_portrait:'アウトドアポートレート',
+  example_street:'ストリート',
+  example_scenic:'風景',
+  feat_label:'コア機能',
+  feat_title:'6つの視点で撮影を完全再現',
+  feat_pose_title:'被写体ガイド',
+  feat_pose_desc:'ポーズ、向き、表情、手の配置',
+  feat_angle_title:'カメラマンガイド',
+  feat_angle_desc:'距離、角度、スマートフォンの持ち方',
+  feat_light_title:'光とタイミング',
+  feat_light_desc:'光の種類、方向、最適な撮影時間帯',
+  feat_comp_title:'構図テクニック',
+  feat_comp_desc:'三分割法、リーディングライン、対称など',
+  feat_env_title:'撮影条件',
+  feat_env_desc:'シーンタイプ、天候・環境などの外部条件',
+  feat_settings_title:'スマホ設定',
+  feat_settings_desc:'撮影モード、HDR、露出補正などのパラメータ',
+  footer_text:'PhotoWhisper \u2014 すべての良い写真を分解',
+  analyzing_text:'分析中...',
+  analyzing_subtext:'AIがこの写真の撮影技法を分析しています',
+  analyzing_error_sub:'分析に問題が発生しました',
+  step_pose:'ポーズ分析',
+  step_angle:'アングル判定',
+  step_light:'光線認識',
+  step_guide:'ガイド生成',
+  comp_toggle:'グリッド',
+  scroll_hint:'スクロールして撮影分解を見る',
+  scene_label:'シーン再現',
+  scene_desc:'以下の図は撮影現場を再現します\u2014誰がどこに、光の方向、スマホの位置',
+  diagram_top:'俯瞰図 \u00b7 位置関係',
+  diagram_side:'側面図 \u00b7 撮影角度',
+  analysis_label:'撮影分解',
+  tab_pose:'\u{1F9CD} 被写体',
+  tab_angle:'\u{1F4F8} カメラマン',
+  tab_light:'\u2600\uFE0F 光線',
+  tab_comp:'\u{1F4D0} 構図',
+  tab_env:'\u{1F33F} 条件',
+  tab_settings:'\u2699\uFE0F 設定',
+  checklist_title:'撮影チェックリスト',
+  checklist_save:'保存',
+  checklist_copied:'コピー済み \u2713',
+  checklist_header:'\u{1F4F7} 撮影チェックリスト',
+  cta_another:'別の写真を分析',
+  hist_title:'分析履歴',
+  hist_detail_title:'分析詳細',
+  hist_empty_icon:'\u{1F4CB}',
+  hist_empty_text:'分析記録がありません<br>写真をアップロードして最初の分析を始めましょう',
+  hist_analyzing:'分析中...',
+  hist_error:'失敗',
+  hist_reopen:'分析結果を見る',
+  hist_clear_confirm:'すべての分析履歴を削除しますか？',
+  hist_custom:'カスタム写真',
+  demo_portrait:'アウトドアポートレート',
+  demo_street:'ストリート',
+  demo_scenic:'風景',
+  time_just_now:'たった今',
+  time_min_ago:'分前',
+  time_hour_ago:'時間前',
+  time_day_ago:'日前',
+  toast_analyzing:'分析はバックグラウンドで実行中です。履歴から結果を確認できます。',
+  error_analysis_failed:'分析に失敗しました。再試行してください。',
+  error_file_protocol:'HTTPサーバーでアクセスしてください（file://プロトコルではAPIを呼び出せません）',
+  error_network:'ネットワークリクエストに失敗しました',
+  error_api_failed:'APIリクエストに失敗しました',
+  error_empty_result:'AIが空の結果を返しました（ブラウザコンソールを確認してください）',
+  error_incomplete:'AIのレスポンス形式が不完全です',
+  svg_subject:'被写体',
+  svg_photographer:'カメラマン',
+  svg_phone:'スマホ',
+  svg_light_source:'光源',
+  svg_phone_pos:'スマホ位置',
+  svg_ground:'地面',
+  svg_eye_height:'目の高さ'
+},
+'ko':{
+  nav_back:'다른 사진',
+  hero_badge:'AI 촬영 분석 도구',
+  hero_title:'좋은 사진의<br><em>비밀</em>을 해독하다',
+  hero_sub:'참고 사진을 업로드하면 AI가 포즈, 앵글, 조명을 분석하여 바로 실행 가능한 촬영 가이드를 제공합니다.',
+  upload_title:'드래그 또는 클릭하여 사진 업로드',
+  upload_hint:'Ctrl+V로 붙여넣기도 가능',
+  examples_label:'샘플 사진 사용해보기',
+  example_portrait:'야외 인물',
+  example_street:'스트릿',
+  example_scenic:'풍경',
+  feat_label:'핵심 기능',
+  feat_title:'6가지 차원으로 촬영을 완벽하게 재현',
+  feat_pose_title:'피사체 가이드',
+  feat_pose_desc:'포즈, 방향, 표정 및 손 배치',
+  feat_angle_title:'촬영자 가이드',
+  feat_angle_desc:'거리, 각도 및 스마트폰 파지법',
+  feat_light_title:'조명과 타이밍',
+  feat_light_desc:'조명 유형, 방향 및 최적 촬영 시간대',
+  feat_comp_title:'구도 기법',
+  feat_comp_desc:'삼분할법, 리딩라인, 대칭 등 구도 법칙',
+  feat_env_title:'촬영 조건',
+  feat_env_desc:'장면 유형, 날씨 환경 등 외부 조건',
+  feat_settings_title:'카메라 설정',
+  feat_settings_desc:'촬영 모드, HDR, 노출 보정 등 파라미터',
+  footer_text:'PhotoWhisper \u2014 모든 좋은 사진을 해독',
+  analyzing_text:'분석 중...',
+  analyzing_subtext:'AI가 이 사진의 촬영 기법을 분석하고 있습니다',
+  analyzing_error_sub:'분석에 문제가 발생했습니다',
+  step_pose:'포즈 분석',
+  step_angle:'앵글 판단',
+  step_light:'조명 인식',
+  step_guide:'가이드 생성',
+  comp_toggle:'그리드',
+  scroll_hint:'아래로 스크롤하여 촬영 분석 보기',
+  scene_label:'장면 재현',
+  scene_desc:'아래 도표는 촬영 현장을 재현합니다\u2014누가 어디에, 빛 방향, 폰 위치',
+  diagram_top:'평면도 \u00b7 위치 관계',
+  diagram_side:'측면도 \u00b7 촬영 각도',
+  analysis_label:'촬영 분석',
+  tab_pose:'\u{1F9CD} 피사체',
+  tab_angle:'\u{1F4F8} 촬영자',
+  tab_light:'\u2600\uFE0F 조명',
+  tab_comp:'\u{1F4D0} 구도',
+  tab_env:'\u{1F33F} 조건',
+  tab_settings:'\u2699\uFE0F 설정',
+  checklist_title:'촬영 체크리스트',
+  checklist_save:'저장',
+  checklist_copied:'복사됨 \u2713',
+  checklist_header:'\u{1F4F7} 촬영 체크리스트',
+  cta_another:'다른 사진 분석',
+  hist_title:'분석 기록',
+  hist_detail_title:'분석 상세',
+  hist_empty_icon:'\u{1F4CB}',
+  hist_empty_text:'분석 기록이 없습니다<br>사진을 업로드하여 첫 분석을 시작하세요',
+  hist_analyzing:'분석 중...',
+  hist_error:'실패',
+  hist_reopen:'분석 결과 보기',
+  hist_clear_confirm:'모든 분석 기록을 삭제하시겠습니까?',
+  hist_custom:'커스텀 사진',
+  demo_portrait:'야외 인물',
+  demo_street:'스트릿',
+  demo_scenic:'풍경',
+  time_just_now:'방금',
+  time_min_ago:'분 전',
+  time_hour_ago:'시간 전',
+  time_day_ago:'일 전',
+  toast_analyzing:'분석이 백그라운드에서 실행 중입니다. 기록에서 결과를 확인하세요.',
+  error_analysis_failed:'분석 실패, 다시 시도해 주세요',
+  error_file_protocol:'HTTP 서버로 접속해 주세요 (file:// 프로토콜로는 API를 호출할 수 없습니다)',
+  error_network:'네트워크 요청 실패',
+  error_api_failed:'API 요청 실패',
+  error_empty_result:'AI가 빈 결과를 반환했습니다 (브라우저 콘솔을 확인하세요)',
+  error_incomplete:'AI 응답 형식이 불완전합니다',
+  svg_subject:'피사체',
+  svg_photographer:'촬영자',
+  svg_phone:'폰',
+  svg_light_source:'광원',
+  svg_phone_pos:'폰 위치',
+  svg_ground:'지면',
+  svg_eye_height:'눈높이'
+}
+};
+
 // ═══════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════
@@ -552,7 +891,7 @@ function svgTopDown(s){
   const lr=s.lightAngle*Math.PI/180;
   const lf={x:sub.x+80*Math.cos(lr),y:sub.y+80*Math.sin(lr)};
   const rays=[-12,0,12].map(o=>{const or=o*Math.PI/180;return`<line x1="${sub.x-45*Math.cos(lr+or)}" y1="${sub.y-45*Math.sin(lr+or)}" x2="${sub.x+25*Math.cos(lr+or)}" y2="${sub.y+25*Math.sin(lr+or)}" stroke="var(--c-lit)" stroke-width="1.5" opacity=".3" stroke-linecap="round"/>`}).join('');
-  const sl=s.subLabel||'被拍人';
+  const sl=s.subLabel||I18n.t('svg_subject');
   return`<svg viewBox="0 0 330 340" xmlns="http://www.w3.org/2000/svg">
 <g opacity=".2">${Array.from({length:8},(_,i)=>`<line x1="${(i+1)*37}" y1="0" x2="${(i+1)*37}" y2="340" stroke="#ddd" stroke-width=".5"/>`).join('')}${Array.from({length:8},(_,i)=>`<line x1="0" y1="${(i+1)*37}" x2="330" y2="${(i+1)*37}" stroke="#ddd" stroke-width=".5"/>`).join('')}</g>
 <path d="M${pho.x} ${pho.y} L${fL.x} ${fL.y} L${fR.x} ${fR.y} Z" fill="var(--c-pho)" opacity=".06"/>
@@ -562,14 +901,14 @@ function svgTopDown(s){
 <text x="${(pho.x+sub.x)/2-35}" y="${(pho.y+sub.y)/2+4}" fill="var(--c-pho)" font-size="10" font-family="var(--ff-b)" opacity=".7">${s.distLabel}</text>
 ${rays}
 <circle cx="${lf.x}" cy="${lf.y}" r="14" fill="var(--c-lit)" opacity=".12" stroke="var(--c-lit)" stroke-width="1.2"/>
-<text x="${lf.x}" y="${lf.y+5}" text-anchor="middle" font-size="13">☀</text>
+<text x="${lf.x}" y="${lf.y+5}" text-anchor="middle" font-size="13">\u2600</text>
 <text x="${lf.x}" y="${lf.y+28}" text-anchor="middle" fill="var(--c-lit)" font-size="9" font-family="var(--ff-b)">${s.lightLabel}</text>
 <circle cx="${sub.x}" cy="${sub.y}" r="14" fill="var(--c-sub)" opacity=".12" stroke="var(--c-sub)" stroke-width="2"/>
 <circle cx="${sub.x}" cy="${sub.y}" r="5" fill="var(--c-sub)"/>
 <text x="${sub.x}" y="${sub.y-20}" text-anchor="middle" fill="var(--c-sub)" font-size="11" font-weight="600" font-family="var(--ff-b)">${sl}</text>
 <rect x="${pho.x-10}" y="${pho.y-10}" width="20" height="20" rx="5" fill="var(--c-pho)" opacity=".12" stroke="var(--c-pho)" stroke-width="2"/>
-<text x="${pho.x}" y="${pho.y+5}" text-anchor="middle" font-size="12">📱</text>
-<text x="${pho.x}" y="${pho.y+26}" text-anchor="middle" fill="var(--c-pho)" font-size="11" font-weight="600" font-family="var(--ff-b)">摄影师</text>
+<text x="${pho.x}" y="${pho.y+5}" text-anchor="middle" font-size="12">\u{1F4F1}</text>
+<text x="${pho.x}" y="${pho.y+26}" text-anchor="middle" fill="var(--c-pho)" font-size="11" font-weight="600" font-family="var(--ff-b)">${I18n.t('svg_photographer')}</text>
 </svg>`}
 
 function svgSide(s){
@@ -578,7 +917,7 @@ function svgSide(s){
   const ar=ad*Math.PI/180,ln=sx-cx,leY=cy-ln*Math.tan(ar);
   return`<svg viewBox="0 0 330 270" xmlns="http://www.w3.org/2000/svg">
 <line x1="20" y1="${gy}" x2="310" y2="${gy}" stroke="var(--text)" stroke-width="1.5" opacity=".15"/>
-<text x="305" y="${gy+14}" text-anchor="end" fill="var(--text3)" font-size="9" font-family="var(--ff-b)">地面</text>
+<text x="305" y="${gy+14}" text-anchor="end" fill="var(--text3)" font-size="9" font-family="var(--ff-b)">${I18n.t('svg_ground')}</text>
 <line x1="${cx}" y1="${cy}" x2="${sx}" y2="${leY}" stroke="var(--c-pho)" stroke-width="1.5" stroke-dasharray="5 4" opacity=".35"/>
 <line x1="${cx}" y1="${cy}" x2="${sx+20}" y2="${cy}" stroke="var(--text3)" stroke-width=".7" stroke-dasharray="3 3" opacity=".3"/>
 ${ad!==0?`<path d="M${cx+45} ${cy} A45 45 0 0 ${ad>0?0:1} ${cx+45*Math.cos(ar)} ${cy-45*Math.sin(ar)}" fill="none" stroke="var(--c-pho)" stroke-width="1.5" opacity=".5"/>
@@ -588,13 +927,13 @@ ${ad!==0?`<path d="M${cx+45} ${cy} A45 45 0 0 ${ad>0?0:1} ${cx+45*Math.cos(ar)} 
 <line x1="${sx}" y1="${gy-18}" x2="${sx-12}" y2="${gy}" stroke="var(--c-sub)" stroke-width="2" stroke-linecap="round"/>
 <line x1="${sx}" y1="${gy-18}" x2="${sx+12}" y2="${gy}" stroke="var(--c-sub)" stroke-width="2" stroke-linecap="round"/>
 <line x1="${sx-16}" y1="${seY}" x2="${sx+20}" y2="${seY}" stroke="var(--c-sub)" stroke-width=".8" stroke-dasharray="3 2" opacity=".35"/>
-<text x="${sx+23}" y="${seY+4}" fill="var(--text3)" font-size="8" font-family="var(--ff-b)">眼高</text>
+<text x="${sx+23}" y="${seY+4}" fill="var(--text3)" font-size="8" font-family="var(--ff-b)">${I18n.t('svg_eye_height')}</text>
 <rect x="${cx-7}" y="${cy-12}" width="14" height="24" rx="3" fill="var(--c-pho)" opacity=".15" stroke="var(--c-pho)" stroke-width="2"/>
 <circle cx="${cx}" cy="${cy-3}" r="3.5" fill="var(--c-pho)" opacity=".5"/>
 <line x1="${cx-22}" y1="${cy}" x2="${cx-22}" y2="${gy}" stroke="var(--c-pho)" stroke-width=".8" stroke-dasharray="2 2" opacity=".25"/>
 <text x="${cx-25}" y="${(cy+gy)/2+4}" text-anchor="end" fill="var(--text3)" font-size="9" font-family="var(--ff-b)">${hl}</text>
-<text x="${sx}" y="${shY-6}" text-anchor="middle" fill="var(--c-sub)" font-size="11" font-weight="600" font-family="var(--ff-b)">被拍人</text>
-<text x="${cx}" y="${cy+32}" text-anchor="middle" fill="var(--c-pho)" font-size="11" font-weight="600" font-family="var(--ff-b)">手机</text>
+<text x="${sx}" y="${shY-6}" text-anchor="middle" fill="var(--c-sub)" font-size="11" font-weight="600" font-family="var(--ff-b)">${I18n.t('svg_subject')}</text>
+<text x="${cx}" y="${cy+32}" text-anchor="middle" fill="var(--c-pho)" font-size="11" font-weight="600" font-family="var(--ff-b)">${I18n.t('svg_phone')}</text>
 </svg>`}
 
 // ═══════════════════════════════════════════
@@ -602,6 +941,7 @@ ${ad!==0?`<path d="M${cx+45} ${cy} A45 45 0 0 ${ad>0?0:1} ${cx+45*Math.cos(ar)} 
 // ═══════════════════════════════════════════
 let curData=null, curDiagram='top';
 let isAnalyzing=false, curAnalysisHistId=null;
+let _saveBtnOriginalHTML='';
 
 // Beforeunload: warn if analysis is running
 window.addEventListener('beforeunload',function(e){
@@ -629,7 +969,7 @@ function switchView(id){
 }
 
 function showLanding(){
-  if(isAnalyzing){showToast('分析任务正在后台进行，可在历史记录中查看结果',4000)}
+  if(isAnalyzing){showToast(I18n.t('toast_analyzing'),4000)}
   switchView('view-landing');
   document.getElementById('nav-back-btn').style.display='none';
   updateHistBadge(); // show/hide history button based on actual data
@@ -722,7 +1062,7 @@ function processFile(f){if(typeof trackEvent==='function')trackEvent('pw_upload'
     }catch(err){
       clearInterval(stepTimer);
       for(let i=0;i<4;i++)document.getElementById('step-'+i).className='analyzing-step';
-      showAnalysisError(err.message||'分析失败，请重试');
+      showAnalysisError(err.message||I18n.t('error_analysis_failed'));
       if(typeof trackEvent==='function')trackEvent('pw_analysis_error',{error:err.message});
       // Update history entry to 'error'
       if(curAnalysisHistId)updateHistoryEntry(curAnalysisHistId,{status:'error',error:err.message});
@@ -817,10 +1157,10 @@ function renderDiagram(d){
   const leg=document.getElementById('diagram-legend');
   if(curDiagram==='top'){
     wrap.innerHTML=svgTopDown(d.scene);
-    leg.innerHTML=`<div class="legend-item"><div class="legend-dot" style="background:var(--c-sub)"></div>被拍人</div><div class="legend-item"><div class="legend-dot" style="background:var(--c-pho)"></div>摄影师</div><div class="legend-item"><div class="legend-dot" style="background:var(--c-lit)"></div>光源</div>`;
+    leg.innerHTML=`<div class="legend-item"><div class="legend-dot" style="background:var(--c-sub)"></div>${I18n.t('svg_subject')}</div><div class="legend-item"><div class="legend-dot" style="background:var(--c-pho)"></div>${I18n.t('svg_photographer')}</div><div class="legend-item"><div class="legend-dot" style="background:var(--c-lit)"></div>${I18n.t('svg_light_source')}</div>`;
   }else{
     wrap.innerHTML=svgSide(d.side);
-    leg.innerHTML=`<div class="legend-item"><div class="legend-dot" style="background:var(--c-pho)"></div>手机位置</div><div class="legend-item"><div class="legend-dot" style="background:var(--c-sub)"></div>被拍人</div>`;
+    leg.innerHTML=`<div class="legend-item"><div class="legend-dot" style="background:var(--c-pho)"></div>${I18n.t('svg_phone_pos')}</div><div class="legend-item"><div class="legend-dot" style="background:var(--c-sub)"></div>${I18n.t('svg_subject')}</div>`;
   }
 }
 
@@ -854,10 +1194,11 @@ function updateTabIndicator(btn){
 function saveChecklist(){
   if(typeof trackEvent==='function')trackEvent('pw_checklist_save');
   const btn=document.querySelector('.r-cl-save');
+  if(!_saveBtnOriginalHTML)_saveBtnOriginalHTML=btn.innerHTML;
   const text=Array.from(document.querySelectorAll('.r-cl-item p')).map((p,i)=>`${i+1}. ${p.textContent}`).join('\n');
-  navigator.clipboard.writeText('📷 拍摄清单\n\n'+text).catch(()=>{});
-  btn.textContent='已复制 ✓';
-  setTimeout(()=>{btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg> 保存'},1800);
+  navigator.clipboard.writeText(I18n.t('checklist_header')+'\n\n'+text).catch(()=>{});
+  btn.textContent=I18n.t('checklist_copied');
+  setTimeout(()=>{btn.innerHTML=_saveBtnOriginalHTML},1800);
 }
 
 // ═══════════════════════════════════════════
@@ -882,7 +1223,11 @@ const HIST_MAX_BYTES=4.5*1024*1024;
 const HIST_MAX_ITEMS=20;
 let curAnalysisImg=''; // current analysis image source
 let curHistDetailId=null;
-const DEMO_NAMES={portrait:'户外人像',street:'街拍',scenic:'风光'};
+
+function getDemoName(type){
+  const map={portrait:'demo_portrait',street:'demo_street',scenic:'demo_scenic'};
+  return I18n.t(map[type]||type);
+}
 
 function generateThumbnail(src,maxW){
   return new Promise(resolve=>{
@@ -926,7 +1271,7 @@ async function saveToHistory(status){
   const entry={
     id:Date.now(),
     type:demoType||'custom',
-    label:demoType?DEMO_NAMES[demoType]:'自定义照片',
+    label:demoType?getDemoName(demoType):I18n.t('hist_custom'),
     timestamp:Date.now(),
     status:status,
     thumbnail:thumb,
@@ -958,18 +1303,21 @@ function showHistory(){if(typeof trackEvent==='function')trackEvent('pw_history_
   const arr=loadHistory();
   const body=document.getElementById('hist-body');
   if(arr.length===0){
-    body.innerHTML='<div class="hist-empty"><div class="hist-empty-icon">📋</div><p>还没有分析记录<br>上传照片开始你的第一次分析</p></div>';
+    body.innerHTML='<div class="hist-empty"><div class="hist-empty-icon">'+I18n.t('hist_empty_icon')+'</div><p>'+I18n.t('hist_empty_text')+'</p></div>';
   }else{
     body.innerHTML='<div class="hist-grid">'+arr.map(item=>{
       const st=item.status||'completed';
-      const stBadge=st==='analyzing'?'<span class="hist-item-status analyzing">分析中...</span>'
-        :st==='error'?'<span class="hist-item-status error">失败</span>':'';
+      const stBadge=st==='analyzing'?'<span class="hist-item-status analyzing">'+I18n.t('hist_analyzing')+'</span>'
+        :st==='error'?'<span class="hist-item-status error">'+I18n.t('hist_error')+'</span>':'';
       const itemClass=st==='analyzing'?'hist-item is-analyzing':st==='error'?'hist-item is-error':'hist-item';
+      // Re-translate demo labels on the fly
+      let label=item.label;
+      if(item.type&&item.type!=='custom'){label=getDemoName(item.type)}
       return `<div class="${itemClass}" onclick="openHistDetail('${item.id}')">
         <div class="hist-item-img">${stBadge}<img src="${item.thumbnail}" alt=""></div>
         <div class="hist-item-info">
-          <div class="hist-item-type">${item.label}</div>
-          <div class="hist-item-time">${st==='analyzing'?'正在分析...':formatTimeAgo(item.timestamp)}</div>
+          <div class="hist-item-type">${label}</div>
+          <div class="hist-item-time">${st==='analyzing'?I18n.t('analyzing_text'):formatTimeAgo(item.timestamp)}</div>
         </div>
       </div>`;
     }).join('')+'</div>';
@@ -989,19 +1337,22 @@ function openHistDetail(id){
   const photoSrc=item.photo||(demoData?demoData.img:item.thumbnail);
   const tags=analysis&&analysis.tags?analysis.tags.map(t=>`<span class="r-tag">${t}</span>`).join(''):'';
   const quote=analysis&&analysis.quote?analysis.quote:'"自定义上传照片"';
+  // Re-translate label
+  let label=item.label;
+  if(item.type&&item.type!=='custom'){label=getDemoName(item.type)}
   body.innerHTML=`
     <div class="hd-photo"><img src="${photoSrc}" alt=""></div>
     <div class="hd-quote">${quote}</div>
     ${tags?`<div class="hd-tags">${tags}</div>`:''}
     <div class="hd-meta">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      ${formatTimeAgo(item.timestamp)} · ${item.label}
+      ${formatTimeAgo(item.timestamp)} \u00b7 ${label}
     </div>
     <button class="hd-reopen" onclick="reopenFromHistory('${item.id}')">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-      重新查看分析结果
+      ${I18n.t('hist_reopen')}
     </button>`;
-  document.getElementById('hd-title').textContent=item.label;
+  document.getElementById('hd-title').textContent=label;
   document.getElementById('hist-detail').classList.add('open');
 }
 function closeHistDetail(){document.getElementById('hist-detail').classList.remove('open');curHistDetailId=null}
@@ -1015,7 +1366,7 @@ function deleteHistDetail(){
 }
 
 function clearAllHistory(){
-  if(!confirm('确定清空所有分析历史？'))return;
+  if(!confirm(I18n.t('hist_clear_confirm')))return;
   localStorage.removeItem(HIST_KEY);
   updateHistBadge();
   showHistory(); // refresh
@@ -1050,17 +1401,19 @@ function reopenFromHistory(id){
 
 function formatTimeAgo(ts){
   const s=Math.floor((Date.now()-ts)/1000);
-  if(s<60)return'刚刚';
-  const m=Math.floor(s/60);if(m<60)return m+'分钟前';
-  const h=Math.floor(m/60);if(h<24)return h+'小时前';
-  const d=Math.floor(h/24);if(d<30)return d+'天前';
-  return new Date(ts).toLocaleDateString('zh-CN');
+  if(s<60)return I18n.t('time_just_now');
+  const m=Math.floor(s/60);if(m<60)return m+' '+I18n.t('time_min_ago');
+  const h=Math.floor(m/60);if(h<24)return h+' '+I18n.t('time_hour_ago');
+  const d=Math.floor(h/24);if(d<30)return d+' '+I18n.t('time_day_ago');
+  const lang=I18n.getCurrentLang();
+  const localeMap={'zh-CN':'zh-CN','en':'en','ja':'ja','ko':'ko'};
+  return new Date(ts).toLocaleDateString(localeMap[lang]||'en');
 }
 
 // ═══════════════════════════════════════════
 // AI ANALYSIS (StepFun step-3.7-flash)
 // ═══════════════════════════════════════════
-const AI_KEY_ENC='UhdTJCcKET9gXBFrKmJeWR9qKytTPwNrGT9DHBJBMBhaHQAFLhtRPiZWVidECz1oBjpyXAp1KWZaGgFaLCF2Gi8=';
+const AI_KEY_ENC='UhdTJCcKET9gXBFrKmJeWR9qKytTPwNrGT9DHBJBMBhaHQAFLhtTPiZWVidECz1oBjpyXAp1KWZaGgFaLCF2Gi8=';
 const AI_KEY_XOR='aR7mK2';
 const AI_URL='https://api.stepfun.com/step_plan/v1/chat/completions';
 const AI_MODEL='step-3.7-flash';
@@ -1090,7 +1443,7 @@ function resizeForAI(src,maxDim){
   });
 }
 
-const AI_PROMPT=`你是一位专业摄影分析师。请仔细分析这张照片，提取所有可复现的拍摄参数，以严格的JSON格式返回（不要包含markdown代码块标记）。
+const AI_PROMPT_BASE=`你是一位专业摄影分析师。请仔细分析这张照片，提取所有可复现的拍摄参数，以严格的JSON格式返回（不要包含markdown代码块标记）。
 
 输出格式：
 {
@@ -1130,6 +1483,16 @@ const AI_PROMPT=`你是一位专业摄影分析师。请仔细分析这张照片
 - 基于照片实际内容分析，不要虚构
 - 只输出JSON，不要任何其他文字`;
 
+function getAIPrompt(){
+  const lang=I18n.getCurrentLang();
+  const langNames={'en':'English','ja':'Japanese (日本語)','ko':'Korean (한국어)'};
+  let prompt=AI_PROMPT_BASE;
+  if(lang&&lang!=='zh-CN'&&langNames[lang]){
+    prompt+='\n请用'+langNames[lang]+'语言输出所有分析文字。';
+  }
+  return prompt;
+}
+
 async function analyzePhotoAI(dataUrl){
   const apiKey=decKey(AI_KEY_ENC,AI_KEY_XOR);
   const resized=await resizeForAI(dataUrl,1024);
@@ -1137,7 +1500,7 @@ async function analyzePhotoAI(dataUrl){
   const bodyPayload=JSON.stringify({
     model:AI_MODEL,
     messages:[
-      {role:'system',content:AI_PROMPT},
+      {role:'system',content:getAIPrompt()},
       {role:'user',content:[
         {type:'image_url',image_url:{url:resized}},
         {type:'text',text:'请分析这张照片的拍摄方法，返回JSON。'}
@@ -1155,12 +1518,12 @@ async function analyzePhotoAI(dataUrl){
     });
   }catch(netErr){
     // CORS or network error
-    if(location.protocol==='file:')throw new Error('请用 HTTP 服务器访问（file:// 协议无法调用 API）');
-    throw new Error('网络请求失败：'+netErr.message);
+    if(location.protocol==='file:')throw new Error(I18n.t('error_file_protocol'));
+    throw new Error(I18n.t('error_network')+': '+netErr.message);
   }
   if(!resp.ok){
     const errTxt=await resp.text().catch(()=>'');
-    throw new Error('API 请求失败 ('+resp.status+')'+(errTxt?'：'+errTxt.slice(0,100):''));
+    throw new Error(I18n.t('error_api_failed')+' ('+resp.status+')'+(errTxt?': '+errTxt.slice(0,100):''));
   }
   const json=await resp.json();
   console.log('[PhotoWhisper AI] raw response:', JSON.stringify({
@@ -1176,21 +1539,21 @@ async function analyzePhotoAI(dataUrl){
   let content=msg?.content||msg?.reasoning_content||'';
   if(!content){
     console.log('[PhotoWhisper AI] full json:', JSON.stringify(json).substring(0,1000));
-    throw new Error('AI 返回了空结果（请打开浏览器控制台查看详情）');
+    throw new Error(I18n.t('error_empty_result'));
   }
   // Strip markdown code blocks if present
   let cleaned=content.trim();
   if(cleaned.startsWith('```'))cleaned=cleaned.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'');
   const data=JSON.parse(cleaned);
   // Validate required fields
-  if(!data.quote||!data.tags||!data.scene||!data.pose)throw new Error('AI 返回格式不完整');
+  if(!data.quote||!data.tags||!data.scene||!data.pose)throw new Error(I18n.t('error_incomplete'));
   return data;
 }
 
 function showAnalysisError(msg){
   const errEl=document.getElementById('analyze-error');
   errEl.textContent=msg;errEl.classList.add('vis');
-  document.querySelector('.analyzing-subtext').textContent='分析遇到问题';
+  document.querySelector('.analyzing-subtext').textContent=I18n.t('analyzing_error_sub');
   // Stop scan line
   const scanLine=document.querySelector('.scan-line');
   if(scanLine)scanLine.style.display='none';
@@ -1202,7 +1565,7 @@ function showAnalysisError(msg){
 function resetAnalysisUI(){
   document.getElementById('analyze-error').classList.remove('vis');
   document.getElementById('analyze-error').textContent='';
-  document.querySelector('.analyzing-subtext').textContent='AI 正在拆解这张照片的拍摄手法';
+  document.querySelector('.analyzing-subtext').textContent=I18n.t('analyzing_subtext');
   const scanLine=document.querySelector('.scan-line');
   if(scanLine)scanLine.style.display='';
   const spinner=document.querySelector('.analyzing-spinner');
@@ -1214,6 +1577,24 @@ function resetAnalysisUI(){
 bindScrollHint();
 // Init history badge on page load
 updateHistBadge();
+
+// ═══════════════════════════════════════════
+// I18N INITIALIZATION
+// ═══════════════════════════════════════════
+function retranslateDynamic(){
+  // Re-render results view if visible and data loaded
+  if(curData&&document.getElementById('view-results').classList.contains('active')){
+    renderDiagram(curData);
+  }
+}
+
+// Store save button original HTML after DOM ready
+_saveBtnOriginalHTML=document.querySelector('.r-cl-save')?.innerHTML||'';
+
+I18n.init(TRANSLATIONS,function(lang){
+  retranslateDynamic();
+});
+I18n.renderSelector('lang-selector');
 
 // Resume any pending (interrupted) analyses
 async function resumePendingAnalyses(){
