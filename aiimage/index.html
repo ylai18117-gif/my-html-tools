@@ -562,7 +562,8 @@ function replaceWithResult(msgId,imageUrl,model,size,elapsed){
 
   // Save to history
   const params=requestParams[msgId];
-  if(typeof trackEvent==='function')trackEvent('ai_generate_complete',{model:msgId.includes('gpt')?'gpt':'gemini',mode:params?params.mode:'t2i'});addToHistory({
+  if(typeof trackEvent==='function')trackEvent('ai_generate_complete',{model:model.includes('gpt')?'gpt':'gemini',mode:params?params.mode:'t2i'});
+  addToHistory({
     id:msgId,
     prompt:params?params.prompt:'',
     model,
@@ -712,15 +713,18 @@ async function clearOriginalImages(){
 // ── Thumbnail generation ──
 function generateThumbnail(dataUrl, maxSize=300){
   return new Promise(resolve=>{
+    if(!dataUrl){resolve('');return}
     const img=new Image();
     img.onload=()=>{
-      const ratio=Math.min(maxSize/img.width, maxSize/img.height);
-      const w=Math.round(img.width*ratio);
-      const h=Math.round(img.height*ratio);
-      const c=document.createElement('canvas');
-      c.width=w;c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
-      resolve(c.toDataURL('image/jpeg',0.8));
+      try{
+        const ratio=Math.min(maxSize/img.width, maxSize/img.height);
+        const w=Math.round(img.width*ratio);
+        const h=Math.round(img.height*ratio);
+        const c=document.createElement('canvas');
+        c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(c.toDataURL('image/jpeg',0.8));
+      }catch(e){resolve(dataUrl)}
     };
     img.onerror=()=>resolve(dataUrl);
     img.src=dataUrl;
@@ -742,20 +746,24 @@ function saveHistory(arr){
 
 // ── Core history operations ──
 async function addToHistory(entry){
-  // Save original full-res image to IndexedDB (large storage)
-  if(entry.imageUrl){
-    await saveOriginalImage(entry.id, entry.imageUrl);
+  try{
+    // Save original full-res image to IndexedDB (large storage)
+    if(entry.imageUrl){
+      await saveOriginalImage(entry.id, entry.imageUrl);
+    }
+    // Generate thumbnail for localStorage (small, fast grid rendering)
+    const thumb=await generateThumbnail(entry.imageUrl, 300);
+    entry.thumbnail=thumb||entry.imageUrl;
+    delete entry.imageUrl; // Only keep thumbnail in localStorage
+    const arr=loadHistory();
+    arr.unshift(entry);
+    let blob=new Blob([JSON.stringify(arr)]);
+    while(blob.size>HIST_MAX_BYTES&&arr.length>1){arr.pop();blob=new Blob([JSON.stringify(arr)])}
+    saveHistory(arr);
+    updateHistBadge();
+  }catch(e){
+    console.warn('[History] addToHistory failed:',e);
   }
-  // Generate thumbnail for localStorage (small, fast grid rendering)
-  const thumb=await generateThumbnail(entry.imageUrl, 300);
-  entry.thumbnail=thumb;
-  delete entry.imageUrl; // Only keep thumbnail in localStorage
-  const arr=loadHistory();
-  arr.unshift(entry);
-  let blob=new Blob([JSON.stringify(arr)]);
-  while(blob.size>HIST_MAX_BYTES&&arr.length>1){arr.pop();blob=new Blob([JSON.stringify(arr)])}
-  saveHistory(arr);
-  updateHistBadge();
 }
 async function removeFromHistory(id){
   const arr=loadHistory().filter(h=>h.id!==id);
