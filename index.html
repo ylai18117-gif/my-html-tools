@@ -39,6 +39,10 @@ body::before{
 .header .logo em{font-style:italic;color:var(--accent)}
 .header .subtitle{font-size:13px;color:var(--text2);line-height:1.6}
 .header .divider{width:40px;height:1px;background:var(--border);margin:20px auto 0}
+.header .lang-wrap{margin-top:16px;display:flex;justify-content:center}
+.header .lang-wrap .i18n-opt{color:var(--text3)}
+.header .lang-wrap .i18n-opt:hover{color:var(--text2)}
+.header .lang-wrap .i18n-opt.active{background:var(--card);color:var(--text);border:1px solid var(--border)}
 
 /* ─── NAV CARDS ─── */
 .cards{display:flex;flex-direction:column;gap:14px}
@@ -141,8 +145,9 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 
   <div class="header">
     <div class="logo">My<em>Html</em></div>
-    <div class="subtitle">Tools & Dashboards</div>
+    <div class="subtitle" data-i18n="header.subtitle">Tools & Dashboards</div>
     <div class="divider"></div>
+    <div class="lang-wrap"><div id="lang-selector"></div></div>
   </div>
 
   <div class="cards">
@@ -152,7 +157,7 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
       <div class="card-icon orange">📷</div>
       <div class="card-body">
         <h3>PhotoWhisper</h3>
-        <p>AI 拍摄拆解 — 上传参考照片，还原姿势、机位、光线</p>
+        <p data-i18n="card.pw.desc">AI 拍摄拆解 — 上传参考照片，还原姿势、机位、光线</p>
       </div>
       <span class="card-badge live">LIVE</span>
       <div class="card-arrow"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
@@ -162,10 +167,10 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
     <a class="nav-card glow-blue" href="dashboard/QR数据看盘.html" id="card-data">
       <div class="card-icon blue">📊</div>
       <div class="card-body">
-        <h3>数据看盘</h3>
-        <p>QR Scan Max 广告数据分析与商业化指标追踪</p>
+        <h3 data-i18n="card.data.title">数据看盘</h3>
+        <p data-i18n="card.data.desc">QR Scan Max 广告数据分析与商业化指标追踪</p>
       </div>
-      <span class="card-badge lock">🔒 需验证</span>
+      <span class="card-badge lock" data-i18n="badge.lock">🔒 需验证</span>
       <div class="card-arrow"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
     </a>
 
@@ -173,10 +178,10 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
     <a class="nav-card glow-orange" href="aiimage/index.html" id="card-aiimage">
       <div class="card-icon orange">🎨</div>
       <div class="card-body">
-        <h3>AI 图片工坊</h3>
-        <p>ChatGPT / Gemini 文生图 & 图生图，AI 对话式创作</p>
+        <h3 data-i18n="card.ai.title">AI 图片工坊</h3>
+        <p data-i18n="card.ai.desc">ChatGPT / Gemini 文生图 & 图生图，AI 对话式创作</p>
       </div>
-      <span class="card-badge lock">🔒 需验证</span>
+      <span class="card-badge lock" data-i18n="badge.lock">🔒 需验证</span>
       <div class="card-arrow"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
     </a>
 
@@ -185,7 +190,7 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
       <div class="card-icon green">📱</div>
       <div class="card-body">
         <h3>QR Scan Max</h3>
-        <p>App 推广落地页 — 扫码下载体验</p>
+        <p data-i18n="card.qr.desc">App 推广落地页 — 扫码下载体验</p>
       </div>
       <div class="card-arrow"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
     </a>
@@ -199,7 +204,79 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 
 </div>
 
+<script src="/i18n.js"></script>
 <script>
+// ─── i18n Translations ───
+const TRANSLATIONS = {
+  'zh-CN': {
+    'header.subtitle': '工具与看板',
+    'card.pw.desc': 'AI 拍摄拆解 — 上传参考照片，还原姿势、机位、光线',
+    'card.data.title': '数据看盘',
+    'card.data.desc': 'QR Scan Max 广告数据分析与商业化指标追踪',
+    'card.ai.title': 'AI 图片工坊',
+    'card.ai.desc': 'ChatGPT / Gemini 文生图 & 图生图，AI 对话式创作',
+    'card.qr.desc': 'App 推广落地页 — 扫码下载体验',
+    'badge.lock': '🔒 需验证',
+    'auth.title': '需要验证',
+    'auth.desc': '此页面包含内部数据，请输入访问密码',
+    'auth.placeholder': '输入密码',
+    'auth.submit': '验证并进入',
+    'auth.cancel': '取消',
+    'auth.error': '密码错误，请重试'
+  },
+  'en': {
+    'header.subtitle': 'Tools & Dashboards',
+    'card.pw.desc': 'AI Photo Analysis — Upload a photo to decode poses, angles & lighting',
+    'card.data.title': 'Data Dashboard',
+    'card.data.desc': 'QR Scan Max ad analytics & monetization metrics',
+    'card.ai.title': 'AI Image Studio',
+    'card.ai.desc': 'ChatGPT / Gemini text-to-image & image-to-image, conversational AI art',
+    'card.qr.desc': 'App landing page — scan & download',
+    'badge.lock': '🔒 Auth',
+    'auth.title': 'Authentication Required',
+    'auth.desc': 'This page contains internal data. Please enter the password.',
+    'auth.placeholder': 'Enter password',
+    'auth.submit': 'Verify & Enter',
+    'auth.cancel': 'Cancel',
+    'auth.error': 'Incorrect password, please try again'
+  },
+  'ja': {
+    'header.subtitle': 'ツール＆ダッシュボード',
+    'card.pw.desc': 'AI撮影分析 — 写真をアップロードしてポーズ・アングル・ライティングを解析',
+    'card.data.title': 'データダッシュボード',
+    'card.data.desc': 'QR Scan Max 広告データ分析と収益化指標',
+    'card.ai.title': 'AI画像スタジオ',
+    'card.ai.desc': 'ChatGPT / Gemini テキストから画像生成＆画像から画像生成',
+    'card.qr.desc': 'アプリ紹介ページ — スキャンしてダウンロード',
+    'badge.lock': '🔒 認証',
+    'auth.title': '認証が必要です',
+    'auth.desc': 'このページには内部データが含まれています。パスワードを入力してください。',
+    'auth.placeholder': 'パスワードを入力',
+    'auth.submit': '確認して入る',
+    'auth.cancel': 'キャンセル',
+    'auth.error': 'パスワードが正しくありません'
+  },
+  'ko': {
+    'header.subtitle': '도구 & 대시보드',
+    'card.pw.desc': 'AI 사진 분석 — 사진을 업로드하여 포즈, 각도, 조명을 해독',
+    'card.data.title': '데이터 대시보드',
+    'card.data.desc': 'QR Scan Max 광고 데이터 분석 및 수익화 지표',
+    'card.ai.title': 'AI 이미지 스튜디오',
+    'card.ai.desc': 'ChatGPT / Gemini 텍스트→이미지 & 이미지→이미지 생성',
+    'card.qr.desc': '앱 소개 페이지 — 스캔하여 다운로드',
+    'badge.lock': '🔒 인증',
+    'auth.title': '인증 필요',
+    'auth.desc': '이 페이지에는 내부 데이터가 포함되어 있습니다. 비밀번호를 입력하세요.',
+    'auth.placeholder': '비밀번호 입력',
+    'auth.submit': '확인 및 입장',
+    'auth.cancel': '취소',
+    'auth.error': '비밀번호가 올바르지 않습니다'
+  }
+};
+
+I18n.init(TRANSLATIONS);
+I18n.renderSelector('lang-selector');
+
 // ─── Password gate for Data Analysis page ───
 (function(){
   const TARGET_HASH = -551981607;
@@ -235,7 +312,6 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
   gateCard(card2);
 
   function showAuth(targetUrl) {
-    // Remove existing overlay
     const old = document.getElementById('auth-overlay');
     if (old) old.remove();
 
@@ -263,12 +339,12 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
       </style>
       <div class="auth-box">
         <div class="lock-icon">🔒</div>
-        <h3>需要验证</h3>
-        <p>此页面包含内部数据，请输入访问密码</p>
-        <input class="auth-input" id="auth-pw" type="password" placeholder="输入密码" autocomplete="off" autofocus>
+        <h3>${I18n.t('auth.title')}</h3>
+        <p>${I18n.t('auth.desc')}</p>
+        <input class="auth-input" id="auth-pw" type="password" placeholder="${I18n.t('auth.placeholder')}" autocomplete="off" autofocus>
         <div class="auth-err-msg" id="auth-err"></div>
-        <button class="auth-btn" id="auth-submit">验证并进入</button>
-        <button class="auth-cancel" id="auth-close">取消</button>
+        <button class="auth-btn" id="auth-submit">${I18n.t('auth.submit')}</button>
+        <button class="auth-cancel" id="auth-close">${I18n.t('auth.cancel')}</button>
       </div>
     `;
     document.body.appendChild(overlay);
@@ -290,7 +366,7 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
       } else {
         if (typeof trackEvent==='function') trackEvent('auth_fail');
         input.classList.add('err');
-        errMsg.textContent = '密码错误，请重试';
+        errMsg.textContent = I18n.t('auth.error');
         setTimeout(() => { input.classList.remove('err'); }, 500);
         input.select();
       }
@@ -313,7 +389,6 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
     setTimeout(() => input.focus(), 100);
   }
 
-  // Auto-focus: if URL hash matches, trigger auth immediately
   if (window.location.hash === '#data' && card) {
     showAuth(card.href);
   } else if (window.location.hash === '#aiimage' && card2) {

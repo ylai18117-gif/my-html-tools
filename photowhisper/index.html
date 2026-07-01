@@ -270,6 +270,20 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:
   .r-cta{padding:36px 0 40px}
   .analyzing-steps{flex-direction:row;gap:20px}
 }
+
+/* ─── Toast ─── */
+.pw-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);z-index:300;background:rgba(26,26,26,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;font-size:13px;font-weight:500;padding:10px 20px;border-radius:100px;white-space:nowrap;opacity:0;pointer-events:none;transition:all .35s var(--ease);max-width:90vw;text-align:center}
+.pw-toast.vis{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ─── History status indicators ─── */
+.hist-item-status{position:absolute;top:8px;left:8px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;z-index:2}
+.hist-item-status.analyzing{background:rgba(193,122,86,.85);color:#fff;animation:statusPulse 1.5s infinite}
+.hist-item-status.error{background:rgba(196,68,68,.85);color:#fff}
+.hist-item-status.completed{background:rgba(52,211,153,.85);color:#fff}
+@keyframes statusPulse{0%,100%{opacity:1}50%{opacity:.6}}
+.hist-item.is-analyzing{pointer-events:none;opacity:.7}
+.hist-item.is-error .hist-item-img{position:relative}
+.hist-item.is-error .hist-item-img::after{content:'';position:absolute;inset:0;background:rgba(196,68,68,.15)}
 </style>
 <!-- Firebase Analytics -->
 <script type="module">
@@ -587,6 +601,23 @@ ${ad!==0?`<path d="M${cx+45} ${cy} A45 45 0 0 ${ad>0?0:1} ${cx+45*Math.cos(ar)} 
 // LOGIC
 // ═══════════════════════════════════════════
 let curData=null, curDiagram='top';
+let isAnalyzing=false, curAnalysisHistId=null;
+
+// Beforeunload: warn if analysis is running
+window.addEventListener('beforeunload',function(e){
+  if(!isAnalyzing)return;
+  e.preventDefault();e.returnValue='';
+});
+
+// Toast notification
+function showToast(msg,duration){
+  duration=duration||3000;
+  let t=document.getElementById('pw-toast');
+  if(!t){t=document.createElement('div');t.id='pw-toast';t.className='pw-toast';document.body.appendChild(t)}
+  t.textContent=msg;t.classList.add('vis');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('vis'),duration);
+}
 
 function switchView(id){
   document.querySelectorAll('.view').forEach(v=>{v.classList.remove('active');v.style.opacity='0'});
@@ -598,6 +629,7 @@ function switchView(id){
 }
 
 function showLanding(){
+  if(isAnalyzing){showToast('分析任务正在后台进行，可在历史记录中查看结果',4000)}
   switchView('view-landing');
   document.getElementById('nav-back-btn').style.display='none';
   updateHistBadge(); // show/hide history button based on actual data
@@ -645,10 +677,14 @@ function processFile(f){if(typeof trackEvent==='function')trackEvent('pw_upload'
   r.onload=async e=>{
     resetAnalysisUI();
     curAnalysisImg=e.target.result;
+    isAnalyzing=true;
     switchView('view-analyzing');
     document.getElementById('analyzing-img').src=curAnalysisImg;
     document.getElementById('nav-back-btn').style.display='flex';
     document.getElementById('hist-btn').style.display='flex';
+    // Save to history at START with 'analyzing' status
+    curAnalysisHistId=await saveToHistory('analyzing');
+    updateHistBadge();
     // Start step animation
     let c=0;
     const stepTimer=setInterval(()=>{
@@ -660,7 +696,6 @@ function processFile(f){if(typeof trackEvent==='function')trackEvent('pw_upload'
     try{
       const aiData=await analyzePhotoAI(curAnalysisImg);if(typeof trackEvent==='function')trackEvent('pw_analysis_complete',{source:'ai'});
       clearInterval(stepTimer);
-      // Mark all steps done
       for(let i=0;i<4;i++)document.getElementById('step-'+i).className='analyzing-step done';
       curData=aiData;
       populateResults(curData);
@@ -675,12 +710,24 @@ function processFile(f){if(typeof trackEvent==='function')trackEvent('pw_upload'
         setTimeout(()=>sh.classList.add('vis'),600);
         setTimeout(()=>updateTabIndicator(document.querySelector('.tab-btn.active')),100);
       },300);
-      saveToHistory();
+      // Update history entry to 'completed' with full analysis data
+      if(curAnalysisHistId){
+        updateHistoryEntry(curAnalysisHistId,{status:'completed',analysis:{
+          quote:curData.quote,tags:curData.tags,compBadge:curData.compBadge,compDot:curData.compDot,
+          scene:curData.scene,side:curData.side,
+          pose:curData.pose,angle:curData.angle,light:curData.light,comp:curData.comp,
+          env:curData.env,settings:curData.settings,checklist:curData.checklist
+        }});
+      }
     }catch(err){
       clearInterval(stepTimer);
       for(let i=0;i<4;i++)document.getElementById('step-'+i).className='analyzing-step';
       showAnalysisError(err.message||'分析失败，请重试');
       if(typeof trackEvent==='function')trackEvent('pw_analysis_error',{error:err.message});
+      // Update history entry to 'error'
+      if(curAnalysisHistId)updateHistoryEntry(curAnalysisHistId,{status:'error',error:err.message});
+    }finally{
+      isAnalyzing=false;curAnalysisHistId=null;
     }
   };
   r.readAsDataURL(f);
@@ -694,6 +741,8 @@ function startAnalysis(img,demoType){
   document.getElementById('analyzing-img').src=img;
   document.getElementById('nav-back-btn').style.display='flex';
   document.getElementById('hist-btn').style.display='flex';
+  // Save to history at START (demo is fast, use 'completed' directly)
+  saveToHistory('completed').then(id=>{updateHistBadge()});
   let c=0;
   function tick(){
     if(c>0)document.getElementById('step-'+(c-1)).className='analyzing-step done';
@@ -712,8 +761,6 @@ function startAnalysis(img,demoType){
         setTimeout(()=>sh.classList.add('vis'),600);
         setTimeout(()=>updateTabIndicator(document.querySelector('.tab-btn.active')),100);
       },300);
-      // Save to history
-      saveToHistory();
     },500);
   }
   for(let i=0;i<4;i++)document.getElementById('step-'+i).className='analyzing-step';
@@ -866,15 +913,14 @@ function updateHistBadge(){
   else{badge.style.display='none';btn.style.display='none'}
 }
 
-async function saveToHistory(){
+async function saveToHistory(status){
+  status=status||'completed';
   const arr=loadHistory();
   const isDemo=curAnalysisImg&&(curAnalysisImg.includes('unsplash.com'));
   let thumb=curAnalysisImg;
-  // Find matching demo type
   let demoType=null;
   for(const[k,v]of Object.entries(D)){if(v.img===curAnalysisImg){demoType=k;break}}
   if(!demoType&&curAnalysisImg){
-    // Custom upload — generate thumbnail
     thumb=await generateThumbnail(curAnalysisImg,300);
   }
   const entry={
@@ -882,9 +928,10 @@ async function saveToHistory(){
     type:demoType||'custom',
     label:demoType?DEMO_NAMES[demoType]:'自定义照片',
     timestamp:Date.now(),
+    status:status,
     thumbnail:thumb,
     photo:curAnalysisImg,
-    analysis:curData?{
+    analysis:status==='completed'&&curData?{
       quote:curData.quote,tags:curData.tags,compBadge:curData.compBadge,compDot:curData.compDot,
       scene:curData.scene,side:curData.side,
       pose:curData.pose,angle:curData.angle,light:curData.light,comp:curData.comp,
@@ -892,10 +939,18 @@ async function saveToHistory(){
     }:null
   };
   arr.unshift(entry);
-  // Prune
   while(arr.length>HIST_MAX_ITEMS)arr.pop();
   let blob=new Blob([JSON.stringify(arr)]);
   while(blob.size>HIST_MAX_BYTES&&arr.length>1){arr.pop();blob=new Blob([JSON.stringify(arr)])}
+  saveHistory(arr);
+  return entry.id;
+}
+
+function updateHistoryEntry(id,updates){
+  const arr=loadHistory();
+  const idx=arr.findIndex(i=>i.id===id);
+  if(idx===-1)return;
+  Object.assign(arr[idx],updates);
   saveHistory(arr);
 }
 
@@ -905,15 +960,19 @@ function showHistory(){if(typeof trackEvent==='function')trackEvent('pw_history_
   if(arr.length===0){
     body.innerHTML='<div class="hist-empty"><div class="hist-empty-icon">📋</div><p>还没有分析记录<br>上传照片开始你的第一次分析</p></div>';
   }else{
-    body.innerHTML='<div class="hist-grid">'+arr.map(item=>
-      `<div class="hist-item" onclick="openHistDetail('${item.id}')">
-        <div class="hist-item-img"><img src="${item.thumbnail}" alt=""></div>
+    body.innerHTML='<div class="hist-grid">'+arr.map(item=>{
+      const st=item.status||'completed';
+      const stBadge=st==='analyzing'?'<span class="hist-item-status analyzing">分析中...</span>'
+        :st==='error'?'<span class="hist-item-status error">失败</span>':'';
+      const itemClass=st==='analyzing'?'hist-item is-analyzing':st==='error'?'hist-item is-error':'hist-item';
+      return `<div class="${itemClass}" onclick="openHistDetail('${item.id}')">
+        <div class="hist-item-img">${stBadge}<img src="${item.thumbnail}" alt=""></div>
         <div class="hist-item-info">
           <div class="hist-item-type">${item.label}</div>
-          <div class="hist-item-time">${formatTimeAgo(item.timestamp)}</div>
+          <div class="hist-item-time">${st==='analyzing'?'正在分析...':formatTimeAgo(item.timestamp)}</div>
         </div>
-      </div>`
-    ).join('')+'</div>';
+      </div>`;
+    }).join('')+'</div>';
   }
   document.getElementById('hist-panel').classList.add('open');
 }
@@ -1075,22 +1134,24 @@ async function analyzePhotoAI(dataUrl){
   const apiKey=decKey(AI_KEY_ENC,AI_KEY_XOR);
   const resized=await resizeForAI(dataUrl,1024);
   let resp;
+  const bodyPayload=JSON.stringify({
+    model:AI_MODEL,
+    messages:[
+      {role:'system',content:AI_PROMPT},
+      {role:'user',content:[
+        {type:'image_url',image_url:{url:resized}},
+        {type:'text',text:'请分析这张照片的拍摄方法，返回JSON。'}
+      ]}
+    ],
+    temperature:0.3,
+    max_tokens:8000
+  });
   try{
     resp=await fetch(AI_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-      body:JSON.stringify({
-        model:AI_MODEL,
-        messages:[
-          {role:'system',content:AI_PROMPT},
-          {role:'user',content:[
-            {type:'image_url',image_url:{url:resized}},
-            {type:'text',text:'请分析这张照片的拍摄方法，返回JSON。'}
-          ]}
-        ],
-        temperature:0.3,
-        max_tokens:8000
-      })
+      body:bodyPayload,
+      keepalive:bodyPayload.length<65536 // keepalive has ~64KB body limit
     });
   }catch(netErr){
     // CORS or network error
@@ -1153,6 +1214,26 @@ function resetAnalysisUI(){
 bindScrollHint();
 // Init history badge on page load
 updateHistBadge();
+
+// Resume any pending (interrupted) analyses
+async function resumePendingAnalyses(){
+  const arr=loadHistory();
+  const pending=arr.filter(i=>i.status==='analyzing'&&i.photo);
+  for(const entry of pending){
+    try{
+      const aiData=await analyzePhotoAI(entry.photo);
+      updateHistoryEntry(entry.id,{status:'completed',analysis:{
+        quote:aiData.quote,tags:aiData.tags,compBadge:aiData.compBadge,compDot:aiData.compDot,
+        scene:aiData.scene,side:aiData.side,
+        pose:aiData.pose,angle:aiData.angle,light:aiData.light,comp:aiData.comp,
+        env:aiData.env,settings:aiData.settings,checklist:aiData.checklist
+      }});
+    }catch(err){
+      updateHistoryEntry(entry.id,{status:'error',error:err.message});
+    }
+  }
+}
+resumePendingAnalyses();
 </script>
 </body>
 </html>

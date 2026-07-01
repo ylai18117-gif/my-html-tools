@@ -91,6 +91,29 @@
       font-size: 18px;
     }
 
+    #lang-selector {
+      margin-left: auto;
+    }
+
+    .hero .i18n-selector {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .hero .i18n-opt {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 10px;
+      padding: 3px 8px;
+    }
+
+    .hero .i18n-opt:hover {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .hero .i18n-opt.active {
+      background: rgba(255, 255, 255, 0.18);
+      color: #fff;
+    }
+
     .hero-copy {
       width: 58%;
       padding-top: 44px;
@@ -412,6 +435,11 @@
         padding-left: 18px;
         padding-right: 18px;
       }
+
+      .hero .i18n-opt {
+        font-size: 9px;
+        padding: 2px 6px;
+      }
     }
   </style>
 <!-- Firebase Analytics -->
@@ -421,6 +449,7 @@ import{getAnalytics,logEvent}from"https://www.gstatic.com/firebasejs/12.15.0/fir
 const app=initializeApp({apiKey:"AIzaSyDT9uNrRj97oLuehLXgOto97Z-mVw12cnk",authDomain:"myhtml-ff6d6.firebaseapp.com",projectId:"myhtml-ff6d6",storageBucket:"myhtml-ff6d6.firebasestorage.app",messagingSenderId:"790702386101",appId:"1:790702386101:web:f4e30fb5ce4771396347fc",measurementId:"G-8FQ9DRDJ6T"});
 const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catch(e){}};
 </script>
+<script src="/i18n.js"></script>
 </head>
 <body>
   <main class="poster">
@@ -428,21 +457,22 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
       <div class="brand-row">
         <img src="img/logo.png" alt="Fast QR Scan app icon" />
         <span>Fast QR Scan</span>
+        <div id="lang-selector"></div>
       </div>
 
       <div class="hero-copy">
-        <h1>Scan Fast. Create Smart.</h1>
-        <p>Read QR codes and barcodes instantly, save every result, and create polished codes for links, Wi-Fi, text, and more.</p>
+        <h1 data-i18n="hero_title">Scan Fast. Create Smart.</h1>
+        <p data-i18n="hero_desc">Read QR codes and barcodes instantly, save every result, and create polished codes for links, Wi-Fi, text, and more.</p>
         <div class="badges" aria-label="App highlights">
-          <span>QR</span>
-          <span>Barcode</span>
-          <span>History</span>
-          <span>Creator</span>
+          <span data-i18n="badge_qr">QR</span>
+          <span data-i18n="badge_barcode">Barcode</span>
+          <span data-i18n="badge_history">History</span>
+          <span data-i18n="badge_creator">Creator</span>
         </div>
         <div class="hero-dl">
           <a class="dl-btn" onclick="if(typeof trackEvent!=='undefined')trackEvent('qr_download_click',{section:'hero'})" href="https://play.google.com/store/apps/details?id=com.qrscanfast.qr&pcampaignid=web_share" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24"><path d="M3.61 1.814L13.793 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .61-.92zm10.893 9.476l2.56-2.56 3.48 2.005c.63.363.63.967 0 1.33l-3.48 2.005-2.56-2.56-.22-.11.22-.11zM5.15.894l8.553 8.553-2.47 2.47L5.15.894zm0 22.212l6.083-7.023 2.47 2.47L5.15 23.106z"/></svg>
-            Get it on Google Play
+            <span data-i18n="dl_google_play">Get it on Google Play</span>
           </a>
         </div>
       </div>
@@ -452,10 +482,10 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
       </div>
     </section>
 
-    <h2 class="section-title"><span><i class="diamond"></i>Company profile<i class="diamond"></i></span></h2>
+    <h2 class="section-title"><span><i class="diamond"></i><span data-i18n="section_company">Company profile</span><i class="diamond"></i></span></h2>
 
     <section class="profile">
-      <p>
+      <p data-i18n-html="profile_text">
         --Our app "Fast QR Scan: Barcode Reader"--<br />
         Fast QR Scan is a practical all-in-one QR and barcode tool made for everyday scanning. Open the camera, decode information in seconds, keep useful scan history, and generate custom QR codes with a simple, modern interface.<br />
         --contact us--<br />
@@ -467,26 +497,26 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
     </section>
 
     <section class="feature-band">
-      <h2 class="section-title"><span><i class="diamond"></i>APP introduction<i class="diamond"></i></span></h2>
+      <h2 class="section-title"><span><i class="diamond"></i><span data-i18n="section_app_intro">APP introduction</span><i class="diamond"></i></span></h2>
       <div class="screens">
         <article class="screen-card">
-          <div class="screen-title">Real-time<br />scanner</div>
+          <div class="screen-title" data-i18n-html="screen_scanner">Real-time<br />scanner</div>
           <img src="img/scan-home.png" alt="Real-time QR scanner screen" />
         </article>
         <article class="screen-card">
-          <div class="screen-title">Clear scan<br />results</div>
+          <div class="screen-title" data-i18n-html="screen_results">Clear scan<br />results</div>
           <img src="img/scan-result.png" alt="Scan result screen" />
         </article>
         <article class="screen-card">
-          <div class="screen-title">Private local<br />history</div>
+          <div class="screen-title" data-i18n-html="screen_history">Private local<br />history</div>
           <img src="img/history.png" alt="Scan history screen" />
         </article>
         <article class="screen-card">
-          <div class="screen-title">Create QR<br />codes</div>
+          <div class="screen-title" data-i18n-html="screen_create">Create QR<br />codes</div>
           <img src="img/create.png" alt="Create QR code screen" />
         </article>
         <article class="screen-card">
-          <div class="screen-title">Customize QR<br />style</div>
+          <div class="screen-title" data-i18n-html="screen_customize">Customize QR<br />style</div>
           <img src="img/customize.png" alt="QR code customization screen" />
         </article>
       </div>
@@ -494,33 +524,33 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 
     <section class="benefits" aria-label="Fast QR Scan benefits">
       <div class="benefit">
-        <strong>Fast capture</strong>
-        <span>Designed for quick camera scanning and photo import decoding.</span>
+        <strong data-i18n="benefit_fast">Fast capture</strong>
+        <span data-i18n="benefit_fast_desc">Designed for quick camera scanning and photo import decoding.</span>
       </div>
       <div class="benefit">
-        <strong>Useful records</strong>
-        <span>Keep scan and generation history ready when you need it again.</span>
+        <strong data-i18n="benefit_records">Useful records</strong>
+        <span data-i18n="benefit_records_desc">Keep scan and generation history ready when you need it again.</span>
       </div>
       <div class="benefit">
-        <strong>Code maker</strong>
-        <span>Create QR codes for links, Wi-Fi, text, contacts, and more.</span>
+        <strong data-i18n="benefit_maker">Code maker</strong>
+        <span data-i18n="benefit_maker_desc">Create QR codes for links, Wi-Fi, text, contacts, and more.</span>
       </div>
       <div class="benefit">
-        <strong>Ad-free option</strong>
-        <span>Upgrade for a quieter, uninterrupted scanning experience.</span>
+        <strong data-i18n="benefit_adfree">Ad-free option</strong>
+        <span data-i18n="benefit_adfree_desc">Upgrade for a quieter, uninterrupted scanning experience.</span>
       </div>
     </section>
 
     <section class="waiting">
-      Ready when you scan
-      <small>Download Fast QR Scan: Barcode Reader and keep a cleaner QR toolkit in your pocket.</small>
+      <span data-i18n="cta_title">Ready when you scan</span>
+      <small data-i18n="cta_subtitle">Download Fast QR Scan: Barcode Reader and keep a cleaner QR toolkit in your pocket.</small>
       <a class="dl-btn" onclick="if(typeof trackEvent!=='undefined')trackEvent('qr_download_click',{section:'cta'})" href="https://play.google.com/store/apps/details?id=com.qrscanfast.qr&pcampaignid=web_share" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24"><path d="M3.61 1.814L13.793 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .61-.92zm10.893 9.476l2.56-2.56 3.48 2.005c.63.363.63.967 0 1.33l-3.48 2.005-2.56-2.56-.22-.11.22-.11zM5.15.894l8.553 8.553-2.47 2.47L5.15.894zm0 22.212l6.083-7.023 2.47 2.47L5.15 23.106z"/></svg>
-        Get it on Google Play
+        <span data-i18n="dl_google_play">Get it on Google Play</span>
       </a>
     </section>
 
-    <footer class="footer">ylai18117@gmail.com</footer>
+    <footer class="footer" data-i18n="footer_email">ylai18117@gmail.com</footer>
   </main>
 <script>
 (function(){
@@ -532,6 +562,127 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
     });
   },{passive:true});
 })();
+</script>
+<script>
+var TRANSLATIONS = {
+  'zh-CN': {
+    hero_title: '\u5FEB\u901F\u626B\u63CF\u3002\u667A\u80FD\u521B\u5EFA\u3002',
+    hero_desc: '\u5373\u65F6\u8BC6\u522B\u4E8C\u7EF4\u7801\u548C\u6761\u7801\uFF0C\u4FDD\u5B58\u6BCF\u6B21\u626B\u63CF\u7ED3\u679C\uFF0C\u8FD8\u80FD\u4E3A\u94FE\u63A5\u3001Wi-Fi\u3001\u6587\u672C\u7B49\u5185\u5BB9\u521B\u5EFA\u7CBE\u7F8E\u7684\u4E8C\u7EF4\u7801\u3002',
+    badge_qr: '\u4E8C\u7EF4\u7801',
+    badge_barcode: '\u6761\u7801',
+    badge_history: '\u5386\u53F2',
+    badge_creator: '\u521B\u5EFA\u5668',
+    dl_google_play: '\u524D\u5F80 Google Play \u4E0B\u8F7D',
+    section_company: '\u516C\u53F8\u7B80\u4ECB',
+    profile_text: '--\u6211\u4EEC\u7684\u5E94\u7528\u201C\u5FEB\u901F\u626B\u63CF\uFF1A\u6761\u7801\u8BFB\u53D6\u5668\u201D--<br/>\u5FEB\u901F\u626B\u63CF\u662F\u4E00\u6B3E\u5B9E\u7528\u7684\u591A\u529F\u80FD\u4E8C\u7EF4\u7801\u548C\u6761\u7801\u5DE5\u5177\uFF0C\u4E13\u4E3A\u65E5\u5E38\u626B\u63CF\u800C\u8BBE\u8BA1\u3002\u6253\u5F00\u76F8\u673A\u5373\u53EF\u5FEB\u901F\u89E3\u7801\uFF0C\u4FDD\u5B58\u626B\u63CF\u5386\u53F2\uFF0C\u8FD8\u80FD\u901A\u8FC7\u7B80\u6D01\u73B0\u4EE3\u7684\u754C\u9762\u751F\u6210\u81EA\u5B9A\u4E49\u4E8C\u7EF4\u7801\u3002<br/>--\u8054\u7CFB\u6211\u4EEC--<br/>\u90AE\u7BB1\uFF1Aylai18117@gmail.com',
+    section_app_intro: '\u5E94\u7528\u4ECB\u7ECD',
+    screen_scanner: '\u5B9E\u65F6<br/>\u626B\u63CF\u5668',
+    screen_results: '\u6E05\u6670\u626B\u63CF<br/>\u7ED3\u679C',
+    screen_history: '\u672C\u5730\u79C1\u5BC6<br/>\u5386\u53F2',
+    screen_create: '\u521B\u5EFA<br/>\u4E8C\u7EF4\u7801',
+    screen_customize: '\u81EA\u5B9A\u4E49<br/>\u4E8C\u7EF4\u7801\u6837\u5F0F',
+    benefit_fast: '\u5FEB\u901F\u626B\u63CF',
+    benefit_fast_desc: '\u4E13\u4E3A\u5FEB\u901F\u76F8\u673A\u626B\u63CF\u548C\u56FE\u7247\u5BFC\u5165\u89E3\u7801\u800C\u8BBE\u8BA1\u3002',
+    benefit_records: '\u5B9E\u7528\u8BB0\u5F55',
+    benefit_records_desc: '\u968F\u65F6\u67E5\u770B\u626B\u63CF\u548C\u751F\u6210\u5386\u53F2\u8BB0\u5F55\u3002',
+    benefit_maker: '\u4E8C\u7EF4\u7801\u751F\u6210',
+    benefit_maker_desc: '\u4E3A\u94FE\u63A5\u3001Wi-Fi\u3001\u6587\u672C\u3001\u8054\u7CFB\u4EBA\u7B49\u5185\u5BB9\u521B\u5EFA\u4E8C\u7EF4\u7801\u3002',
+    benefit_adfree: '\u65E0\u5E7F\u544A\u9009\u9879',
+    benefit_adfree_desc: '\u5347\u7EA7\u4EAB\u53D7\u66F4\u5B89\u9759\u3001\u65E0\u5E72\u6270\u7684\u626B\u63CF\u4F53\u9A8C\u3002',
+    cta_title: '\u968F\u65F6\u5F85\u547D\uFF0C\u5F00\u626B\u5373\u7528',
+    cta_subtitle: '\u4E0B\u8F7D\u5FEB\u901F\u626B\u63CF\uFF1A\u6761\u7801\u8BFB\u53D6\u5668\uFF0C\u968F\u8EAB\u643A\u5E26\u66F4\u597D\u7528\u7684\u4E8C\u7EF4\u7801\u5DE5\u5177\u3002',
+    footer_email: 'ylai18117@gmail.com'
+  },
+  'en': {
+    hero_title: 'Scan Fast. Create Smart.',
+    hero_desc: 'Read QR codes and barcodes instantly, save every result, and create polished codes for links, Wi-Fi, text, and more.',
+    badge_qr: 'QR',
+    badge_barcode: 'Barcode',
+    badge_history: 'History',
+    badge_creator: 'Creator',
+    dl_google_play: 'Get it on Google Play',
+    section_company: 'Company profile',
+    profile_text: '--Our app "Fast QR Scan: Barcode Reader"--<br/>Fast QR Scan is a practical all-in-one QR and barcode tool made for everyday scanning. Open the camera, decode information in seconds, keep useful scan history, and generate custom QR codes with a simple, modern interface.<br/>--contact us--<br/>Email: ylai18117@gmail.com',
+    section_app_intro: 'APP introduction',
+    screen_scanner: 'Real-time<br/>scanner',
+    screen_results: 'Clear scan<br/>results',
+    screen_history: 'Private local<br/>history',
+    screen_create: 'Create QR<br/>codes',
+    screen_customize: 'Customize QR<br/>style',
+    benefit_fast: 'Fast capture',
+    benefit_fast_desc: 'Designed for quick camera scanning and photo import decoding.',
+    benefit_records: 'Useful records',
+    benefit_records_desc: 'Keep scan and generation history ready when you need it again.',
+    benefit_maker: 'Code maker',
+    benefit_maker_desc: 'Create QR codes for links, Wi-Fi, text, contacts, and more.',
+    benefit_adfree: 'Ad-free option',
+    benefit_adfree_desc: 'Upgrade for a quieter, uninterrupted scanning experience.',
+    cta_title: 'Ready when you scan',
+    cta_subtitle: 'Download Fast QR Scan: Barcode Reader and keep a cleaner QR toolkit in your pocket.',
+    footer_email: 'ylai18117@gmail.com'
+  },
+  'ja': {
+    hero_title: '\u30B9\u30AD\u30E3\u30F3\u8FC5\u901F\u3002\u4F5C\u6210\u30B9\u30DE\u30FC\u30C8\u3002',
+    hero_desc: 'QR\u30B3\u30FC\u30C9\u3068\u30D0\u30FC\u30B3\u30FC\u30C9\u3092\u3059\u3050\u306B\u8AAD\u307F\u53D6\u308A\u3001\u3059\u3079\u3066\u306E\u7D50\u679C\u3092\u4FDD\u5B58\u3057\u3001\u30EA\u30F3\u30AF\u30FBWi-Fi\u30FB\u30C6\u30AD\u30B9\u30C8\u306A\u3069\u306E\u304A\u3057\u3083\u308C\u306A\u30B3\u30FC\u30C9\u3092\u4F5C\u6210\u3067\u304D\u307E\u3059\u3002',
+    badge_qr: 'QR',
+    badge_barcode: '\u30D0\u30FC\u30B3\u30FC\u30C9',
+    badge_history: '\u5C65\u6B74',
+    badge_creator: '\u4F5C\u6210',
+    dl_google_play: 'Google Play\u3067\u5165\u624B',
+    section_company: '\u4F1A\u793E\u6982\u8981',
+    profile_text: '--\u305D\u306E\u30A2\u30D7\u30EA\u300C\u30B9\u30D4\u30FC\u30C9QR\u30B9\u30AD\u30E3\u30F3\uFF1A\u30D0\u30FC\u30B3\u30FC\u30C9\u30EA\u30FC\u30C0\u30FC\u300D--<br/>\u30B9\u30D4\u30FC\u30C9QR\u30B9\u30AD\u30E3\u30F3\u306F\u3001\u65E5\u5E38\u306E\u30B9\u30AD\u30E3\u30F3\u306B\u6700\u9069\u306A\u5B9F\u7528\u7684\u306AQR\u30FB\u30D0\u30FC\u30B3\u30FC\u30C9\u7D71\u5408\u30C4\u30FC\u30EB\u3067\u3059\u3002\u30AB\u30E1\u30E9\u3092\u958B\u3044\u3066\u6570\u79D2\u3067\u89E3\u8AAD\u3057\u3001\u30B9\u30AD\u30E3\u30F3\u5C65\u6B74\u3092\u4FDD\u5B58\u3057\u3001\u30B7\u30F3\u30D7\u30EB\u3067\u30E2\u30C0\u30F3\u306A\u754C\u9762\u3067\u30AB\u30B9\u30BF\u30E0QR\u30B3\u30FC\u30C9\u3092\u751F\u6210\u3067\u304D\u307E\u3059\u3002<br/>--\u304A\u554F\u3044\u5408\u308F\u305B--<br/>\u30E1\u30FC\u30EB\uFF1Aylai18117@gmail.com',
+    section_app_intro: '\u30A2\u30D7\u30EA\u7D39\u4ECB',
+    screen_scanner: '\u30EA\u30A2\u30EB\u30BF\u30A4\u30E0<br/>\u30B9\u30AD\u30E3\u30CA\u30FC',
+    screen_results: '\u30AF\u30EA\u30A2\u306A<br/>\u30B9\u30AD\u30E3\u30F3\u7D50\u679C',
+    screen_history: '\u30ED\u30FC\u30AB\u30EB<br/>\u5C65\u6B74',
+    screen_create: 'QR\u30B3\u30FC\u30C9<br/>\u4F5C\u6210',
+    screen_customize: 'QR\u30B9\u30BF\u30A4\u30EB<br/>\u30AB\u30B9\u30BF\u30DE\u30A4\u30BA',
+    benefit_fast: '\u9AD8\u901F\u30B9\u30AD\u30E3\u30F3',
+    benefit_fast_desc: '\u30AB\u30E1\u30E9\u3067\u306E\u7D20\u65E9\u3044\u30B9\u30AD\u30E3\u30F3\u3068\u5199\u771F\u306E\u30A4\u30F3\u30DD\u30FC\u30C8\u89E3\u8AAD\u306B\u5BFE\u5FDC\u3002',
+    benefit_records: '\u4FBF\u5229\u306A\u8A18\u9332',
+    benefit_records_desc: '\u30B9\u30AD\u30E3\u30F3\u3068\u751F\u6210\u306E\u5C65\u6B74\u3092\u5FC5\u8981\u306A\u3068\u304D\u306B\u3059\u3050\u78BA\u8A8D\u3067\u304D\u307E\u3059\u3002',
+    benefit_maker: '\u30B3\u30FC\u30C9\u4F5C\u6210',
+    benefit_maker_desc: '\u30EA\u30F3\u30AF\u30FBWi-Fi\u30FB\u30C6\u30AD\u30B9\u30C8\u30FB\u9023\u7D61\u5148\u306A\u3069\u306EQR\u30B3\u30FC\u30C9\u3092\u4F5C\u6210\u3002',
+    benefit_adfree: '\u5E83\u544A\u306A\u3057\u30AA\u30D7\u30B7\u30E7\u30F3',
+    benefit_adfree_desc: '\u30A2\u30C3\u30D7\u30B0\u30EC\u30FC\u30C9\u3067\u9759\u304B\u3067\u59A8\u3052\u3089\u308C\u306A\u3044\u30B9\u30AD\u30E3\u30F3\u4F53\u9A13\u3092\u3002',
+    cta_title: '\u30B9\u30AD\u30E3\u30F3\u3059\u308C\u3070\u3059\u3050\u4F7F\u3048\u308B',
+    cta_subtitle: '\u30B9\u30D4\u30FC\u30C9QR\u30B9\u30AD\u30E3\u30F3\uFF1A\u30D0\u30FC\u30B3\u30FC\u30C9\u30EA\u30FC\u30C0\u30FC\u3092\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9\u3057\u3066\u3001\u3059\u3063\u304D\u308A\u3057\u305FQR\u30C4\u30FC\u30EB\u3092\u624B\u5143\u306B\u3002',
+    footer_email: 'ylai18117@gmail.com'
+  },
+  'ko': {
+    hero_title: '\uBE60\uB974\uAC8C \uC2A4\uCE94. \uC2A4\uB9C8\uD2B8\uD558\uAC8C \uC81C\uC791.',
+    hero_desc: 'QR \uCF54\uB4DC\uC640 \uBC14\uCF54\uB4DC\uB97C \uC989\uC2DC \uC77D\uACE0, \uBAA8\uB4E0 \uACB0\uACFC\uB97C \uC800\uC7A5\uD558\uACE0, \uB9C1\uD06C, Wi-Fi, \uD14D\uC2A4\uD2B8 \uB4F1\uC744 \uC704\uD55C \uC544\uB984\uB2E4\uC6B4 \uCF54\uB4DC\uB97C \uC81C\uC791\uD558\uC138\uC694.',
+    badge_qr: 'QR',
+    badge_barcode: '\uBC14\uCF54\uB4DC',
+    badge_history: '\uAE30\uB85D',
+    badge_creator: '\uC81C\uC791\uC18C',
+    dl_google_play: 'Google Play\uC5D0\uC11C \uB2E4\uC6B4\uB85C\uB4DC',
+    section_company: '\uD68C\uC0AC \uC18C\uAC1C',
+    profile_text: '--\uC6B0\uB9AC \uC571 "\uD328\uC2A4\uD2B8 QR \uC2A4\uCE94: \uBC14\uCF54\uB4DC \uB9AC\uB354"--<br/>\uD328\uC2A4\uD2B8 QR \uC2A4\uCE94\uC740 \uC77C\uC0C1 \uC2A4\uCE94\uC744 \uC704\uD574 \uC124\uACC4\uB41C \uC2E4\uC6A9\uC801\uC778 QR \uBC0F \uBC14\uCF54\uB4DC \uD1B0\uD569 \uB3C4\uAD6C\uC785\uB2C8\uB2E4. \uCE74\uBA54\uB77C\uB97C \uC5F4\uACE0 \uC218 \uCD08 \uB0B4\uC5D0 \uD574\uB3C5\uD558\uACE0, \uC2A4\uCE94 \uAE30\uB85D\uC744 \uC800\uC7A5\uD558\uACE0, \uAC04\uACB0\uD558\uACE0 \uD604\uB300\uC801\uC778 \uD654\uBA74\uC5D0\uC11C \uC0AC\uC6A9\uC790 \uC815\uC758 QR \uCF54\uB4DC\uB97C \uC0DD\uC131\uD558\uC138\uC694.<br/>--\uBB38\uC758--<br/>\uC774\uBA54\uC77C: ylai18117@gmail.com',
+    section_app_intro: '\uC571 \uC18C\uAC1C',
+    screen_scanner: '\uC2E4\uC2DC\uAC04<br/>\uC2A4\uCE90\uB108',
+    screen_results: '\uC120\uBA85\uD55C<br/>\uC2A4\uCE94 \uACB0\uACFC',
+    screen_history: '\uB85C\uCEEC \uBE44\uBC00<br/>\uAE30\uB85D',
+    screen_create: 'QR \uCF54\uB4DC<br/>\uC81C\uC791',
+    screen_customize: 'QR \uC2A4\uD0C0\uC77C<br/>\uC0AC\uC6A9\uC790 \uC815\uC758',
+    benefit_fast: '\uBE60\uB978 \uC2A4\uCE94',
+    benefit_fast_desc: '\uBE60\uB978 \uCE74\uBA54\uB77C \uC2A4\uCE94\uACFC \uC0AC\uC9C4 \uAC00\uC838\uC624\uAE30 \uD574\uB3C5\uC744 \uC704\uD574 \uC124\uACC4\uB418\uC5C8\uC2B5\uB2C8\uB2E4.',
+    benefit_records: '\uC720\uC6A9\uD55C \uAE30\uB85D',
+    benefit_records_desc: '\uC2A4\uCE94 \uBC0F \uC0DD\uC131 \uAE30\uB85D\uC744 \uD544\uC694\uD560 \uB54C \uC989\uC2DC \uD655\uC778\uD558\uC138\uC694.',
+    benefit_maker: '\uCF54\uB4DC \uC81C\uC791',
+    benefit_maker_desc: '\uB9C1\uD06C, Wi-Fi, \uD14D\uC2A4\uD2B8, \uC5F0\uB77D\uCC98 \uB4F1\uC758 QR \uCF54\uB4DC\uB97C \uC81C\uC791\uD558\uC138\uC694.',
+    benefit_adfree: '\uAD11\uACE0 \uC5C6\uB294 \uC635\uC158',
+    benefit_adfree_desc: '\uC5C5\uADF8\uB808\uC774\uB4DC\uD558\uACE0 \uC880\uB354 \uC88B\uC740 \uC2A4\uCE94 \uACBD\uD5D8\uC744 \uC990\uAE30\uC138\uC694.',
+    cta_title: '\uC2A4\uCE94\uD558\uBA74 \uC989\uC2DC \uC900\uBE44',
+    cta_subtitle: '\uD328\uC2A4\uD2B8 QR \uC2A4\uCE94: \uBC14\uCF54\uB4DC \uB9AC\uB354\uB97C \uB2E4\uC6B4\uB85C\uB4DC\uD558\uACE0 \uB354 \uB098\uC740 QR \uB3C4\uAD6C\uB97C \uC190\uC5D0 \uC9C0\uB2C8\uC138\uC694.',
+    footer_email: 'ylai18117@gmail.com'
+  }
+};
+
+if (typeof I18n !== 'undefined') {
+  I18n.init(TRANSLATIONS);
+  I18n.renderSelector('lang-selector');
+}
 </script>
 </body>
 </html>
