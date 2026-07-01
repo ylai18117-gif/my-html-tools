@@ -274,9 +274,9 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:
 <!-- Firebase Analytics -->
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import{getAnalytics}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
+import{getAnalytics,logEvent}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
 const app=initializeApp({apiKey:"AIzaSyDT9uNrRj97oLuehLXgOto97Z-mVw12cnk",authDomain:"myhtml-ff6d6.firebaseapp.com",projectId:"myhtml-ff6d6",storageBucket:"myhtml-ff6d6.firebasestorage.app",messagingSenderId:"790702386101",appId:"1:790702386101:web:f4e30fb5ce4771396347fc",measurementId:"G-8FQ9DRDJ6T"});
-getAnalytics(app);
+const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catch(e){}};
 </script>
 </head>
 <body>
@@ -639,7 +639,7 @@ function handleDragLeave(){uz.classList.remove('drag-over')}
 function handleDrop(e){e.preventDefault();uz.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))processFile(f)}
 function handleFileSelect(e){if(e.target.files[0])processFile(e.target.files[0])}
 document.addEventListener('paste',e=>{for(const i of e.clipboardData.items)if(i.type.startsWith('image/')){processFile(i.getAsFile());break}});
-function processFile(f){
+function processFile(f){if(typeof trackEvent==='function')trackEvent('pw_upload');
   if(!f||!f.type.startsWith('image/'))return;
   const r=new FileReader();
   r.onload=async e=>{
@@ -658,7 +658,7 @@ function processFile(f){
     },1200);
     // Call AI
     try{
-      const aiData=await analyzePhotoAI(curAnalysisImg);
+      const aiData=await analyzePhotoAI(curAnalysisImg);if(typeof trackEvent==='function')trackEvent('pw_analysis_complete',{source:'ai'});
       clearInterval(stepTimer);
       // Mark all steps done
       for(let i=0;i<4;i++)document.getElementById('step-'+i).className='analyzing-step done';
@@ -680,11 +680,12 @@ function processFile(f){
       clearInterval(stepTimer);
       for(let i=0;i<4;i++)document.getElementById('step-'+i).className='analyzing-step';
       showAnalysisError(err.message||'分析失败，请重试');
+      if(typeof trackEvent==='function')trackEvent('pw_analysis_error',{error:err.message});
     }
   };
   r.readAsDataURL(f);
 }
-function analyzeDemo(t){curData=D[t];startAnalysis(D[t].img,t)}
+function analyzeDemo(t){if(typeof trackEvent==='function')trackEvent('pw_demo_click',{type:t});curData=D[t];startAnalysis(D[t].img,t)}
 
 function startAnalysis(img,demoType){
   resetAnalysisUI();
@@ -753,7 +754,7 @@ function fillTab(id,items){
 
 // Diagram toggle with fade
 function switchDiagram(type){
-  if(type===curDiagram)return;
+  if(type===curDiagram)return;if(typeof trackEvent==='function')trackEvent('pw_diagram_switch',{view:type});
   const wrap=document.getElementById('diagram-display');
   const leg=document.getElementById('diagram-legend');
   wrap.classList.add('fading');leg.style.opacity='0';
@@ -781,7 +782,7 @@ let curTab='pose';
 document.getElementById('tab-bar').addEventListener('click',e=>{
   const btn=e.target.closest('.tab-btn');if(!btn)return;
   const tab=btn.dataset.tab;if(tab===curTab)return;
-  curTab=tab;
+  curTab=tab;if(typeof trackEvent==='function')trackEvent('pw_tab_switch',{tab:tab});
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   updateTabIndicator(btn);
@@ -804,6 +805,7 @@ function updateTabIndicator(btn){
 }
 
 function saveChecklist(){
+  if(typeof trackEvent==='function')trackEvent('pw_checklist_save');
   const btn=document.querySelector('.r-cl-save');
   const text=Array.from(document.querySelectorAll('.r-cl-item p')).map((p,i)=>`${i+1}. ${p.textContent}`).join('\n');
   navigator.clipboard.writeText('📷 拍摄清单\n\n'+text).catch(()=>{});
@@ -816,7 +818,7 @@ function saveChecklist(){
 // ═══════════════════════════════════════════
 let compGridVisible=true;
 function toggleCompGrid(){
-  compGridVisible=!compGridVisible;
+  compGridVisible=!compGridVisible;if(typeof trackEvent==='function')trackEvent('pw_comp_toggle',{visible:compGridVisible});
   const grid=document.getElementById('comp-grid');
   const badge=document.getElementById('comp-badge');
   const btn=document.getElementById('comp-toggle');
@@ -897,7 +899,7 @@ async function saveToHistory(){
   saveHistory(arr);
 }
 
-function showHistory(){
+function showHistory(){if(typeof trackEvent==='function')trackEvent('pw_history_view');
   const arr=loadHistory();
   const body=document.getElementById('hist-body');
   if(arr.length===0){

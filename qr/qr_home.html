@@ -356,6 +356,35 @@
       text-transform: none;
     }
 
+    .dl-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+      padding: 12px 28px;
+      background: #0f8e74;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 100px;
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: none;
+      transition: background .2s, transform .15s;
+      box-shadow: 0 4px 16px rgba(15,142,116,.25);
+    }
+    .dl-btn:hover { background: #0d7d66; }
+    .dl-btn:active { transform: scale(.97); }
+    .dl-btn svg { width: 20px; height: 20px; fill: currentColor; flex-shrink: 0; }
+
+    .hero-dl {
+      margin-top: 16px;
+      text-align: center;
+    }
+    .hero-dl .dl-btn {
+      font-size: 14px;
+      padding: 10px 24px;
+    }
+
     .footer {
       padding: 17px 20px 18px;
       background: #0f8e74;
@@ -420,9 +449,9 @@
 <!-- Firebase Analytics -->
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import{getAnalytics}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
+import{getAnalytics,logEvent}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
 const app=initializeApp({apiKey:"AIzaSyDT9uNrRj97oLuehLXgOto97Z-mVw12cnk",authDomain:"myhtml-ff6d6.firebaseapp.com",projectId:"myhtml-ff6d6",storageBucket:"myhtml-ff6d6.firebasestorage.app",messagingSenderId:"790702386101",appId:"1:790702386101:web:f4e30fb5ce4771396347fc",measurementId:"G-8FQ9DRDJ6T"});
-getAnalytics(app);
+const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catch(e){}};
 </script>
 </head>
 <body>
@@ -452,6 +481,13 @@ getAnalytics(app);
         <div>On-device<br />scan</div>
         <div>Instant<br />results</div>
         <div>Clean<br />tools</div>
+      </div>
+
+      <div class="hero-dl">
+        <a class="dl-btn" onclick="if(typeof trackEvent!=='undefined')trackEvent('qr_download_click',{section:'hero'})" href="https://play.google.com/store/apps/details?id=com.qrscanfast.qr&pcampaignid=web_share" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M3.61 1.814L13.793 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .61-.92zm10.893 9.476l2.56-2.56 3.48 2.005c.63.363.63.967 0 1.33l-3.48 2.005-2.56-2.56-.22-.11.22-.11zM5.15.894l8.553 8.553-2.47 2.47L5.15.894zm0 22.212l6.083-7.023 2.47 2.47L5.15 23.106z"/></svg>
+          Get it on Google Play
+        </a>
       </div>
     </section>
 
@@ -517,9 +553,24 @@ getAnalytics(app);
     <section class="waiting">
       Ready when you scan
       <small>Download Fast QR Scan: Barcode Reader and keep a cleaner QR toolkit in your pocket.</small>
+      <a class="dl-btn" onclick="if(typeof trackEvent!=='undefined')trackEvent('qr_download_click',{section:'cta'})" href="https://play.google.com/store/apps/details?id=com.qrscanfast.qr&pcampaignid=web_share" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M3.61 1.814L13.793 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .61-.92zm10.893 9.476l2.56-2.56 3.48 2.005c.63.363.63.967 0 1.33l-3.48 2.005-2.56-2.56-.22-.11.22-.11zM5.15.894l8.553 8.553-2.47 2.47L5.15.894zm0 22.212l6.083-7.023 2.47 2.47L5.15 23.106z"/></svg>
+        Get it on Google Play
+      </a>
     </section>
 
     <footer class="footer">ylai18117@gmail.com</footer>
   </main>
 </body>
 </html>
+<script>
+(function(){
+  var fired={};
+  window.addEventListener('scroll',function(){
+    var pct=Math.round((window.scrollY/(document.body.scrollHeight-window.innerHeight))*100);
+    [25,50,75,100].forEach(function(t){
+      if(pct>=t&&!fired[t]){fired[t]=1;if(typeof trackEvent==='function')trackEvent('qr_scroll',{depth:t})}
+    });
+  },{passive:true});
+})();
+</script>

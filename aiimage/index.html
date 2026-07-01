@@ -230,9 +230,9 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:
 <!-- Firebase Analytics -->
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import{getAnalytics}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
+import{getAnalytics,logEvent}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
 const app=initializeApp({apiKey:"AIzaSyDT9uNrRj97oLuehLXgOto97Z-mVw12cnk",authDomain:"myhtml-ff6d6.firebaseapp.com",projectId:"myhtml-ff6d6",storageBucket:"myhtml-ff6d6.firebasestorage.app",messagingSenderId:"790702386101",appId:"1:790702386101:web:f4e30fb5ce4771396347fc",measurementId:"G-8FQ9DRDJ6T"});
-getAnalytics(app);
+const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catch(e){}};
 </script>
 </head>
 <body>
@@ -378,12 +378,12 @@ authPw.addEventListener('keydown',e=>{if(e.key==='Enter')tryAuth()});
 document.getElementById('model-switch').addEventListener('click',e=>{
   const b=e.target.closest('button[data-model]');if(!b)return;
   document.querySelectorAll('#model-switch button').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');currentModel=b.dataset.model;updatePlaceholder();
+  b.classList.add('active');currentModel=b.dataset.model;if(typeof trackEvent==='function')trackEvent('ai_model_switch',{model:currentModel});updatePlaceholder();
 });
 document.getElementById('mode-switch').addEventListener('click',e=>{
   const b=e.target.closest('button[data-mode]');if(!b)return;
   document.querySelectorAll('#mode-switch button').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');currentMode=b.dataset.mode;updatePlaceholder();
+  b.classList.add('active');currentMode=b.dataset.mode;if(typeof trackEvent==='function')trackEvent('ai_mode_switch',{mode:currentMode});updatePlaceholder();
 });
 function updatePlaceholder(){
   const inp=document.getElementById('prompt-input');
@@ -431,7 +431,7 @@ imgInput.addEventListener('change',e=>{
   imgInput.value='';
 });
 
-function addImages(files){
+function addImages(files){if(typeof trackEvent==='function')trackEvent('ai_image_attach',{count:files.length});
   const remaining=MAX_IMAGES-attachedImages.length;
   if(remaining<=0){return}
   const toAdd=files.slice(0,remaining);
@@ -504,6 +504,7 @@ sendBtn.addEventListener('click',handleSend);
 function handleSend(){
   const prompt=promptInput.value.trim();
   if(!prompt&&attachedImages.length===0)return;
+  if(typeof trackEvent==='function')trackEvent('ai_send',{model:currentModel,mode:currentMode});
   if(currentMode==='i2i'&&attachedImages.length===0){
     promptInput.placeholder='请先添加参考图片 ⬆';promptInput.focus();return;
   }
@@ -561,7 +562,7 @@ function replaceWithResult(msgId,imageUrl,model,size,elapsed){
 
   // Save to history
   const params=requestParams[msgId];
-  addToHistory({
+  if(typeof trackEvent==='function')trackEvent('ai_generate_complete',{model:msgId.includes('gpt')?'gpt':'gemini',mode:params?params.mode:'t2i'});addToHistory({
     id:msgId,
     prompt:params?params.prompt:'',
     model,
@@ -795,7 +796,7 @@ document.getElementById('hist-detail-back').addEventListener('click',()=>{
   histDetail.classList.remove('show');
 });
 
-function openHistPanel(){
+function openHistPanel(){if(typeof trackEvent==='function')trackEvent('ai_history_view');
   histDetail.classList.remove('show');
   renderHistGrid();
   histPanel.classList.add('show');
@@ -866,7 +867,7 @@ window.downloadHistImage=async function(id){
   if(src)downloadImage(src,id);
 };
 
-window.reusePrompt=function(id){
+window.reusePrompt=function(id){if(typeof trackEvent==='function')trackEvent('ai_reuse_prompt');
   const h=loadHistory().find(x=>x.id===id);
   if(!h)return;
   histDetail.classList.remove('show');

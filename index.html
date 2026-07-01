@@ -131,9 +131,9 @@ body::before{
 <!-- Firebase Analytics -->
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import{getAnalytics}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
+import{getAnalytics,logEvent}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
 const app=initializeApp({apiKey:"AIzaSyDT9uNrRj97oLuehLXgOto97Z-mVw12cnk",authDomain:"myhtml-ff6d6.firebaseapp.com",projectId:"myhtml-ff6d6",storageBucket:"myhtml-ff6d6.firebasestorage.app",messagingSenderId:"790702386101",appId:"1:790702386101:web:f4e30fb5ce4771396347fc",measurementId:"G-8FQ9DRDJ6T"});
-getAnalytics(app);
+const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catch(e){}};
 </script>
 </head>
 <body>
@@ -222,10 +222,12 @@ getAnalytics(app);
     if (!el) return;
     el.addEventListener('click', function(e) {
       e.preventDefault();
+      if (typeof trackEvent==='function') trackEvent('nav_card_click',{card:el.id||el.href,target:el.href});
       if (sessionStorage.getItem('_v') === '1') {
         window.location.href = el.href;
         return;
       }
+      if (typeof trackEvent==='function') trackEvent('auth_gate_shown',{target:el.href});
       showAuth(el.href);
     });
   }
@@ -280,11 +282,13 @@ getAnalytics(app);
       const val = input.value;
       if (!val) { input.focus(); return; }
       if (check(val)) {
+        if (typeof trackEvent==='function') trackEvent('auth_success');
         sessionStorage.setItem('_v', '1');
         overlay.style.opacity = '0';
         overlay.style.transition = 'opacity .25s';
         setTimeout(() => { overlay.remove(); window.location.href = targetUrl; }, 250);
       } else {
+        if (typeof trackEvent==='function') trackEvent('auth_fail');
         input.classList.add('err');
         errMsg.textContent = '密码错误，请重试';
         setTimeout(() => { input.classList.remove('err'); }, 500);
