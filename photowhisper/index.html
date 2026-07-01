@@ -271,6 +271,13 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:
   .analyzing-steps{flex-direction:row;gap:20px}
 }
 </style>
+<!-- Firebase Analytics -->
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import{getAnalytics}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
+const app=initializeApp({apiKey:"AIzaSyDT9uNrRj97oLuehLXgOto97Z-mVw12cnk",authDomain:"myhtml-ff6d6.firebaseapp.com",projectId:"myhtml-ff6d6",storageBucket:"myhtml-ff6d6.firebasestorage.app",messagingSenderId:"790702386101",appId:"1:790702386101:web:f4e30fb5ce4771396347fc",measurementId:"G-8FQ9DRDJ6T"});
+getAnalytics(app);
+</script>
 </head>
 <body>
 
