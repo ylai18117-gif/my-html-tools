@@ -13,7 +13,7 @@
 - **场景还原图**：SVG 俯视图 + 侧视图，直观展示拍摄位置关系
 - **构图叠加层**：九宫格 + 主体标记，可手动开关
 - **拍摄清单**：一键复制可执行的拍摄步骤
-- **历史记录**：localStorage 持久化，随时回顾
+- **历史记录**：localStorage + IndexedDB 持久化，随时回顾
 
 `photowhisper/index.html`
 
@@ -39,23 +39,10 @@
 
 > QR 扫描 App 的产品宣传页
 
-- 功能展示、下载引导、应用截图
+- 功能展示、Google Play 下载引导、应用截图
 - 独立页面，无返回导航（广告落地页标准设计）
 
 `qr/qr_home.html`
-
----
-
-### 数据看盘 — QR 业务数据看板
-
-> 本地数据可视化看板，支持每日数据录入和趋势分析
-
-- 三 Tab 布局：总览 / 商业化 / 用户漏斗
-- Chart.js 图表可视化
-- 数据导入导出（CSV/Excel）
-- 密码保护
-
-`dashboard/QR数据看盘.html`
 
 ## 技术栈
 
@@ -66,7 +53,7 @@
 | AI 生图 | DMXAPI (OpenAI 兼容) | gpt-image-2 + gemini-3.1-flash-image |
 | 存储 | localStorage + IndexedDB | 元数据+缩略图 / 原图分离存储 |
 | 安全 | XOR + Base64 + DJB2 | 客户端密码/密钥混淆（非加密） |
-| 图表 | Chart.js (CDN) | 数据看盘可视化 |
+| 统计 | Firebase Analytics (GA4) | 自定义事件埋点，全页面覆盖 |
 
 ## 本地运行
 
@@ -89,18 +76,11 @@ npx serve .
 ├── aiimage/
 │   └── index.html          ← AI 图片工坊
 ├── photowhisper/
-│   ├── index.html          ← PhotoWhisper 拍照助手
-│   └── UI-Design-Spec.html ← UI 设计规范稿
+│   └── index.html          ← PhotoWhisper 拍照助手
 ├── qr/
 │   ├── qr_home.html        ← QR 广告落地页
 │   └── img/                ← 广告页图片资源
-├── dashboard/
-│   ├── QR数据看盘.html      ← 数据看板
-│   ├── QR数据分析与商业化探索.md
-│   ├── QR用户漏斗.xlsx
-│   └── 混变商业化模型-公式手册.md
-├── PRD/
-│   └── 产品架构.md
+├── .gitignore
 └── README.md
 ```
 
@@ -108,8 +88,8 @@ npx serve .
 
 整个目录可直接部署到任意静态托管服务：
 
+- **Cloudflare Pages**：连接 GitHub 仓库，根目录部署（当前使用）
 - **GitHub Pages**：推送到 `gh-pages` 分支
-- **Cloudflare Pages**：连接仓库，根目录部署
 - **Vercel / Netlify**：拖拽上传或 Git 集成
 
 ## License
