@@ -1174,7 +1174,7 @@ function renderFunnelHealth(data) {
     checks[5].goodCheck = vol <= 30;
   }
 
-  let html = `<table class="data-table"><thead><tr><th>${I18n.t('health.col.metric')}</th><th class="num">${I18n.t('health.col.current')}</th><th>${I18n.t('health.col.status')}</th><th>${I18n.t('health.col.warn')}</th><th>${I18n.t('health.col.healthy')}</th></tr></thead><tbody>';
+  let html = `<table class="data-table"><thead><tr><th>${I18n.t('health.col.metric')}</th><th class="num">${I18n.t('health.col.current')}</th><th>${I18n.t('health.col.status')}</th><th>${I18n.t('health.col.warn')}</th><th>${I18n.t('health.col.healthy')}</th></tr></thead><tbody>`;
   checks.forEach(c => {
     const status = c.warnCheck ? `<span class="status-badge bad">${I18n.t('health.status.warn')}</span>` : (c.goodCheck ? `<span class="status-badge good">${I18n.t('health.status.good')}</span>` : `<span class="status-badge warn">${I18n.t('health.status.watch')}</span>`);
     html += `<tr><td style="font-weight:500">${c.label}</td><td class="num">${c.val!=null?c.val.toFixed(1)+(c.isPct?'%':''):'—'}</td><td>${status}</td><td class="dim">${c.warn}</td><td class="dim">${c.good}</td></tr>`;
