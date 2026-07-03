@@ -195,18 +195,42 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:
 .hist-clear{font-size:13px;color:var(--text3)}
 
 .hist-body{padding:16px}
-.hist-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hist-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .hist-item{border-radius:var(--r);overflow:hidden;cursor:pointer;border:1px solid var(--border-lt);background:var(--surface);transition:all .25s;-webkit-tap-highlight-color:transparent}
 .hist-item:active{transform:scale(.97)}
-.hist-item-img{width:100%;aspect-ratio:3/4;overflow:hidden}
+.hist-item-img{width:100%;aspect-ratio:3/4;overflow:hidden;position:relative}
 .hist-item-img img{width:100%;height:100%;object-fit:cover;display:block}
 .hist-item-info{padding:8px 10px}
-.hist-item-type{font-size:11px;font-weight:500;margin-bottom:2px}
+.hist-item-type{font-size:11px;font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hist-item-time{font-size:10px;color:var(--text3)}
 
 .hist-empty{text-align:center;padding:60px 20px;color:var(--text3)}
 .hist-empty-icon{font-size:40px;margin-bottom:12px;opacity:.4}
 .hist-empty p{font-size:13px;line-height:1.5}
+
+/* ─── Responsive: Tablet+ ─── */
+@media(min-width:768px){
+  .hist-panel{display:flex;justify-content:center}
+  .hist-head{padding:18px 28px}
+  .hist-head h2{font-size:20px}
+  .hist-body{padding:24px 28px;max-width:960px;width:100%}
+  .hist-grid{grid-template-columns:repeat(3,1fr);gap:16px}
+  .hist-item{border-radius:var(--r-lg)}
+  .hist-item:active{transform:none}
+  .hist-item:hover{border-color:var(--accent);box-shadow:var(--sh-md);transform:translateY(-2px)}
+  .hist-item-info{padding:10px 12px}
+  .hist-item-type{font-size:12px}
+  .hist-item-time{font-size:11px}
+  .hist-empty{padding:100px 20px}
+  .hist-empty-icon{font-size:56px}
+  .hist-empty p{font-size:14px}
+}
+
+/* ─── Responsive: Desktop ─── */
+@media(min-width:1024px){
+  .hist-body{max-width:1100px}
+  .hist-grid{grid-template-columns:repeat(4,1fr);gap:18px}
+}
 
 /* ─── History detail ─── */
 .hist-detail{position:fixed;inset:0;z-index:210;background:var(--bg);transform:translateX(100%);transition:transform .35s var(--ease);overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -223,6 +247,14 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:
 .hist-detail .hd-meta{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);margin-bottom:16px}
 .hist-detail .hd-reopen{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px 0;background:var(--accent);color:#fff;border:none;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--ff-b);transition:all .3s;-webkit-tap-highlight-color:transparent}
 .hist-detail .hd-reopen:active{transform:scale(.97)}
+
+/* ─── Responsive: Detail Tablet+ ─── */
+@media(min-width:768px){
+  .hist-detail .hd-head{padding:18px 28px}
+  .hist-detail .hd-body{padding:28px;max-width:720px;margin:0 auto}
+  .hist-detail .hd-quote{font-size:18px}
+  .hist-detail .hd-reopen:hover{opacity:.9;transform:none}
+}
 
 /* ─── ANIMATIONS ─── */
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -293,7 +325,7 @@ import{getAnalytics,logEvent}from"https://www.gstatic.com/firebasejs/12.15.0/fir
 const app=initializeApp({apiKey:"AIzaSyDT9uNrRj97oLuehLXgOto97Z-mVw12cnk",authDomain:"myhtml-ff6d6.firebaseapp.com",projectId:"myhtml-ff6d6",storageBucket:"myhtml-ff6d6.firebasestorage.app",messagingSenderId:"790702386101",appId:"1:790702386101:web:f4e30fb5ce4771396347fc",measurementId:"G-8FQ9DRDJ6T"});
 const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catch(e){}};
 </script>
-<script src="/i18n.js"></script>
+<script src="../i18n.js"></script>
 </head>
 <body>
 
@@ -1413,7 +1445,7 @@ function formatTimeAgo(ts){
 // ═══════════════════════════════════════════
 // AI ANALYSIS (StepFun step-3.7-flash)
 // ═══════════════════════════════════════════
-const AI_KEY_ENC='UhdTJCcKET9gXBFrKmJeWR9qKytTPwNrGT9DHBJBMBhaHQAFLhtTPiZWVidECz1oBjpyXAp1KWZaGgFaLCF2Gi8=';
+const AI_KEY_ENC='VChYKy9BCihgWgMDICB2AXJWG2FzDjFiAAZPCh5qAiB4Pg9zWGRjH3p8CBZQWwh5AyEFW3xwEjttLHlBAhQFHAE=';
 const AI_KEY_XOR='aR7mK2';
 const AI_URL='https://api.stepfun.com/step_plan/v1/chat/completions';
 const AI_MODEL='step-3.7-flash';

@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI API Test - Model Capability Tester | AI 模型 API 测试</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0C0C0F;--surface:#16161A;--card:#1C1C22;
+  --text:#ECEAE6;--text2:#8A8A8E;--text3:#55555A;
+  --accent:#C17A56;--accent-lt:#E8A97E;
+  --green:#34D399;--blue:#60A5FA;--yellow:#FBBF24;--orange:#FB923C;--red:#F87171;
+  --border:#2A2A30;
+  --ff-b:'Inter',-apple-system,sans-serif;
+  --ff-d:'Playfair Display',serif;
+  --ff-m:'IBM Plex Mono',monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--ff-b);background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 20%,rgba(193,122,86,.06) 0%,transparent 70%),
+    radial-gradient(ellipse 500px 500px at 80% 80%,rgba(96,165,250,.04) 0%,transparent 70%);
+}
+.wrap{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:60px 20px 80px}
+
+/* ─── HEADER ─── */
+.header{text-align:center;margin-bottom:40px;animation:fadeIn .8s var(--ease) both}
+.header .logo{font-family:var(--ff-d);font-size:26px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
+.header .logo em{font-style:italic;color:var(--accent)}
+.header .subtitle{font-size:13px;color:var(--text2);line-height:1.6}
+.header .divider{width:40px;height:1px;background:var(--border);margin:16px auto 0}
+.header .lang-wrap{margin-top:12px;display:flex;justify-content:center}
+.header .lang-wrap .i18n-opt{color:var(--text3)}
+.header .lang-wrap .i18n-opt:hover{color:var(--text2)}
+.header .lang-wrap .i18n-opt.active{background:var(--card);color:var(--text);border:1px solid var(--border)}
+
+/* ─── SECTION ─── */
+.section{margin-bottom:32px;animation:fadeIn .6s var(--ease) both}
+.section-title{font-size:14px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-title::before{content:'';display:block;width:3px;height:14px;background:var(--accent);border-radius:2px}
+
+/* ─── CONFIG CARD ─── */
+.config-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:18px}
+.field-row{display:flex;flex-direction:column;gap:6px}
+.field-label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text2)}
+.field-label label{cursor:pointer}
+
+/* Tooltip */
+.tip-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:50%;border:1px solid var(--text3);
+  background:none;color:var(--text3);font-size:11px;font-weight:700;cursor:pointer;
+  position:relative;flex-shrink:0;transition:all .2s;font-family:var(--ff-b);line-height:1;
+}
+.tip-btn:hover,.tip-btn.active{border-color:var(--accent);color:var(--accent)}
+.tip-popup{
+  position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  background:rgba(28,28,34,.96);border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;font-size:12px;font-weight:400;color:var(--text);
+  width:max-content;max-width:260px;line-height:1.5;z-index:100;
+  pointer-events:none;opacity:0;transition:opacity .2s;white-space:pre-line;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.tip-popup::after{
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:6px solid transparent;border-top-color:rgba(28,28,34,.96);
+}
+.tip-btn:hover .tip-popup,.tip-btn.active .tip-popup{opacity:1;pointer-events:auto}
+
+/* Inputs */
+select,input[type="text"],input[type="password"]{
+  width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-size:14px;font-family:var(--ff-b);
+  outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none;
+}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' fill='none' stroke='%238A8A8E' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+select:focus,input:focus{border-color:var(--accent)}
+select option{background:var(--card);color:var(--text)}
+
+/* Key field with toggle */
+.key-wrap{position:relative}
+.key-wrap input{padding-right:42px}
+.key-toggle{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;
+  display:flex;align-items:center;justify-content:center;transition:color .2s;
+}
+.key-toggle:hover{color:var(--text2)}
+.key-toggle svg{width:18px;height:18px}
+
+/* ─── ACTION BAR ─── */
+.action-bar{display:flex;gap:10px;margin-top:8px}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px 20px;border-radius:10px;border:none;cursor:pointer;
+  font-size:13px;font-weight:600;font-family:var(--ff-b);transition:all .25s var(--ease);
+  -webkit-tap-highlight-color:transparent;
+}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--accent-lt)}
+.btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover:not(:disabled){border-color:var(--text3)}
+.btn-sm{padding:7px 14px;font-size:12px;border-radius:8px}
+
+/* ─── TEST CARDS ─── */
+.test-grid{display:flex;flex-direction:column;gap:12px}
+.test-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:20px;transition:border-color .3s;overflow:hidden;
+}
+.test-card.running{border-color:var(--blue)}
+.test-card.pass{border-color:var(--green)}
+.test-card.fail{border-color:var(--red)}
+.test-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.test-info{flex:1;min-width:0}
+.test-name{font-size:15px;font-weight:600;margin-bottom:3px;display:flex;align-items:center;gap:8px}
+.test-desc{font-size:12px;color:var(--text2);line-height:1.5}
+.test-status{
+  display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;
+  font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;
+  background:var(--surface);color:var(--text3);transition:all .3s;
+}
+.test-status.idle{background:var(--surface);color:var(--text3)}
+.test-status.running{background:rgba(96,165,250,.12);color:var(--blue)}
+.test-status.pass{background:rgba(52,211,153,.12);color:var(--green)}
+.test-status.fail{background:rgba(248,113,113,.12);color:var(--red)}
+.test-status .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.test-status.running .dot{animation:pulse 1.2s infinite}
+
+.test-body{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.test-body.show{display:block}
+.latency{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;font-family:var(--ff-m);margin-bottom:8px}
+.latency.excellent{color:var(--green)}
+.latency.good{color:var(--blue)}
+.latency.average{color:var(--yellow)}
+.latency.slow{color:var(--orange)}
+.latency.vslow{color:var(--red)}
+.response-preview{
+  background:var(--surface);border-radius:8px;padding:12px;font-size:12px;
+  font-family:var(--ff-m);color:var(--text2);line-height:1.6;max-height:120px;
+  overflow-y:auto;word-break:break-word;white-space:pre-wrap;
+}
+.response-preview img{max-width:120px;max-height:120px;border-radius:6px;display:block;margin-top:4px}
+.error-msg{color:var(--red);font-size:12px;margin-top:6px;line-height:1.5}
+.test-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+
+/* ─── SUMMARY ─── */
+.summary-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:24px;display:none;
+}
+.summary-card.show{display:block}
+.summary-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.summary-title{font-size:16px;font-weight:600}
+.summary-badge{
+  padding:4px 12px;border-radius:100px;font-size:12px;font-weight:700;
+}
+.summary-badge.excellent{background:rgba(52,211,153,.15);color:var(--green)}
+.summary-badge.good{background:rgba(96,165,250,.15);color:var(--blue)}
+.summary-badge.average{background:rgba(251,191,36,.15);color:var(--yellow)}
+.summary-badge.poor{background:rgba(248,113,113,.15);color:var(--red)}
+.summary-meta{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.summary-item{
+  background:var(--surface);border-radius:8px;padding:10px 12px;text-align:center;
+}
+.summary-item .s-label{font-size:11px;color:var(--text3);margin-bottom:4px}
+.summary-item .s-value{font-size:13px;font-weight:600;font-family:var(--ff-m)}
+.summary-item .s-value.pass{color:var(--green)}
+.summary-item .s-value.fail{color:var(--red)}
+.summary-item .s-value.skip{color:var(--text3)}
+
+/* ─── SPINNER ─── */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{
+  width:14px;height:14px;border:2px solid transparent;border-top-color:currentColor;
+  border-radius:50%;animation:spin .6s linear infinite;display:inline-block;
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.section:nth-child(2){animation-delay:.1s}
+.section:nth-child(3){animation-delay:.2s}
+.section:nth-child(4){animation-delay:.3s}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:600px){
+  .wrap{padding:40px 16px 60px}
+  .config-card{padding:18px}
+  .test-card{padding:16px}
+  .summary-grid{grid-template-columns:repeat(2,1fr)}
+  .action-bar{flex-direction:column}
+  .btn{width:100%}
+}
+
+/* ─── CORS WARNING ─── */
+.cors-notice{
+  background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);
+  border-radius:10px;padding:12px 16px;font-size:12px;color:var(--red);
+  line-height:1.6;display:none;margin-top:12px;
+}
+.cors-notice.show{display:block}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo">AI <em>API</em> Test</div>
+    <p class="subtitle" data-i18n="headerSub">Model Capability Tester — verify text, image & video APIs in seconds</p>
+    <div class="divider"></div>
+    <div class="lang-wrap" id="langSel"></div>
+  </header>
+
+  <!-- CONFIG SECTION -->
+  <section class="section">
+    <div class="section-title"><span data-i18n="configTitle">Configuration</span></div>
+    <div class="config-card">
+      <!-- Provider -->
+      <div class="field-row">
+        <div class="field-label">
+          <label for="selProvider" data-i18n="lblProvider">Provider / 服务商</label>
+          <button class="tip-btn" aria-label="help">?<span class="tip-popup" data-i18n="tipProvider">Select your AI API provider. Each has different endpoints, auth methods, and model names.</span></button>
+        </div>
+        <select id="selProvider">
+          <option value="dmxapi">DMXAPI (OpenAI-compatible)</option>
+          <option value="stepfun">StepFun 阶跃星辰</option>
+          <option value="openai">OpenAI</option>
+          <option value="gemini">Google Gemini</option>
+          <option value="custom">自定义 / Custom</option>
+        </select>
+      </div>
+      <!-- Base URL -->
+      <div class="field-row">
+        <div class="field-label">
+          <label for="inpBaseUrl" data-i18n="lblBaseUrl">API Base URL</label>
+          <button class="tip-btn" aria-label="help">?<span class="tip-popup" data-i18n="tipBaseUrl">The root URL of the API, e.g. https://api.openai.com/v1. Do NOT include the endpoint path like /chat/completions.</span></button>
+        </div>
+        <input type="text" id="inpBaseUrl" placeholder="https://api.openai.com/v1" data-i18n-attr="placeholder:phBaseUrl">
+      </div>
+      <!-- API Key -->
+      <div class="field-row">
+        <div class="field-label">
+          <label for="inpKey" data-i18n="lblKey">API Key / 密钥</label>
+          <button class="tip-btn" aria-label="help">?<span class="tip-popup" data-i18n="tipKey">Your API key/token. For DMXAPI, find it in your dashboard. For OpenAI, visit platform.openai.com. Keep it secret!</span></button>
+        </div>
+        <div class="key-wrap">
+          <input type="password" id="inpKey" placeholder="sk-..." data-i18n-attr="placeholder:phKey">
+          <button class="key-toggle" id="btnKeyToggle" type="button" aria-label="Toggle key visibility">
+            <svg id="iconEye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <!-- Model -->
+      <div class="field-row">
+        <div class="field-label">
+          <label for="inpModel" data-i18n="lblModel">Model Name / 模型名称</label>
+          <button class="tip-btn" aria-label="help">?<span class="tip-popup" id="tipModelText" data-i18n="tipModel">Enter the model identifier, e.g. gpt-4o, gemini-2.0-flash, step-2-16k.</span></button>
+        </div>
+        <input type="text" id="inpModel" placeholder="gpt-4o" data-i18n-attr="placeholder:phModel">
+      </div>
+      <!-- Custom endpoint paths (shown only for custom) -->
+      <div class="field-row" id="customPathsRow" style="display:none">
+        <div class="field-label">
+          <label for="inpChatPath" data-i18n="lblChatPath">Chat Endpoint Path</label>
+          <button class="tip-btn" aria-label="help">?<span class="tip-popup" data-i18n="tipChatPath">The path appended to base URL for chat requests, e.g. /chat/completions</span></button>
+        </div>
+        <input type="text" id="inpChatPath" placeholder="/chat/completions">
+      </div>
+      <!-- Actions -->
+      <div class="action-bar">
+        <button class="btn btn-primary" id="btnRunAll" data-i18n="btnRunAll">Run All Tests</button>
+        <button class="btn btn-secondary" id="btnSaveCfg" data-i18n="btnSave">Save Config</button>
+        <button class="btn btn-secondary" id="btnClearCfg" data-i18n="btnClear">Clear</button>
+      </div>
+      <div class="cors-notice" id="corsNotice" data-i18n-html="corsNotice">⚠ CORS error detected. Some APIs may not allow direct browser requests. Consider using a CORS proxy or testing from a server.</div>
+    </div>
+  </section>
+
+  <!-- TESTS SECTION -->
+  <section class="section">
+    <div class="section-title"><span data-i18n="testsTitle">Tests</span></div>
+    <div class="test-grid" id="testGrid"></div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section class="section">
+    <div class="section-title"><span data-i18n="summaryTitle">Summary</span></div>
+    <div class="summary-card" id="summaryCard">
+      <div class="summary-head">
+        <div class="summary-title" id="summaryTitle"></div>
+        <span class="summary-badge" id="summaryBadge"></span>
+      </div>
+      <div class="summary-meta" id="summaryMeta"></div>
+      <div class="summary-grid" id="summaryGrid"></div>
+    </div>
+  </section>
+</div>
+
+<script src="/i18n.js"></script>
+<script>
+// ══════════════════════════════════════════════
+// TRANSLATIONS
+// ══════════════════════════════════════════════
+const TRANSLATIONS = {
+  'zh-CN': {
+    headerSub: '模型能力测试工具 — 快速验证文本、图像和视频 API',
+    configTitle: '配置',
+    lblProvider: '服务商 / Provider',
+    tipProvider: '选择你的 AI API 服务商。每个服务商的接口地址、认证方式和模型名称各不相同。',
+    lblBaseUrl: 'API Base URL',
+    tipBaseUrl: 'API 的根地址，例如 https://api.openai.com/v1。不要包含 /chat/completions 等端点路径。',
+    lblKey: 'API Key / 密钥',
+    tipKey: '你的 API 密钥。DMXAPI 可在其控制台获取，OpenAI 请访问 platform.openai.com。请妥善保管！',
+    lblModel: '模型名称 / Model Name',
+    tipModel: '输入模型标识符，例如 gpt-4o、gemini-2.0-flash、step-2-16k。',
+    lblChatPath: '对话端点路径',
+    tipChatPath: '追加到 Base URL 后面的对话请求路径，例如 /chat/completions',
+    btnRunAll: '运行全部测试',
+    btnSave: '保存配置',
+    btnClear: '清除',
+    corsNotice: '⚠ 检测到 CORS 错误。部分 API 可能不允许浏览器直接请求，建议使用 CORS 代理或从服务器测试。',
+    testsTitle: '测试项目',
+    summaryTitle: '测试总结',
+    // Tests
+    t1Name: '文本理解',
+    t1Desc: '发送简单问题 "What is 2+2? Reply with just the number." 测试基本对话能力',
+    t2Name: '图像理解',
+    t2Desc: '发送一张测试图片，检验多模态视觉理解能力',
+    t3Name: '视频理解',
+    t3Desc: '检查 API 是否支持视频理解功能',
+    t4Name: '图像生成',
+    t4Desc: '发送 "A red circle on white background" 请求图像生成',
+    t5Name: '视频生成',
+    t5Desc: '检查服务商是否支持视频生成功能',
+    // Status
+    stIdle: '待测试',
+    stRunning: '测试中…',
+    stPass: '通过',
+    stFail: '失败',
+    stSkip: '不支持',
+    // Latency
+    latExcellent: '极佳',
+    latGood: '良好',
+    latAverage: '一般',
+    latSlow: '较慢',
+    latVSlow: '很慢',
+    // Buttons
+    btnRun: '运行测试',
+    btnRetry: '重试',
+    // Summary
+    sumOverall: '综合评价',
+    sumProvider: '服务商',
+    sumModel: '模型',
+    sumPassed: '通过',
+    sumFailed: '失败',
+    sumAvgLatency: '平均延迟',
+    sumNotSupported: '不支持',
+    phBaseUrl: 'https://api.openai.com/v1',
+    phKey: 'sk-...',
+    phModel: 'gpt-4o',
+    // Errors
+    errNoKey: '请填写 API Key',
+    errNoUrl: '请填写 API Base URL',
+    errNoModel: '请填写模型名称',
+    errCors: 'CORS 错误：此 API 不允许浏览器直接请求。请尝试使用代理或从服务器端测试。',
+    errNetwork: '网络错误，请检查连接和 API 地址',
+    errTimeout: '请求超时（30s）',
+    errUnknown: '未知错误',
+    errApiError: 'API 返回错误',
+  },
+  'en': {
+    headerSub: 'Model Capability Tester — verify text, image & video APIs in seconds',
+    configTitle: 'Configuration',
+    lblProvider: 'Provider',
+    tipProvider: 'Select your AI API provider. Each has different endpoints, auth methods, and model names.',
+    lblBaseUrl: 'API Base URL',
+    tipBaseUrl: 'The root URL of the API, e.g. https://api.openai.com/v1. Do NOT include the endpoint path like /chat/completions.',
+    lblKey: 'API Key',
+    tipKey: 'Your API key/token. For DMXAPI, find it in your dashboard. For OpenAI, visit platform.openai.com. Keep it secret!',
+    lblModel: 'Model Name',
+    tipModel: 'Enter the model identifier, e.g. gpt-4o, gemini-2.0-flash, step-2-16k.',
+    lblChatPath: 'Chat Endpoint Path',
+    tipChatPath: 'The path appended to base URL for chat requests, e.g. /chat/completions',
+    btnRunAll: 'Run All Tests',
+    btnSave: 'Save Config',
+    btnClear: 'Clear',
+    corsNotice: '⚠ CORS error detected. Some APIs may not allow direct browser requests. Consider using a CORS proxy or testing from a server.',
+    testsTitle: 'Tests',
+    summaryTitle: 'Summary',
+    t1Name: 'Text Understanding',
+    t1Desc: 'Send "What is 2+2? Reply with just the number." to test basic chat capability',
+    t2Name: 'Image Understanding',
+    t2Desc: 'Send a small test image to verify multimodal vision capability',
+    t3Name: 'Video Understanding',
+    t3Desc: 'Check if the API supports video understanding',
+    t4Name: 'Image Generation',
+    t4Desc: 'Send "A red circle on white background" to test image generation',
+    t5Name: 'Video Generation',
+    t5Desc: 'Check if the provider supports video generation',
+    stIdle: 'Idle',
+    stRunning: 'Running…',
+    stPass: 'Pass',
+    stFail: 'Fail',
+    stSkip: 'Not Supported',
+    latExcellent: 'Excellent',
+    latGood: 'Good',
+    latAverage: 'Average',
+    latSlow: 'Slow',
+    latVSlow: 'Very Slow',
+    btnRun: 'Run Test',
+    btnRetry: 'Retry',
+    sumOverall: 'Overall',
+    sumProvider: 'Provider',
+    sumModel: 'Model',
+    sumPassed: 'Passed',
+    sumFailed: 'Failed',
+    sumAvgLatency: 'Avg Latency',
+    sumNotSupported: 'Not Supported',
+    phBaseUrl: 'https://api.openai.com/v1',
+    phKey: 'sk-...',
+    phModel: 'gpt-4o',
+    errNoKey: 'Please enter your API Key',
+    errNoUrl: 'Please enter the API Base URL',
+    errNoModel: 'Please enter a model name',
+    errCors: 'CORS error: This API does not allow direct browser requests. Try using a proxy or testing from a server.',
+    errNetwork: 'Network error. Check your connection and API address.',
+    errTimeout: 'Request timed out (30s)',
+    errUnknown: 'Unknown error',
+    errApiError: 'API returned an error',
+  },
+  'ja': {
+    headerSub: 'モデル機能テスター — テキスト、画像、動画APIを瞬時に検証',
+    configTitle: '設定',
+    lblProvider: 'プロバイダー',
+    tipProvider: 'AI APIプロバイダーを選択してください。各プロバイダーでエンドポイント、認証方法、モデル名が異なります。',
+    lblBaseUrl: 'APIベースURL',
+    tipBaseUrl: 'APIのルートURL。例: https://api.openai.com/v1。/chat/completionsなどのパスは含めないでください。',
+    lblKey: 'APIキー',
+    tipKey: 'APIキー/トークン。DMXAPIはダッシュボードで、OpenAIはplatform.openai.comで取得できます。',
+    lblModel: 'モデル名',
+    tipModel: 'モデル識別子を入力。例: gpt-4o, gemini-2.0-flash, step-2-16k',
+    lblChatPath: 'チャットエンドポイントパス',
+    tipChatPath: 'チャットリクエスト用のベースURLに追加するパス。例: /chat/completions',
+    btnRunAll: '全テスト実行',
+    btnSave: '設定保存',
+    btnClear: 'クリア',
+    corsNotice: '⚠ CORSエラーが検出されました。ブラウザからの直接リクエストを許可しないAPIもあります。',
+    testsTitle: 'テスト',
+    summaryTitle: 'サマリー',
+    t1Name: 'テキスト理解',
+    t1Desc: '"What is 2+2? Reply with just the number."を送信して基本チャット機能をテスト',
+    t2Name: '画像理解',
+    t2Desc: 'テスト画像を送信してマルチモーダル視覚機能を検証',
+    t3Name: '動画理解',
+    t3Desc: 'APIが動画理解をサポートしているか確認',
+    t4Name: '画像生成',
+    t4Desc: '"A red circle on white background"を送信して画像生成をテスト',
+    t5Name: '動画生成',
+    t5Desc: 'プロバイダーが動画生成をサポートしているか確認',
+    stIdle: '待機中',
+    stRunning: '実行中…',
+    stPass: '成功',
+    stFail: '失敗',
+    stSkip: '非対応',
+    latExcellent: '優秀',
+    latGood: '良好',
+    latAverage: '普通',
+    latSlow: '遅い',
+    latVSlow: '非常に遅い',
+    btnRun: 'テスト実行',
+    btnRetry: '再試行',
+    sumOverall: '総合評価',
+    sumProvider: 'プロバイダー',
+    sumModel: 'モデル',
+    sumPassed: '成功',
+    sumFailed: '失敗',
+    sumAvgLatency: '平均遅延',
+    sumNotSupported: '非対応',
+    phBaseUrl: 'https://api.openai.com/v1',
+    phKey: 'sk-...',
+    phModel: 'gpt-4o',
+    errNoKey: 'APIキーを入力してください',
+    errNoUrl: 'APIベースURLを入力してください',
+    errNoModel: 'モデル名を入力してください',
+    errCors: 'CORSエラー: ブラウザからの直接リクエストは許可されていません。',
+    errNetwork: 'ネットワークエラー。接続とAPIアドレスを確認してください。',
+    errTimeout: 'リクエストタイムアウト（30秒）',
+    errUnknown: '不明なエラー',
+    errApiError: 'APIがエラーを返しました',
+  },
+  'ko': {
+    headerSub: '모델 기능 테스터 — 텍스트, 이미지, 비디오 API를 빠르게 검증',
+    configTitle: '설정',
+    lblProvider: '제공자',
+    tipProvider: 'AI API 제공자를 선택하세요. 각 제공자마다 엔드포인트, 인증 방법, 모델명이 다릅니다.',
+    lblBaseUrl: 'API 베이스 URL',
+    tipBaseUrl: 'API의 루트 URL. 예: https://api.openai.com/v1. /chat/completions 같은 경로는 포함하지 마세요.',
+    lblKey: 'API 키',
+    tipKey: 'API 키/토큰. DMXAPI는 대시보드에서, OpenAI는 platform.openai.com에서 확인하세요.',
+    lblModel: '모델명',
+    tipModel: '모델 식별자를 입력하세요. 예: gpt-4o, gemini-2.0-flash, step-2-16k',
+    lblChatPath: '챗 엔드포인트 경로',
+    tipChatPath: '챗 요청 시 베이스 URL에 추가되는 경로. 예: /chat/completions',
+    btnRunAll: '전체 테스트 실행',
+    btnSave: '설정 저장',
+    btnClear: '초기화',
+    corsNotice: '⚠ CORS 오류가 감지되었습니다. 일부 API는 브라우저에서 직접 요청을 허용하지 않을 수 있습니다.',
+    testsTitle: '테스트',
+    summaryTitle: '요약',
+    t1Name: '텍스트 이해',
+    t1Desc: '"What is 2+2? Reply with just the number."를 전송하여 기본 챗 기능 테스트',
+    t2Name: '이미지 이해',
+    t2Desc: '테스트 이미지를 전송하여 멀티모달 시각 기능 검증',
+    t3Name: '비디오 이해',
+    t3Desc: 'API가 비디오 이해를 지원하는지 확인',
+    t4Name: '이미지 생성',
+    t4Desc: '"A red circle on white background"를 전송하여 이미지 생성 테스트',
+    t5Name: '비디오 생성',
+    t5Desc: '제공자가 비디오 생성을 지원하는지 확인',
+    stIdle: '대기',
+    stRunning: '실행 중…',
+    stPass: '통과',
+    stFail: '실패',
+    stSkip: '미지원',
+    latExcellent: '우수',
+    latGood: '양호',
+    latAverage: '보통',
+    latSlow: '느림',
+    latVSlow: '매우 느림',
+    btnRun: '테스트 실행',
+    btnRetry: '재시도',
+    sumOverall: '종합 평가',
+    sumProvider: '제공자',
+    sumModel: '모델',
+    sumPassed: '통과',
+    sumFailed: '실패',
+    sumAvgLatency: '평균 지연',
+    sumNotSupported: '미지원',
+    phBaseUrl: 'https://api.openai.com/v1',
+    phKey: 'sk-...',
+    phModel: 'gpt-4o',
+    errNoKey: 'API 키를 입력하세요',
+    errNoUrl: 'API 베이스 URL을 입력하세요',
+    errNoModel: '모델명을 입력하세요',
+    errCors: 'CORS 오류: 브라우저에서 직접 요청이 허용되지 않습니다.',
+    errNetwork: '네트워크 오류. 연결과 API 주소를 확인하세요.',
+    errTimeout: '요청 타임아웃 (30초)',
+    errUnknown: '알 수 없는 오류',
+    errApiError: 'API가 오류를 반환했습니다',
+  }
+};
+
+// ══════════════════════════════════════════════
+// PROVIDER PRESETS
+// ══════════════════════════════════════════════
+const PROVIDERS = {
+  dmxapi: {
+    name: 'DMXAPI',
+    baseUrl: 'https://www.dmxapi.com/v1',
+    authType: 'bearer',
+    chatPath: '/chat/completions',
+    imageGenPath: '/images/generations',
+    defaultModel: 'gpt-4o',
+    supportsImageGen: true,
+    supportsVideoGen: false,
+    supportsVideoUnderstanding: false,
+  },
+  stepfun: {
+    name: 'StepFun',
+    baseUrl: 'https://api.stepfun.com/v1',
+    authType: 'bearer',
+    chatPath: '/chat/completions',
+    imageGenPath: null,
+    defaultModel: 'step-2-16k',
+    supportsImageGen: false,
+    supportsVideoGen: false,
+    supportsVideoUnderstanding: false,
+  },
+  openai: {
+    name: 'OpenAI',
+    baseUrl: 'https://api.openai.com/v1',
+    authType: 'bearer',
+    chatPath: '/chat/completions',
+    imageGenPath: '/images/generations',
+    defaultModel: 'gpt-4o',
+    supportsImageGen: true,
+    supportsVideoGen: false,
+    supportsVideoUnderstanding: false,
+  },
+  gemini: {
+    name: 'Google Gemini',
+    baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
+    authType: 'x-goog-api-key',
+    chatPath: '/models/{model}:generateContent',
+    imageGenPath: '/models/{model}:generateContent',
+    defaultModel: 'gemini-2.0-flash',
+    supportsImageGen: true,
+    supportsVideoGen: false,
+    supportsVideoUnderstanding: false,
+  },
+  custom: {
+    name: 'Custom',
+    baseUrl: '',
+    authType: 'bearer',
+    chatPath: '/chat/completions',
+    imageGenPath: '/images/generations',
+    defaultModel: '',
+    supportsImageGen: true,
+    supportsVideoGen: true,
+    supportsVideoUnderstanding: true,
+  }
+};
+
+// ══════════════════════════════════════════════
+// TEST DEFINITIONS
+// ══════════════════════════════════════════════
+const TEST_DEFS = [
+  { id: 'text', nameKey: 't1Name', descKey: 't1Desc' },
+  { id: 'image-understand', nameKey: 't2Name', descKey: 't2Desc' },
+  { id: 'video-understand', nameKey: 't3Name', descKey: 't3Desc' },
+  { id: 'image-gen', nameKey: 't4Name', descKey: 't4Desc' },
+  { id: 'video-gen', nameKey: 't5Name', descKey: 't5Desc' },
+];
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let testStates = {};
+TEST_DEFS.forEach(t => testStates[t.id] = { status: 'idle', latency: 0, response: '', error: '' });
+let isRunningAll = false;
+
+// ══════════════════════════════════════════════
+// DOM REFS
+// ══════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const selProvider = $('selProvider');
+const inpBaseUrl = $('inpBaseUrl');
+const inpKey = $('inpKey');
+const inpModel = $('inpModel');
+const inpChatPath = $('inpChatPath');
+const customPathsRow = $('customPathsRow');
+const btnRunAll = $('btnRunAll');
+const btnSaveCfg = $('btnSaveCfg');
+const btnClearCfg = $('btnClearCfg');
+const btnKeyToggle = $('btnKeyToggle');
+const testGrid = $('testGrid');
+const corsNotice = $('corsNotice');
+const summaryCard = $('summaryCard');
+
+// ══════════════════════════════════════════════
+// PROVIDER SWITCHING
+// ══════════════════════════════════════════════
+function applyProvider(key) {
+  const p = PROVIDERS[key];
+  if (!p) return;
+  inpBaseUrl.value = p.baseUrl;
+  inpModel.value = p.defaultModel;
+  customPathsRow.style.display = key === 'custom' ? '' : 'none';
+  if (key === 'custom') {
+    inpChatPath.value = '/chat/completions';
+  }
+}
+
+selProvider.addEventListener('change', () => {
+  applyProvider(selProvider.value);
+});
+
+// ══════════════════════════════════════════════
+// KEY TOGGLE
+// ══════════════════════════════════════════════
+btnKeyToggle.addEventListener('click', () => {
+  const isPw = inpKey.type === 'password';
+  inpKey.type = isPw ? 'text' : 'password';
+  $('iconEye').innerHTML = isPw
+    ? '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+    : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+});
+
+// ══════════════════════════════════════════════
+// TOOLTIP MOBILE SUPPORT
+// ══════════════════════════════════════════════
+document.querySelectorAll('.tip-btn').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const wasActive = btn.classList.contains('active');
+    document.querySelectorAll('.tip-btn.active').forEach(b => b.classList.remove('active'));
+    if (!wasActive) btn.classList.add('active');
+  });
+});
+document.addEventListener('click', () => {
+  document.querySelectorAll('.tip-btn.active').forEach(b => b.classList.remove('active'));
+});
+
+// ══════════════════════════════════════════════
+// BUILD TEST CARDS
+// ══════════════════════════════════════════════
+function buildTestCards() {
+  testGrid.innerHTML = '';
+  TEST_DEFS.forEach(def => {
+    const card = document.createElement('div');
+    card.className = 'test-card';
+    card.id = `card-${def.id}`;
+    card.innerHTML = `
+      <div class="test-head">
+        <div class="test-info">
+          <div class="test-name"><span data-i18n="${def.nameKey}"></span></div>
+          <div class="test-desc" data-i18n="${def.descKey}"></div>
+        </div>
+        <div class="test-status idle" id="status-${def.id}"><span class="dot"></span><span class="status-text" data-i18n="stIdle"></span></div>
+      </div>
+      <div class="test-body" id="body-${def.id}">
+        <div class="latency" id="lat-${def.id}"></div>
+        <div class="response-preview" id="resp-${def.id}"></div>
+        <div class="error-msg" id="err-${def.id}"></div>
+      </div>
+      <div class="test-actions">
+        <button class="btn btn-secondary btn-sm btn-run-test" data-test="${def.id}" data-i18n="btnRun">Run Test</button>
+      </div>
+    `;
+    testGrid.appendChild(card);
+  });
+  // Bind run buttons
+  document.querySelectorAll('.btn-run-test').forEach(btn => {
+    btn.addEventListener('click', () => runSingleTest(btn.dataset.test));
+  });
+}
+
+// ══════════════════════════════════════════════
+// STATUS UPDATE
+// ══════════════════════════════════════════════
+function updateTestUI(testId) {
+  const s = testStates[testId];
+  const card = $(`card-${testId}`);
+  const statusEl = $(`status-${testId}`);
+  const bodyEl = $(`body-${testId}`);
+  const latEl = $(`lat-${testId}`);
+  const respEl = $(`resp-${testId}`);
+  const errEl = $(`err-${testId}`);
+
+  // Card border
+  card.className = 'test-card' + (s.status !== 'idle' ? ' ' + s.status : '');
+
+  // Status badge
+  const statusMap = { idle: 'stIdle', running: 'stRunning', pass: 'stPass', fail: 'stFail', skip: 'stSkip' };
+  statusEl.className = 'test-status ' + s.status;
+  statusEl.querySelector('.status-text').setAttribute('data-i18n', statusMap[s.status] || 'stIdle');
+  statusEl.querySelector('.status-text').textContent = I18n.t(statusMap[s.status] || 'stIdle');
+  if (s.status === 'running') {
+    statusEl.querySelector('.dot').outerHTML = '<span class="spinner" style="width:10px;height:10px;border-width:1.5px"></span>';
+  } else {
+    const sp = statusEl.querySelector('.spinner');
+    if (sp) sp.outerHTML = '<span class="dot"></span>';
+  }
+
+  // Body
+  if (s.status === 'idle') {
+    bodyEl.classList.remove('show');
+  } else {
+    bodyEl.classList.add('show');
+  }
+
+  // Latency
+  if (s.latency > 0) {
+    const { cls, label } = getLatencyClass(s.latency);
+    latEl.className = 'latency ' + cls;
+    latEl.textContent = (s.latency / 1000).toFixed(2) + 's — ' + label;
+    latEl.style.display = '';
+  } else {
+    latEl.style.display = 'none';
+  }
+
+  // Response
+  respEl.innerHTML = s.response || '';
+  respEl.style.display = s.response ? '' : 'none';
+
+  // Error
+  errEl.textContent = s.error || '';
+  errEl.style.display = s.error ? '' : 'none';
+}
+
+function getLatencyClass(ms) {
+  const t = I18n.t.bind(I18n);
+  if (ms <= 1000) return { cls: 'excellent', label: t('latExcellent') };
+  if (ms <= 3000) return { cls: 'good', label: t('latGood') };
+  if (ms <= 8000) return { cls: 'average', label: t('latAverage') };
+  if (ms <= 15000) return { cls: 'slow', label: t('latSlow') };
+  return { cls: 'vslow', label: t('latVSlow') };
+}
+
+// ══════════════════════════════════════════════
+// API ADAPTERS
+// ══════════════════════════════════════════════
+function getConfig() {
+  return {
+    provider: selProvider.value,
+    baseUrl: inpBaseUrl.value.trim(),
+    key: inpKey.value.trim(),
+    model: inpModel.value.trim(),
+    chatPath: selProvider.value === 'custom' ? (inpChatPath.value.trim() || '/chat/completions') : PROVIDERS[selProvider.value].chatPath,
+  };
+}
+
+function getProviderDef() {
+  return PROVIDERS[selProvider.value];
+}
+
+function buildHeaders(cfg) {
+  const headers = { 'Content-Type': 'application/json' };
+  const def = getProviderDef();
+  if (def.authType === 'bearer') {
+    headers['Authorization'] = 'Bearer ' + cfg.key;
+  } else if (def.authType === 'x-goog-api-key') {
+    headers['x-goog-api-key'] = cfg.key;
+  }
+  return headers;
+}
+
+// Generate a tiny test image as base64 PNG (a 4x4 red square)
+function getTestImageBase64() {
+  const c = document.createElement('canvas');
+  c.width = 32; c.height = 32;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#FF0000';
+  ctx.fillRect(0, 0, 32, 32);
+  ctx.fillStyle = '#00FF00';
+  ctx.fillRect(8, 8, 16, 16);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 14px sans-serif';
+  ctx.fillText('T', 10, 22);
+  return c.toDataURL('image/png').split(',')[1];
+}
+
+// ─── OpenAI-compatible chat ───
+async function chatOpenAI(cfg, messages, extraParams = {}) {
+  const url = cfg.baseUrl.replace(/\/$/, '') + cfg.chatPath;
+  const body = { model: cfg.model, messages, max_tokens: 300, ...extraParams };
+  const res = await fetchWithTimeout(url, {
+    method: 'POST',
+    headers: buildHeaders(cfg),
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+  return data.choices?.[0]?.message?.content || JSON.stringify(data);
+}
+
+// ─── Gemini chat ───
+async function chatGemini(cfg, contents, generationConfig = {}) {
+  const path = cfg.chatPath.replace('{model}', cfg.model);
+  const url = cfg.baseUrl.replace(/\/$/, '') + path;
+  const body = { contents, generationConfig };
+  const res = await fetchWithTimeout(url, {
+    method: 'POST',
+    headers: buildHeaders(cfg),
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+  // Extract text
+  const parts = data.candidates?.[0]?.content?.parts || [];
+  const textParts = parts.filter(p => p.text).map(p => p.text).join('\n');
+  const imageParts = parts.filter(p => p.inlineData);
+  if (imageParts.length > 0) {
+    return { text: textParts, images: imageParts.map(p => `data:${p.inlineData.mimeType};base64,${p.inlineData.data}`) };
+  }
+  return textParts || JSON.stringify(data);
+}
+
+// ─── Image generation (OpenAI-compatible) ───
+async function imageGenOpenAI(cfg, prompt) {
+  const def = getProviderDef();
+  const url = cfg.baseUrl.replace(/\/$/, '') + def.imageGenPath;
+  const body = { model: cfg.model, prompt, n: 1, size: '256x256' };
+  const res = await fetchWithTimeout(url, {
+    method: 'POST',
+    headers: buildHeaders(cfg),
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+  const imgUrl = data.data?.[0]?.url || data.data?.[0]?.b64_json;
+  if (!imgUrl) throw new Error('No image data in response');
+  if (imgUrl.startsWith('http')) return { imageUrl: imgUrl };
+  return { imageUrl: 'data:image/png;base64,' + imgUrl };
+}
+
+// ─── Image generation (Gemini) ───
+async function imageGenGemini(cfg, prompt) {
+  const result = await chatGemini(cfg,
+    [{ role: 'user', parts: [{ text: prompt }] }],
+    { responseModalities: ['IMAGE', 'TEXT'] }
+  );
+  if (typeof result === 'object' && result.images) {
+    return { imageUrl: result.images[0] };
+  }
+  throw new Error('No image generated in response');
+}
+
+// ─── Fetch with timeout ───
+function fetchWithTimeout(url, opts, timeoutMs = 30000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { ...opts, signal: controller.signal, keepalive: true })
+    .finally(() => clearTimeout(id));
+}
+
+// ══════════════════════════════════════════════
+// TEST RUNNERS
+// ══════════════════════════════════════════════
+function validateConfig() {
+  const cfg = getConfig();
+  if (!cfg.baseUrl) return I18n.t('errNoUrl');
+  if (!cfg.key) return I18n.t('errNoKey');
+  if (!cfg.model) return I18n.t('errNoModel');
+  return null;
+}
+
+async function runTest(testId) {
+  const cfg = getConfig();
+  const def = getProviderDef();
+  const state = testStates[testId];
+
+  state.status = 'running';
+  state.latency = 0;
+  state.response = '';
+  state.error = '';
+  updateTestUI(testId);
+
+  const start = performance.now();
+
+  try {
+    let result;
+
+    switch (testId) {
+      case 'text': {
+        if (selProvider.value === 'gemini') {
+          result = await chatGemini(cfg, [{ role: 'user', parts: [{ text: 'What is 2+2? Reply with just the number.' }] }]);
+        } else {
+          result = await chatOpenAI(cfg, [{ role: 'user', content: 'What is 2+2? Reply with just the number.' }]);
+        }
+        state.response = typeof result === 'string' ? result.substring(0, 500) : JSON.stringify(result).substring(0, 500);
+        break;
+      }
+
+      case 'image-understand': {
+        const imgBase64 = getTestImageBase64();
+        if (selProvider.value === 'gemini') {
+          result = await chatGemini(cfg, [{
+            role: 'user',
+            parts: [
+              { text: 'Describe this image briefly.' },
+              { inlineData: { mimeType: 'image/png', data: imgBase64 } }
+            ]
+          }]);
+        } else {
+          result = await chatOpenAI(cfg, [{
+            role: 'user',
+            content: [
+              { type: 'text', text: 'Describe this image briefly.' },
+              { type: 'image_url', image_url: { url: 'data:image/png;base64,' + imgBase64 } }
+            ]
+          }]);
+        }
+        state.response = typeof result === 'string' ? result.substring(0, 500) : JSON.stringify(result).substring(0, 500);
+        break;
+      }
+
+      case 'video-understand': {
+        if (!def.supportsVideoUnderstanding && selProvider.value !== 'custom') {
+          state.status = 'skip';
+          state.error = I18n.t('sumNotSupported');
+          state.latency = 0;
+          updateTestUI(testId);
+          return;
+        }
+        // Minimal check: send a text-only request to verify endpoint exists
+        if (selProvider.value === 'gemini') {
+          result = await chatGemini(cfg, [{ role: 'user', parts: [{ text: 'Can you analyze video content? Reply yes or no.' }] }]);
+        } else {
+          result = await chatOpenAI(cfg, [{ role: 'user', content: 'Can you analyze video content? Reply yes or no.' }]);
+        }
+        state.response = (typeof result === 'string' ? result : JSON.stringify(result)).substring(0, 300);
+        break;
+      }
+
+      case 'image-gen': {
+        if (!def.supportsImageGen && selProvider.value !== 'custom') {
+          state.status = 'skip';
+          state.error = I18n.t('sumNotSupported');
+          state.latency = 0;
+          updateTestUI(testId);
+          return;
+        }
+        let imgResult;
+        if (selProvider.value === 'gemini') {
+          imgResult = await imageGenGemini(cfg, 'A red circle on white background');
+        } else {
+          imgResult = await imageGenOpenAI(cfg, 'A red circle on white background');
+        }
+        state.response = `<img src="${imgResult.imageUrl}" alt="Generated image" loading="lazy"><br><small style="color:var(--text3)">${imgResult.imageUrl.substring(0, 80)}…</small>`;
+        break;
+      }
+
+      case 'video-gen': {
+        if (!def.supportsVideoGen && selProvider.value !== 'custom') {
+          state.status = 'skip';
+          state.error = I18n.t('sumNotSupported');
+          state.latency = 0;
+          updateTestUI(testId);
+          return;
+        }
+        // Most providers don't have video gen in standard REST - show as not supported
+        state.status = 'skip';
+        state.error = I18n.t('sumNotSupported') + ' — video generation APIs typically require specialized SDKs.';
+        state.latency = 0;
+        updateTestUI(testId);
+        return;
+      }
+    }
+
+    state.latency = Math.round(performance.now() - start);
+    state.status = 'pass';
+  } catch (err) {
+    state.latency = Math.round(performance.now() - start);
+    state.status = 'fail';
+    if (err.name === 'AbortError') {
+      state.error = I18n.t('errTimeout');
+    } else if (err.message && err.message.includes('Failed to fetch')) {
+      state.error = I18n.t('errCors');
+      corsNotice.classList.add('show');
+    } else if (err.message && err.message.includes('NetworkError')) {
+      state.error = I18n.t('errNetwork');
+    } else {
+      state.error = err.message || I18n.t('errUnknown');
+    }
+  }
+
+  updateTestUI(testId);
+}
+
+async function runSingleTest(testId) {
+  const err = validateConfig();
+  if (err) {
+    testStates[testId].status = 'fail';
+    testStates[testId].error = err;
+    updateTestUI(testId);
+    return;
+  }
+  await runTest(testId);
+  updateSummary();
+}
+
+async function runAllTests() {
+  if (isRunningAll) return;
+  const err = validateConfig();
+  if (err) {
+    TEST_DEFS.forEach(def => {
+      testStates[def.id].status = 'fail';
+      testStates[def.id].error = err;
+      updateTestUI(def.id);
+    });
+    return;
+  }
+
+  isRunningAll = true;
+  btnRunAll.disabled = true;
+  btnRunAll.innerHTML = '<span class="spinner"></span> ' + I18n.t('stRunning');
+
+  // Reset all
+  TEST_DEFS.forEach(def => {
+    testStates[def.id] = { status: 'idle', latency: 0, response: '', error: '' };
+    updateTestUI(def.id);
+  });
+
+  for (const def of TEST_DEFS) {
+    await runTest(def.id);
+  }
+
+  isRunningAll = false;
+  btnRunAll.disabled = false;
+  btnRunAll.textContent = I18n.t('btnRunAll');
+  updateSummary();
+}
+
+// ══════════════════════════════════════════════
+// SUMMARY
+// ══════════════════════════════════════════════
+function updateSummary() {
+  const hasResults = TEST_DEFS.some(d => testStates[d.id].status !== 'idle');
+  if (!hasResults) { summaryCard.classList.remove('show'); return; }
+
+  summaryCard.classList.add('show');
+  const cfg = getConfig();
+  const def = getProviderDef();
+
+  const passed = TEST_DEFS.filter(d => testStates[d.id].status === 'pass').length;
+  const failed = TEST_DEFS.filter(d => testStates[d.id].status === 'fail').length;
+  const skipped = TEST_DEFS.filter(d => testStates[d.id].status === 'skip').length;
+  const latencies = TEST_DEFS.filter(d => testStates[d.id].latency > 0).map(d => testStates[d.id].latency);
+  const avgLatency = latencies.length ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length) : 0;
+
+  // Title
+  $('summaryTitle').textContent = `${def.name} — ${cfg.model}`;
+
+  // Badge
+  const badge = $('summaryBadge');
+  const ratio = passed / TEST_DEFS.length;
+  if (ratio >= 0.8) { badge.className = 'summary-badge excellent'; badge.textContent = I18n.t('latExcellent'); }
+  else if (ratio >= 0.6) { badge.className = 'summary-badge good'; badge.textContent = I18n.t('latGood'); }
+  else if (ratio >= 0.4) { badge.className = 'summary-badge average'; badge.textContent = I18n.t('latAverage'); }
+  else { badge.className = 'summary-badge poor'; badge.textContent = I18n.t('latVSlow'); }
+
+  // Meta
+  $('summaryMeta').textContent = `${I18n.t('sumProvider')}: ${def.name} | ${I18n.t('sumModel')}: ${cfg.model}`;
+
+  // Grid
+  const grid = $('summaryGrid');
+  grid.innerHTML = '';
+  TEST_DEFS.forEach(d => {
+    const s = testStates[d.id];
+    const item = document.createElement('div');
+    item.className = 'summary-item';
+    const valClass = s.status === 'pass' ? 'pass' : (s.status === 'fail' ? 'fail' : 'skip');
+    const valText = s.status === 'pass'
+      ? I18n.t('stPass') + (s.latency > 0 ? ` (${(s.latency/1000).toFixed(1)}s)` : '')
+      : (s.status === 'fail' ? I18n.t('stFail') : I18n.t('stSkip'));
+    item.innerHTML = `
+      <div class="s-label">${I18n.t(d.nameKey)}</div>
+      <div class="s-value ${valClass}">${valText}</div>
+    `;
+    grid.appendChild(item);
+  });
+
+  // Add average latency item
+  if (avgLatency > 0) {
+    const item = document.createElement('div');
+    item.className = 'summary-item';
+    const { cls } = getLatencyClass(avgLatency);
+    item.innerHTML = `
+      <div class="s-label">${I18n.t('sumAvgLatency')}</div>
+      <div class="s-value ${cls}">${(avgLatency / 1000).toFixed(2)}s</div>
+    `;
+    grid.appendChild(item);
+  }
+}
+
+// ══════════════════════════════════════════════
+// SAVE / LOAD CONFIG
+// ══════════════════════════════════════════════
+const CFG_KEY = 'apitest_config';
+
+function saveConfig() {
+  const data = {
+    provider: selProvider.value,
+    baseUrl: inpBaseUrl.value,
+    key: inpKey.value,
+    model: inpModel.value,
+    chatPath: inpChatPath.value,
+  };
+  localStorage.setItem(CFG_KEY, JSON.stringify(data));
+  // Flash button
+  btnSaveCfg.textContent = '✓';
+  setTimeout(() => { btnSaveCfg.textContent = I18n.t('btnSave'); }, 1200);
+}
+
+function loadConfig() {
+  const raw = localStorage.getItem(CFG_KEY);
+  if (!raw) { applyProvider(selProvider.value); return; }
+  try {
+    const data = JSON.parse(raw);
+    if (data.provider) selProvider.value = data.provider;
+    if (data.baseUrl) inpBaseUrl.value = data.baseUrl;
+    if (data.key) inpKey.value = data.key;
+    if (data.model) inpModel.value = data.model;
+    if (data.chatPath) inpChatPath.value = data.chatPath;
+    applyProvider(selProvider.value);
+    // Restore overrides from saved data
+    if (data.baseUrl) inpBaseUrl.value = data.baseUrl;
+    if (data.model) inpModel.value = data.model;
+  } catch (e) {}
+}
+
+function clearConfig() {
+  localStorage.removeItem(CFG_KEY);
+  selProvider.value = 'dmxapi';
+  applyProvider('dmxapi');
+  inpKey.value = '';
+  summaryCard.classList.remove('show');
+  corsNotice.classList.remove('show');
+  TEST_DEFS.forEach(def => {
+    testStates[def.id] = { status: 'idle', latency: 0, response: '', error: '' };
+    updateTestUI(def.id);
+  });
+}
+
+// ══════════════════════════════════════════════
+// EVENT BINDINGS
+// ══════════════════════════════════════════════
+btnRunAll.addEventListener('click', runAllTests);
+btnSaveCfg.addEventListener('click', saveConfig);
+btnClearCfg.addEventListener('click', clearConfig);
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+buildTestCards();
+loadConfig();
+
+// i18n
+I18n.init(TRANSLATIONS, () => {
+  // Re-apply test UI on lang switch
+  TEST_DEFS.forEach(d => updateTestUI(d.id));
+  updateSummary();
+  // Update run all button text
+  if (!isRunningAll) btnRunAll.textContent = I18n.t('btnRunAll');
+});
+I18n.renderSelector('langSel');
+
+// ══════════════════════════════════════════════
+// FIREBASE ANALYTICS
+// ══════════════════════════════════════════════
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-analytics.js";
+  const firebaseConfig = {
+    apiKey:"AIzaSyDT9uNrRj97oLuehLXgOto97Z-mVw12cnk",
+    authDomain:"myhtml-ff6d6.firebaseapp.com",
+    projectId:"myhtml-ff6d6",
+    storageBucket:"myhtml-ff6d6.firebasestorage.app",
+    messagingSenderId:"790702386101",
+    appId:"1:790702386101:web:f4e30fb5ce4771396347fc",
+    measurementId:"G-8FQ9DRDJ6T"
+  };
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+</body>
+</html>
