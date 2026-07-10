@@ -564,7 +564,7 @@ function replaceWithResult(msgId,imageUrl,model,size,elapsed){
   const params=requestParams[msgId];
   if(typeof trackEvent==='function')trackEvent('ai_generate_complete',{model:model.includes('gpt')?'gpt':'gemini',mode:params?params.mode:'t2i'});
   addToHistory({
-    id:msgId,
+    id:makeHistId(),
     prompt:params?params.prompt:'',
     model,
     mode:params?params.mode:'t2i',
@@ -732,10 +732,40 @@ function generateThumbnail(dataUrl, maxSize=300){
 }
 
 // ── localStorage metadata ──
+function makeHistId(){
+  return 'hist-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
+}
+function normalizeHistory(arr,persist){
+  if(!Array.isArray(arr))return[];
+  const counts={};
+  arr.forEach(h=>{if(h&&h.id)counts[h.id]=(counts[h.id]||0)+1});
+  let changed=false;
+  const seen=new Set();
+  arr.forEach(h=>{
+    if(!h||typeof h!=='object')return;
+    const oldId=h.id;
+    const duplicated=oldId&&counts[oldId]>1;
+    if(!oldId||duplicated||seen.has(oldId)){
+      h.legacyImageKey=oldId||h.legacyImageKey||'';
+      h.id=makeHistId();
+      // Legacy duplicate ids may point to the newest overwritten IndexedDB image.
+      // Use each card's own thumbnail instead of a stale shared original.
+      h.imageKey='';
+      changed=true;
+    }else if(!('imageKey'in h)){
+      h.imageKey=oldId;
+      changed=true;
+    }
+    seen.add(h.id);
+  });
+  if(changed&&persist){try{localStorage.setItem(HIST_KEY,JSON.stringify(arr))}catch{}}
+  return arr;
+}
 function loadHistory(){
-  try{return JSON.parse(localStorage.getItem(HIST_KEY)||'[]')}catch{return[]}
+  try{return normalizeHistory(JSON.parse(localStorage.getItem(HIST_KEY)||'[]'),true)}catch{return[]}
 }
 function saveHistory(arr){
+  arr=normalizeHistory(arr,false);
   try{localStorage.setItem(HIST_KEY,JSON.stringify(arr))}catch(e){
     while(arr.length>1){
       arr.shift();
@@ -743,13 +773,16 @@ function saveHistory(arr){
     }
   }
 }
+function getHistImageKey(h){return h&&('imageKey'in h)?h.imageKey:(h&&h.id?h.id:'')}
 
 // ── Core history operations ──
 async function addToHistory(entry){
   try{
+    entry.id=entry.id||makeHistId();
+    entry.imageKey=entry.id;
     // Save original full-res image to IndexedDB (large storage)
     if(entry.imageUrl){
-      await saveOriginalImage(entry.id, entry.imageUrl);
+      await saveOriginalImage(entry.imageKey, entry.imageUrl);
     }
     // Generate thumbnail for localStorage (small, fast grid rendering)
     const thumb=await generateThumbnail(entry.imageUrl, 300);
@@ -766,9 +799,11 @@ async function addToHistory(entry){
   }
 }
 async function removeFromHistory(id){
-  const arr=loadHistory().filter(h=>h.id!==id);
-  saveHistory(arr);
-  await deleteOriginalImage(id);
+  const arr=loadHistory();
+  const item=arr.find(h=>h.id===id);
+  saveHistory(arr.filter(h=>h.id!==id));
+  const imageKey=getHistImageKey(item);
+  if(imageKey)await deleteOriginalImage(imageKey);
   updateHistBadge();
 }
 async function clearHistory(){
@@ -842,7 +877,8 @@ async function openHistDetail(id){
   const mn=h.model.includes('gpt')?'ChatGPT':'Gemini';
   const mode=h.mode==='i2i'?'图生图':'文生图';
   // Try to load original from IndexedDB, fall back to thumbnail
-  const original=await getOriginalImage(id);
+  const imageKey=getHistImageKey(h);
+  const original=imageKey?await getOriginalImage(imageKey):null;
   const displayImg=original||h.thumbnail||h.imageUrl;
   histDetailBody.innerHTML=`
     <img class="hist-detail-img" src="${displayImg}" alt="" onclick="openLightbox(this.src)">
@@ -869,8 +905,9 @@ async function openHistDetail(id){
 }
 
 window.downloadHistImage=async function(id){
-  const original=await getOriginalImage(id);
   const h=loadHistory().find(x=>x.id===id);
+  const imageKey=getHistImageKey(h);
+  const original=imageKey?await getOriginalImage(imageKey):null;
   const src=original||(h&&h.thumbnail)||'';
   if(src)downloadImage(src,id);
 };
