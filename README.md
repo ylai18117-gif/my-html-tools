@@ -1,6 +1,10 @@
 # MyHtml — 个人网页工具集合
 
-一组纯前端单页面工具，部署在个人域名下日常使用。全部使用原生 HTML/CSS/JavaScript 构建，零依赖，开箱即用。
+一组纯前端单页面工具，部署在个人域名 `https://lokmoon.xyz` 下日常使用。全部使用原生 HTML/CSS/JavaScript 构建，零依赖，开箱即用。
+
+- **部署平台**：Cloudflare Pages
+- **GitHub 仓库**：`ylai18117-gif/my-html-tools`
+- **线上域名**：`https://lokmoon.xyz`
 
 ## 子项目
 
@@ -106,7 +110,8 @@ npx serve .
 
 整个目录可直接部署到任意静态托管服务：
 
-- **Cloudflare Pages**：连接 GitHub 仓库，根目录部署（当前使用）
+- **Cloudflare Pages**：连接 GitHub 仓库 `ylai18117-gif/my-html-tools`，根目录部署（当前使用）
+- **自定义域名**：`https://lokmoon.xyz`
 - **GitHub Pages**：推送到 `gh-pages` 分支
 - **Vercel / Netlify**：拖拽上传或 Git 集成
 
