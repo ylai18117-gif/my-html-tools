@@ -50,11 +50,20 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:
 .topbar-title{font-family:var(--ff-d);font-size:18px;font-weight:700;letter-spacing:-.02em}
 
 /* CONTROLS */
-.controls{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border-lt);background:var(--surface)}
+.controls{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border-lt);background:var(--surface);flex-wrap:wrap}
 .seg-group{display:flex;background:var(--bg-deep);border-radius:8px;padding:2px}
 .seg-group button{padding:6px 14px;border:none;border-radius:6px;background:transparent;font-size:12px;font-weight:500;font-family:var(--ff-b);color:var(--text2);cursor:pointer;transition:all .25s var(--ease);white-space:nowrap}
 .seg-group button.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .controls .spacer{flex:1}
+.size-row{flex:0 0 100%;display:flex;gap:6px;overflow-x:auto;padding:2px 0 0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.size-row::-webkit-scrollbar{display:none}
+.size-chip{border:1px solid var(--border);background:var(--bg);border-radius:999px;padding:5px 10px;display:flex;align-items:center;gap:5px;font-family:var(--ff-b);font-size:11px;color:var(--text2);white-space:nowrap;cursor:pointer;transition:all .2s}
+.size-chip b{font-size:11px;color:var(--text);font-weight:600}.size-chip small{font-size:10px;color:var(--text3)}
+.size-chip.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.size-chip.active b,.size-chip.active small{color:var(--accent)}
+.recover-tip{display:none;margin-bottom:8px;padding:8px 10px;border-radius:10px;background:var(--accent-light);border:1px solid rgba(193,122,86,.18);color:var(--accent);font-size:12px;line-height:1.45}
+.recover-tip.show{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.recover-tip button{border:none;background:var(--accent);color:#fff;border-radius:8px;padding:4px 8px;font-size:11px;font-family:var(--ff-b);cursor:pointer;white-space:nowrap}
 
 /* DRAG OVERLAY */
 .drag-overlay{position:fixed;inset:0;z-index:50;background:rgba(193,122,86,.08);border:3px dashed var(--accent);border-radius:16px;display:none;align-items:center;justify-content:center;pointer-events:none}
@@ -156,6 +165,11 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:
 .hist-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .hist-item{background:var(--surface);border:1px solid var(--border-lt);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
 .hist-item:hover{border-color:var(--border);box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.hist-item.is-generating{opacity:.72}.hist-item.is-error{border-color:#F5D5D5}
+.hist-item-status{position:absolute;top:7px;left:7px;z-index:2;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;color:#fff;background:rgba(52,211,153,.9)}
+.hist-item-status.generating{background:rgba(193,122,86,.9);animation:statusPulse 1.4s infinite}.hist-item-status.error{background:rgba(217,79,79,.9)}
+@keyframes statusPulse{0%,100%{opacity:1}50%{opacity:.55}}
+.hist-item .hist-img-placeholder{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:var(--bg-deep);color:var(--text3);font-size:28px}
 .hist-item img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
 .hist-item .hist-info{padding:8px 10px}
 .hist-item .hist-prompt{font-size:11px;color:var(--text2);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -282,6 +296,7 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
       <button class="active" data-mode="t2i">文生图</button>
       <button data-mode="i2i">图生图</button>
     </div>
+    <div class="size-row" id="size-row"></div>
   </div>
 
   <div class="chat-area" id="chat-area">
@@ -293,6 +308,7 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
   </div>
 
   <div class="input-bar">
+    <div class="recover-tip" id="recover-tip"><span>已保留上次失败内容，可修改后重新发送。</span><button id="recover-fill">恢复</button></div>
     <div class="attach-previews" id="attach-previews"></div>
     <div class="input-row">
       <div class="attach-btn" id="attach-btn" title="添加参考图（可多选）">
@@ -346,6 +362,18 @@ function getApiKey(){return decryptXor(ENC_B64,ENC_KEY_XOR)}
 // ═══ STATE ═══
 let currentModel='gpt-image-2';
 let currentMode='t2i';
+let currentSize='1024x1024';
+const SIZE_PRESETS={
+  '1024x1024':{label:'方图',desc:'1:1',gpt:'1024x1024',aspect:'1:1'},
+  '1024x1536':{label:'竖图',desc:'2:3',gpt:'1024x1536',aspect:'2:3'},
+  '1536x1024':{label:'横图',desc:'3:2',gpt:'1536x1024',aspect:'3:2'},
+  '1080x1920':{label:'手机壁纸',desc:'9:16',gpt:'1024x1536',aspect:'9:16'},
+  '1920x1080':{label:'横版封面',desc:'16:9',gpt:'1536x1024',aspect:'16:9'},
+  '1240x1754':{label:'A4传单',desc:'A4',gpt:'1024x1536',aspect:'3:4'},
+  '1080x1350':{label:'社媒竖版',desc:'4:5',gpt:'1024x1536',aspect:'4:5'},
+  '1050x600':{label:'名片',desc:'7:4',gpt:'1536x1024',aspect:'7:4'},
+  '512x512':{label:'头像',desc:'1:1',gpt:'1024x1024',aspect:'1:1'}
+};
 let attachedImages=[]; // [{dataUrl, base64, mimeType}]
 let msgIdCounter=0;
 
@@ -425,6 +453,22 @@ function hasImageFiles(e){
 const imgInput=document.getElementById('img-input');
 const attachBtn=document.getElementById('attach-btn');
 const attachPreviews=document.getElementById('attach-previews');
+const sizeRow=document.getElementById('size-row');
+const recoverTip=document.getElementById('recover-tip');
+const recoverFill=document.getElementById('recover-fill');
+let lastFailedParams=null;
+
+renderSizePresets();
+function renderSizePresets(){
+  sizeRow.innerHTML=Object.entries(SIZE_PRESETS).map(([key,p])=>`<button class="size-chip ${key===currentSize?'active':''}" data-size="${key}"><b>${p.label}</b><small>${p.desc}</small></button>`).join('');
+}
+sizeRow.addEventListener('click',e=>{
+  const btn=e.target.closest('.size-chip');if(!btn)return;
+  currentSize=btn.dataset.size;
+  renderSizePresets();
+  if(typeof trackEvent==='function')trackEvent('ai_size_select',{size:currentSize});
+});
+function getSizePreset(){return SIZE_PRESETS[currentSize]||SIZE_PRESETS['1024x1024']}
 
 imgInput.addEventListener('change',e=>{
   const files=[...e.target.files];
@@ -442,12 +486,31 @@ function addImages(files){if(typeof trackEvent==='function')trackEvent('ai_image
 function readFile(file){
   const reader=new FileReader();
   reader.onload=e=>{
-    const dataUrl=e.target.result;
-    const base64=dataUrl.split(',')[1];
-    attachedImages.push({dataUrl,base64,mimeType:file.type});
-    renderAttachPreviews();
+    resizeUploadImage(e.target.result,file.type).then(img=>{
+      attachedImages.push(img);
+      renderAttachPreviews();
+    });
   };
   reader.readAsDataURL(file);
+}
+function resizeUploadImage(dataUrl,mimeType){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      try{
+        const maxDim=1536;
+        let w=img.width,h=img.height;
+        if(w>maxDim||h>maxDim){const r=Math.min(maxDim/w,maxDim/h);w=Math.round(w*r);h=Math.round(h*r)}
+        const c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        const type=mimeType&&mimeType.includes('png')?'image/png':'image/jpeg';
+        const data=c.toDataURL(type,type==='image/jpeg'?0.88:undefined);
+        resolve({dataUrl:data,base64:data.split(',')[1],mimeType:type});
+      }catch{resolve({dataUrl,base64:dataUrl.split(',')[1],mimeType:mimeType||'image/png'})}
+    };
+    img.onerror=()=>resolve({dataUrl,base64:dataUrl.split(',')[1],mimeType:mimeType||'image/png'});
+    img.src=dataUrl;
+  });
 }
 
 function renderAttachPreviews(){
@@ -508,6 +571,22 @@ function resetComposer(){
   attachedImages=[];
   renderAttachPreviews();
 }
+function hideRecoverTip(){recoverTip.classList.remove('show')}
+function showRecoverTip(params){
+  lastFailedParams=params;
+  recoverTip.classList.add('show');
+}
+recoverFill.addEventListener('click',()=>{
+  if(!lastFailedParams)return;
+  currentModel=lastFailedParams.model||currentModel;
+  currentMode=lastFailedParams.mode||currentMode;
+  currentSize=lastFailedParams.size||currentSize;
+  document.querySelector(`#model-switch button[data-model="${currentModel}"]`)?.click();
+  document.querySelector(`#mode-switch button[data-mode="${currentMode}"]`)?.click();
+  renderSizePresets();
+  restoreComposer(lastFailedParams.prompt,lastFailedParams.images);
+  hideRecoverTip();
+});
 function restoreComposer(prompt,images){
   promptInput.value=prompt||'';
   promptInput.style.height='auto';
@@ -531,13 +610,17 @@ function handleSend(){
   const images=[...attachedImages]; // snapshot
   const model=currentModel;
   const mode=currentMode;
+  const size=currentSize;
+  const histId=makeHistId();
 
   appendUserMsg(msgId,prompt,images);
   appendLoadingMsg(msgId,model);
+  addHistoryEntry({id:histId,prompt,model,mode,size,status:'generating',refImageCount:images.length,timestamp:Date.now(),thumbnail:images[0]?.dataUrl||''});
 
   resetComposer();
+  hideRecoverTip();
 
-  fireRequest(msgId,prompt,images,model,mode);
+  fireRequest(msgId,prompt,images,model,mode,size,histId);
 }
 
 function appendUserMsg(msgId,text,images){
@@ -585,21 +668,6 @@ function replaceWithResult(msgId,imageUrl,model,size,elapsed){
   const mn=model.includes('gpt')?'gpt-image-2':'gemini-3.1';
   botEl.innerHTML=`<div class="result-card"><img src="${imageUrl}" alt="生成结果" onclick="openLightbox(this.src)"><div class="result-meta"><span class="model-tag">${mn}</span><span class="meta-sep">·</span><span>${size}</span><span class="meta-sep">·</span><span>${elapsed}s</span><button class="download-btn" onclick="downloadImage('${imageUrl}','${msgId}')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>保存</button></div></div>`;
   scrollBottom();
-
-  // Save to history
-  const params=requestParams[msgId];
-  if(typeof trackEvent==='function')trackEvent('ai_generate_complete',{model:model.includes('gpt')?'gpt':'gemini',mode:params?params.mode:'t2i'});
-  addToHistory({
-    id:makeHistId(),
-    prompt:params?params.prompt:'',
-    model,
-    mode:params?params.mode:'t2i',
-    imageUrl,
-    refImageCount:params&&params.images?params.images.length:0,
-    size,
-    duration:elapsed,
-    timestamp:Date.now()
-  });
 }
 
 function replaceWithError(msgId,errorMsg,model){
@@ -613,31 +681,39 @@ function replaceWithError(msgId,errorMsg,model){
 
 const requestParams={};
 
-async function fireRequest(msgId,prompt,images,model,mode){
+async function fireRequest(msgId,prompt,images,model,mode,size,histId){
   const start=Date.now();
   let ok=false;
-  requestParams[msgId]={prompt,images,model,mode};
+  requestParams[msgId]={prompt,images,model,mode,size,histId};
+  if(histId)updateHistoryEntry(histId,{status:'generating',error:''});
   try{
     const apiKey=getApiKey();
     let result;
-    if(model.includes('gpt'))result=await callGPTImage(prompt,images,model,mode,apiKey);
-    else result=await callGeminiImage(prompt,images,model,mode,apiKey);
+    if(model.includes('gpt'))result=await callGPTImage(prompt,images,model,mode,apiKey,size);
+    else result=await callGeminiImage(prompt,images,model,mode,apiKey,size);
     const elapsed=Math.floor((Date.now()-start)/1000);
-    replaceWithResult(msgId,result.url,model,result.size,elapsed);
+    replaceWithResult(msgId,result.url,model,result.size||size,elapsed);
+    if(typeof trackEvent==='function')trackEvent('ai_generate_complete',{model:model.includes('gpt')?'gpt':'gemini',mode});
+    await completeHistoryEntry(histId,{imageUrl:result.url,size:result.size||size,duration:elapsed});
     ok=true;
   }catch(err){
-    replaceWithError(msgId,err.message||'未知错误',model);
+    const msg=err.message||'未知错误';
+    replaceWithError(msgId,msg,model);
+    markHistoryError(histId,msg);
+    showRecoverTip({prompt,images,model,mode,size});
   }finally{if(ok)delete requestParams[msgId]}
 }
 
 // ═══ API CALLS ═══
-async function callGPTImage(prompt,images,model,mode,apiKey){
+async function callGPTImage(prompt,images,model,mode,apiKey,sizeKey){
+  const preset=SIZE_PRESETS[sizeKey]||SIZE_PRESETS['1024x1024'];
+  const gptSize=preset.gpt;
   if(mode==='i2i'&&images.length>0){
     const fd=new FormData();
     fd.append('model',model);
     fd.append('prompt',prompt);
     fd.append('n','1');
-    fd.append('size','1024x1024');
+    fd.append('size',gptSize);
     images.forEach((img,i)=>{
       const blob=base64ToBlob(img.base64,img.mimeType);
       fd.append('image',blob,`image_${i}.png`);
@@ -647,22 +723,23 @@ async function callGPTImage(prompt,images,model,mode,apiKey){
     });
     if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.error?.message||`HTTP ${res.status}: 请求失败`)}
     const data=await res.json();
-    if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'1024×1024'}}
+    if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:sizeKey}}
     throw new Error('未返回图片数据');
   }else{
     const res=await fetch(`${API_BASE}/images/generations`,{
       method:'POST',
       headers:{'x-client-api-key':apiKey,'Content-Type':'application/json'},
-      body:JSON.stringify({model,prompt,n:1,size:'1024x1024',quality:'high'})
+      body:JSON.stringify({model,prompt,n:1,size:gptSize,quality:'high'})
     });
     if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.error?.message||`HTTP ${res.status}: 请求失败`)}
     const data=await res.json();
-    if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'1024×1024'}}
+    if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:sizeKey}}
     throw new Error('未返回图片数据');
   }
 }
 
-async function callGeminiImage(prompt,images,model,mode,apiKey){
+async function callGeminiImage(prompt,images,model,mode,apiKey,sizeKey){
+  const preset=SIZE_PRESETS[sizeKey]||SIZE_PRESETS['1024x1024'];
   const parts=[];
   if(mode==='i2i'&&images.length>0){
     images.forEach(img=>{
@@ -672,7 +749,7 @@ async function callGeminiImage(prompt,images,model,mode,apiKey){
   parts.push({text:prompt});
   const body={
     contents:[{role:'user',parts}],
-    generationConfig:{responseModalities:['IMAGE','TEXT'],imageConfig:{aspectRatio:'1:1',imageSize:'2K'}}
+    generationConfig:{responseModalities:['IMAGE','TEXT'],imageConfig:{aspectRatio:preset.aspect,imageSize:'2K'}}
   };
   const res=await fetch(`${API_BASE_BETA}/models/${model}:generateContent`,{
     method:'POST',
@@ -683,7 +760,7 @@ async function callGeminiImage(prompt,images,model,mode,apiKey){
   const data=await res.json();
   if(data.candidates&&data.candidates[0]){
     const rp=data.candidates[0].content.parts;
-    for(const p of rp){if(p.inlineData&&p.inlineData.data){const mime=p.inlineData.mimeType||'image/png';return{url:`data:${mime};base64,${p.inlineData.data}`,size:p.inlineData.imageSize||'2K'}}}
+    for(const p of rp){if(p.inlineData&&p.inlineData.data){const mime=p.inlineData.mimeType||'image/png';return{url:`data:${mime};base64,${p.inlineData.data}`,size:sizeKey}}}
     for(const p of rp){if(p.text)throw new Error(p.text.substring(0,200))}
   }
   throw new Error('未返回图片数据，请检查提示词后重试');
@@ -694,7 +771,7 @@ function retryRequest(msgId){
   const params=requestParams[msgId];
   if(params){
     resetBotToLoading(msgId,params.model);
-    fireRequest(msgId,params.prompt,params.images,params.model,params.mode);
+    fireRequest(msgId,params.prompt,params.images,params.model,params.mode,params.size,params.histId);
     return;
   }
   const userEl=document.getElementById(msgId+'-user');if(!userEl)return;
@@ -809,6 +886,35 @@ function saveHistory(arr){
   }
 }
 function getHistImageKey(h){return h&&('imageKey'in h)?h.imageKey:(h&&h.id?h.id:'')}
+function addHistoryEntry(entry){
+  const arr=loadHistory();
+  arr.unshift(entry);
+  saveHistory(arr);
+  updateHistBadge();
+  return entry.id;
+}
+function updateHistoryEntry(id,updates){
+  const arr=loadHistory();
+  const idx=arr.findIndex(h=>h.id===id);
+  if(idx<0)return;
+  Object.assign(arr[idx],updates);
+  saveHistory(arr);
+  updateHistBadge();
+  if(histPanel.classList.contains('show'))renderHistGrid();
+}
+async function completeHistoryEntry(id,updates){
+  const entry={...updates,status:'completed'};
+  if(updates.imageUrl){
+    entry.imageKey=id;
+    await saveOriginalImage(id,updates.imageUrl);
+    entry.thumbnail=await generateThumbnail(updates.imageUrl,300);
+    delete entry.imageUrl;
+  }
+  updateHistoryEntry(id,entry);
+}
+function markHistoryError(id,error){
+  updateHistoryEntry(id,{status:'error',error});
+}
 
 // ── Core history operations ──
 async function addToHistory(entry){
@@ -858,6 +964,9 @@ function timeAgo(ts){
   if(s<86400)return Math.floor(s/3600)+'小时前';
   return Math.floor(s/86400)+'天前';
 }
+function histStatus(h){return h.status||'completed'}
+function histStatusText(st){return st==='generating'?'生成中':st==='error'?'失败':'已完成'}
+function histStatusIcon(st){return st==='generating'?'⏳':st==='error'?'⚠️':'🖼️'}
 
 // Panel UI
 const histPanel=document.getElementById('hist-panel');
@@ -888,12 +997,15 @@ function renderHistGrid(){
   }
   histBody.innerHTML='<div class="hist-grid">'+arr.map(h=>{
     const mn=h.model.includes('gpt')?'ChatGPT':'Gemini';
-    return `<div class="hist-item" data-id="${h.id}">
-      <img src="${h.thumbnail||h.imageUrl}" alt="" loading="lazy">
+    const st=histStatus(h);
+    const img=h.thumbnail||h.imageUrl;
+    return `<div class="hist-item is-${st}" data-id="${h.id}">
+      <span class="hist-item-status ${st}">${histStatusText(st)}</span>
+      ${img?`<img src="${img}" alt="" loading="lazy">`:`<div class="hist-img-placeholder">${histStatusIcon(st)}</div>`}
       <button class="hist-del" data-id="${h.id}" title="删除">✕</button>
       <div class="hist-info">
         <div class="hist-prompt">${escapeHtml(h.prompt||'无提示词')}</div>
-        <div class="hist-meta"><span class="hist-model">${mn}</span><span>${timeAgo(h.timestamp)}</span></div>
+        <div class="hist-meta"><span class="hist-model">${mn}</span><span>${h.size||''}</span><span>${timeAgo(h.timestamp)}</span></div>
       </div>
     </div>`;
   }).join('')+'</div>';
@@ -911,20 +1023,26 @@ async function openHistDetail(id){
   if(!h)return;
   const mn=h.model.includes('gpt')?'ChatGPT':'Gemini';
   const mode=h.mode==='i2i'?'图生图':'文生图';
-  // Try to load original from IndexedDB, fall back to thumbnail
+  const st=histStatus(h);
   const imageKey=getHistImageKey(h);
   const original=imageKey?await getOriginalImage(imageKey):null;
   const displayImg=original||h.thumbnail||h.imageUrl;
+  const visual=displayImg?`<img class="hist-detail-img" src="${displayImg}" alt="" onclick="openLightbox(this.src)">`:`<div class="hist-img-placeholder" style="border-radius:14px">${histStatusIcon(st)}</div>`;
   histDetailBody.innerHTML=`
-    <img class="hist-detail-img" src="${displayImg}" alt="" onclick="openLightbox(this.src)">
+    ${visual}
     <div class="hist-detail-prompt">${escapeHtml(h.prompt||'无提示词')}</div>
+    ${st==='error'?`<div class="hist-detail-prompt" style="color:var(--error);border-color:#F5D5D5;background:var(--error-bg)">${escapeHtml(h.error||'生成失败')}</div>`:''}
     <div class="hist-detail-tags">
-      <span>${mn}</span><span>${mode}</span><span>${h.size||''}</span><span>${h.duration||''}s</span><span>${new Date(h.timestamp).toLocaleString('zh-CN')}</span>
+      <span>${mn}</span><span>${mode}</span><span>${h.size||''}</span><span>${histStatusText(st)}</span><span>${h.duration? h.duration+'s':''}</span><span>${new Date(h.timestamp).toLocaleString('zh-CN')}</span>
     </div>
     <div class="hist-detail-actions">
-      <button class="btn-primary" onclick="reusePrompt('${id}')">
-        <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-        重新生成
+      <button class="btn-primary" onclick="editFromHistory('${id}')">
+        <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        再次编辑
+      </button>
+      <button class="btn-secondary" onclick="copyHistPrompt('${id}')">
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        复制提示词
       </button>
       <button class="btn-secondary" onclick="downloadHistImage('${id}')">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -947,18 +1065,23 @@ window.downloadHistImage=async function(id){
   if(src)downloadImage(src,id);
 };
 
-window.reusePrompt=function(id){if(typeof trackEvent==='function')trackEvent('ai_reuse_prompt');
+window.copyHistPrompt=function(id){
+  const h=loadHistory().find(x=>x.id===id);if(!h)return;
+  navigator.clipboard?.writeText(h.prompt||'').catch(()=>{});
+};
+
+window.editFromHistory=function(id){if(typeof trackEvent==='function')trackEvent('ai_history_edit');
   const h=loadHistory().find(x=>x.id===id);
   if(!h)return;
   histDetail.classList.remove('show');
   histPanel.classList.remove('show');
-  promptInput.value=h.prompt||'';
-  if(h.model){
-    const btn=document.querySelector(`#model-switch button[data-model="${h.model}"]`);
-    if(btn)btn.click();
-  }
-  promptInput.focus();
+  if(h.model)document.querySelector(`#model-switch button[data-model="${h.model}"]`)?.click();
+  if(h.mode)document.querySelector(`#mode-switch button[data-mode="${h.mode}"]`)?.click();
+  if(h.size&&SIZE_PRESETS[h.size]){currentSize=h.size;renderSizePresets()}
+  restoreComposer(h.prompt||'',[]);
 };
+
+window.reusePrompt=function(id){window.editFromHistory(id)};
 
 window.deleteFromDetail=function(id){
   if(!confirm('删除这条记录？'))return;
