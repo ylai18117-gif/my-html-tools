@@ -44,3 +44,17 @@
 - 新增 `makeHistId()` 生成全局唯一历史 ID，不再使用会重置的消息 ID。
 - 新增 `imageKey` 字段，详情页和下载都按记录自己的 `imageKey` 读取原图。
 - 对已有重复 ID 的历史记录做兼容迁移：检测到重复 ID 时改成唯一 ID，并回退使用该卡片自己的 thumbnail，避免继续读取被覆盖的最新原图。
+
+
+## 2026-07-10 — AI 图片工坊生成失败后重试/继续输入仍失败 + 缺少 favicon
+
+### 问题
+- 朋友使用 `https://lokmoon.xyz/aiimage/` 时，ChatGPT 图生图多次显示 `Failed to fetch`。
+- 点击失败卡片的“重试”后仍失败，并且失败后继续在输入框输入提示词也无法恢复，通常需要刷新页面。
+- 浏览器标签页标题旁显示默认图标，不够美观。
+
+### 修复
+- 新增 `functions/api/dmxapi/[[path]].js`，将 AI 图片工坊的 DMXAPI 请求改为同源 Cloudflare Pages Function 代理，减少浏览器端 CORS/Failed to fetch 问题。
+- 失败时不再删除 `requestParams`，保留 prompt、图片、模型和模式，点击“重试”会直接用原参数重新请求。
+- 新输入发送会使用新的请求 ID，不受旧失败卡片影响。
+- 添加 AI 图片工坊 favicon，浏览器标签页不再显示默认地球图标。

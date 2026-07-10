@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AI 图片工坊</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='12' y1='8' x2='52' y2='56'%3E%3Cstop stop-color='%23E8A97E'/%3E%3Cstop offset='1' stop-color='%23C17A56'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='18' fill='%23F7F4EF'/%3E%3Cpath d='M18 43c8-16 12-19 20-11 4 4 7 5 12-3-2 15-11 20-23 18-5-.8-8-2-9-4Z' fill='url(%23g)'/%3E%3Ccircle cx='25' cy='23' r='5' fill='%23C17A56'/%3E%3Cpath d='M43 13l2 7 7 2-7 2-2 7-2-7-7-2 7-2 2-7Z' fill='%23A78BFA'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -329,8 +330,8 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 
 <script>
 // ═══ CONFIG & CRYPTO ═══
-const API_BASE='https://www.dmxapi.com/v1';
-const API_BASE_BETA='https://www.dmxapi.com/v1beta';
+const API_BASE='/api/dmxapi/v1';
+const API_BASE_BETA='/api/dmxapi/v1beta';
 const ENC_KEY_XOR='aR7mK2';
 const ENC_B64='EjkaXQBcUBZlKi4HKhteDwB5WTlZFRh6DCADXQpfNAFfDxJHExdPKgdGNR10XTFKDQFQ';
 const PW_HASH=-551981607;
@@ -501,6 +502,20 @@ promptInput.addEventListener('input',()=>{
 promptInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend()}});
 sendBtn.addEventListener('click',handleSend);
 
+function resetComposer(){
+  promptInput.value='';
+  promptInput.style.height='auto';
+  attachedImages=[];
+  renderAttachPreviews();
+}
+function restoreComposer(prompt,images){
+  promptInput.value=prompt||'';
+  promptInput.style.height='auto';
+  promptInput.style.height=Math.min(promptInput.scrollHeight,120)+'px';
+  attachedImages=(images||[]).map(i=>({...i}));
+  renderAttachPreviews();
+  promptInput.focus();
+}
 function handleSend(){
   const prompt=promptInput.value.trim();
   if(!prompt&&attachedImages.length===0)return;
@@ -520,8 +535,7 @@ function handleSend(){
   appendUserMsg(msgId,prompt,images);
   appendLoadingMsg(msgId,model);
 
-  promptInput.value='';promptInput.style.height='auto';
-  attachedImages=[];renderAttachPreviews();
+  resetComposer();
 
   fireRequest(msgId,prompt,images,model,mode);
 }
@@ -537,20 +551,32 @@ function appendUserMsg(msgId,text,images){
   div.innerHTML=html;chatArea.appendChild(div);scrollBottom();
 }
 
-function appendLoadingMsg(msgId,model){
-  const div=document.createElement('div');
-  div.className='msg msg-bot';div.id=msgId+'-bot';
+function loadingHTML(msgId,model){
   const mn=model.includes('gpt')?'ChatGPT':'Gemini';
-  div.innerHTML=`<div class="loading-card"><div class="loading-spinner"></div><div class="loading-text">${mn} 正在生成...</div><div class="loading-timer" id="${msgId}-timer">0s</div></div>`;
-  chatArea.appendChild(div);scrollBottom();
-
+  return `<div class="loading-card"><div class="loading-spinner"></div><div class="loading-text">${mn} 正在生成...</div><div class="loading-timer" id="${msgId}-timer">0s</div></div>`;
+}
+function startLoadingTimer(el,msgId){
+  if(el._timerId)clearInterval(el._timerId);
   const start=Date.now();
   const timerEl=document.getElementById(msgId+'-timer');
   const tid=setInterval(()=>{
     const s=Math.floor((Date.now()-start)/1000);
     if(timerEl)timerEl.textContent=s+'s';
   },1000);
-  div._timerId=tid;
+  el._timerId=tid;
+}
+function appendLoadingMsg(msgId,model){
+  const div=document.createElement('div');
+  div.className='msg msg-bot';div.id=msgId+'-bot';
+  div.innerHTML=loadingHTML(msgId,model);
+  chatArea.appendChild(div);scrollBottom();
+  startLoadingTimer(div,msgId);
+}
+function resetBotToLoading(msgId,model){
+  const botEl=document.getElementById(msgId+'-bot');if(!botEl)return;
+  botEl.innerHTML=loadingHTML(msgId,model);
+  startLoadingTimer(botEl,msgId);
+  scrollBottom();
 }
 
 function replaceWithResult(msgId,imageUrl,model,size,elapsed){
@@ -580,7 +606,8 @@ function replaceWithError(msgId,errorMsg,model){
   const botEl=document.getElementById(msgId+'-bot');if(!botEl)return;
   if(botEl._timerId)clearInterval(botEl._timerId);
   const mn=model.includes('gpt')?'ChatGPT':'Gemini';
-  botEl.innerHTML=`<div class="error-card"><div class="err-head"><div class="err-icon">!</div><div class="err-title">${mn} 生成失败</div></div><div class="err-detail">${escapeHtml(errorMsg)}</div><button class="retry-btn" onclick="retryRequest('${msgId}')">重试</button></div>`;
+  const friendly=String(errorMsg||'未知错误').includes('Failed to fetch')?'网络请求失败，已为你保留本次内容，可直接重试或修改后再发送。':errorMsg;
+  botEl.innerHTML=`<div class="error-card"><div class="err-head"><div class="err-icon">!</div><div class="err-title">${mn} 生成失败</div></div><div class="err-detail">${escapeHtml(friendly)}</div><button class="retry-btn" onclick="retryRequest('${msgId}')">重试</button></div>`;
   scrollBottom();
 }
 
@@ -588,6 +615,7 @@ const requestParams={};
 
 async function fireRequest(msgId,prompt,images,model,mode){
   const start=Date.now();
+  let ok=false;
   requestParams[msgId]={prompt,images,model,mode};
   try{
     const apiKey=getApiKey();
@@ -596,9 +624,10 @@ async function fireRequest(msgId,prompt,images,model,mode){
     else result=await callGeminiImage(prompt,images,model,mode,apiKey);
     const elapsed=Math.floor((Date.now()-start)/1000);
     replaceWithResult(msgId,result.url,model,result.size,elapsed);
+    ok=true;
   }catch(err){
     replaceWithError(msgId,err.message||'未知错误',model);
-  }finally{delete requestParams[msgId]}
+  }finally{if(ok)delete requestParams[msgId]}
 }
 
 // ═══ API CALLS ═══
@@ -614,7 +643,7 @@ async function callGPTImage(prompt,images,model,mode,apiKey){
       fd.append('image',blob,`image_${i}.png`);
     });
     const res=await fetch(`${API_BASE}/images/edits`,{
-      method:'POST',headers:{'Authorization':`Bearer ${apiKey}`},body:fd
+      method:'POST',headers:{'x-client-api-key':apiKey},body:fd
     });
     if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.error?.message||`HTTP ${res.status}: 请求失败`)}
     const data=await res.json();
@@ -623,7 +652,7 @@ async function callGPTImage(prompt,images,model,mode,apiKey){
   }else{
     const res=await fetch(`${API_BASE}/images/generations`,{
       method:'POST',
-      headers:{'Authorization':`Bearer ${apiKey}`,'Content-Type':'application/json'},
+      headers:{'x-client-api-key':apiKey,'Content-Type':'application/json'},
       body:JSON.stringify({model,prompt,n:1,size:'1024x1024',quality:'high'})
     });
     if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.error?.message||`HTTP ${res.status}: 请求失败`)}
@@ -647,7 +676,7 @@ async function callGeminiImage(prompt,images,model,mode,apiKey){
   };
   const res=await fetch(`${API_BASE_BETA}/models/${model}:generateContent`,{
     method:'POST',
-    headers:{'x-goog-api-key':apiKey,'Content-Type':'application/json'},
+    headers:{'x-client-api-key':apiKey,'Content-Type':'application/json'},
     body:JSON.stringify(body)
   });
   if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.error?.message||err.message||`HTTP ${res.status}: 请求失败`)}
@@ -662,12 +691,18 @@ async function callGeminiImage(prompt,images,model,mode,apiKey){
 
 // ═══ RETRY ═══
 function retryRequest(msgId){
+  const params=requestParams[msgId];
+  if(params){
+    resetBotToLoading(msgId,params.model);
+    fireRequest(msgId,params.prompt,params.images,params.model,params.mode);
+    return;
+  }
   const userEl=document.getElementById(msgId+'-user');if(!userEl)return;
   const bubble=userEl.querySelector('.bubble');
   const prompt=bubble?bubble.textContent:'';
   document.getElementById(msgId+'-bot')?.remove();
   userEl.remove();
-  promptInput.value=prompt;promptInput.focus();
+  restoreComposer(prompt,[]);
 }
 
 // ═══ LIGHTBOX ═══
