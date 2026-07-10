@@ -15,3 +15,18 @@
 ### 后续要求
 - 不再复用 `photomax` 仓库。
 - PhotoHtml 必须使用独立仓库部署。
+
+## 2026-07-10 — Cloudflare Pages API Key 安全优化
+
+### 问题
+- `photowhisper/index.html` 原本在前端用 XOR/Base64 混淆保存 StepFun API Key。
+- 前端混淆不是安全方案，懂技术的人仍可从源码还原密钥。
+
+### 修复
+- 新增 `functions/api/stepfun.js`，由 Cloudflare Pages Function 读取 `STEPFUN_API_KEY` 密钥并代理请求 StepFun。
+- `photowhisper/index.html` 改为请求站内接口 `/api/stepfun`。
+- 前端移除了 StepFun API Key 密文和 Authorization header。
+
+### 验证
+- 本地静态语法检查通过。
+- 部署后需访问 `https://lokmoon.xyz/api/stepfun` 验证函数可用，并测试 PhotoWhisper 图片分析链路。

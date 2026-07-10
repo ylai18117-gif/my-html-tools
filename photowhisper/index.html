@@ -1445,16 +1445,8 @@ function formatTimeAgo(ts){
 // ═══════════════════════════════════════════
 // AI ANALYSIS (StepFun step-3.7-flash)
 // ═══════════════════════════════════════════
-const AI_KEY_ENC='VChYKy9BCihgWgMDICB2AXJWG2FzDjFiAAZPCh5qAiB4Pg9zWGRjH3p8CBZQWwh5AyEFW3xwEjttLHlBAhQFHAE=';
-const AI_KEY_XOR='aR7mK2';
-const AI_URL='https://api.stepfun.com/step_plan/v1/chat/completions';
+const AI_URL='/api/stepfun';
 const AI_MODEL='step-3.7-flash';
-
-function decKey(enc,xk){
-  const raw=atob(enc);let r='';
-  for(let i=0;i<raw.length;i++)r+=String.fromCharCode(raw.charCodeAt(i)^xk.charCodeAt(i%xk.length));
-  return r;
-}
 
 function resizeForAI(src,maxDim){
   return new Promise(resolve=>{
@@ -1526,7 +1518,6 @@ function getAIPrompt(){
 }
 
 async function analyzePhotoAI(dataUrl){
-  const apiKey=decKey(AI_KEY_ENC,AI_KEY_XOR);
   const resized=await resizeForAI(dataUrl,1024);
   let resp;
   const bodyPayload=JSON.stringify({
@@ -1544,7 +1535,7 @@ async function analyzePhotoAI(dataUrl){
   try{
     resp=await fetch(AI_URL,{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+      headers:{'Content-Type':'application/json'},
       body:bodyPayload,
       keepalive:bodyPayload.length<65536 // keepalive has ~64KB body limit
     });
