@@ -303,9 +303,20 @@ function loadFile(file){
 
 function loadImageFromURL(url){
   const img=new Image();
-  img.crossOrigin='anonymous';
+  // data URLs don't need crossOrigin; external URLs might fail with it
+  if(!url.startsWith('data:'))img.crossOrigin='anonymous';
   img.onload=()=>{origImg=img;initCanvas();showToolbar(true);pushUndo();saveHistEntry('加载图片')};
-  img.onerror=()=>alert('图片加载失败');
+  img.onerror=()=>{
+    // Retry without crossOrigin for external URLs
+    if(img.crossOrigin){
+      const img2=new Image();
+      img2.onload=()=>{origImg=img2;initCanvas();showToolbar(true);pushUndo();saveHistEntry('加载图片')};
+      img2.onerror=()=>alert('图片加载失败');
+      img2.src=url;
+    }else{
+      alert('图片加载失败');
+    }
+  };
   img.src=url;
 }
 
@@ -588,10 +599,17 @@ document.getElementById('btn-changelog').addEventListener('click',()=>versionShe
 document.getElementById('version-close').addEventListener('click',()=>versionSheet.classList.remove('show'));
 versionSheet.addEventListener('click',e=>{if(e.target===versionSheet)versionSheet.classList.remove('show')});
 
-// ═══ URL PARAM ═══
+// ═══ URL PARAM & SESSION STORAGE ═══
 const params=new URLSearchParams(window.location.search);
 if(params.get('tool')){/* future: auto-apply tool */}
-if(params.get('image'))loadImageFromURL(params.get('image'));
+// Try sessionStorage first (for large images), then URL param
+const sessionImg=sessionStorage.getItem('editor_image');
+if(sessionImg){
+  sessionStorage.removeItem('editor_image');
+  loadImageFromURL(sessionImg);
+}else if(params.get('image')){
+  loadImageFromURL(params.get('image'));
+}
 
 // ═══ RESIZE ═══
 window.addEventListener('resize',()=>{

@@ -623,7 +623,18 @@ window.openEditor=function(tool){
 };
 window.openEditorDirect=function(imageUrl){
   if(typeof trackEvent==='function')trackEvent('ai_editor_open',{tool:'direct'});
-  window.location.href='./editor.html?image='+encodeURIComponent(imageUrl);
+  // Use sessionStorage for large data URLs to avoid URL length limits
+  try{
+    sessionStorage.setItem('editor_image',imageUrl);
+    window.location.href='./editor.html';
+  }catch(e){
+    // Fallback: try URL param for small images
+    if(imageUrl.length<50000){
+      window.location.href='./editor.html?image='+encodeURIComponent(imageUrl);
+    }else{
+      showToast('图片数据过大，无法打开编辑');
+    }
+  }
 };
 window.openEditorFromHist=function(id){
   const h=loadHistory().find(x=>x.id===id);if(!h)return;
@@ -633,9 +644,12 @@ window.openEditorFromHist=function(id){
       const url=img||h.thumbnail||h.imageUrl;
       if(url)window.openEditorDirect(url);
       else showToast('无图片可编辑');
+    }).catch(()=>{
+      const url=h.thumbnail||h.imageUrl;
+      if(url)window.openEditorDirect(url);
+      else showToast('无图片可编辑');
     });
   }else{
-    // Fallback: use thumbnail or imageUrl directly
     const url=h.thumbnail||h.imageUrl;
     if(url)window.openEditorDirect(url);
     else showToast('无图片可编辑');
