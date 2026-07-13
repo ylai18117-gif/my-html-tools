@@ -327,7 +327,7 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 
   <div class="controls">
     <div class="seg-group" id="model-switch">
-      <button class="active" data-model="gpt-image-2">ChatGPT</button>
+      <button class="active" data-model="gpt-image-1">ChatGPT</button>
       <button data-model="gemini-3.1-flash-image">Gemini</button>
     </div>
     <div class="spacer"></div>
@@ -482,7 +482,7 @@ function verifyPassword(input){let h=0;for(let i=0;i<input.length;i++)h=((h<<5)-
 function getApiKey(){return decryptXor(ENC_B64,ENC_KEY_XOR)}
 
 // ═══ STATE ═══
-let currentModel='gpt-image-2';
+let currentModel='gpt-image-1';
 let currentMode='t2i';
 let currentSize='default';
 const SIZE_PRESETS={
@@ -937,7 +937,7 @@ async function callGPTImage(prompt,images,model,mode,apiKey,sizeKey){
     const res=await fetch(`${API_BASE}/images/generations`,{
       method:'POST',
       headers:{'x-client-api-key':apiKey,'Content-Type':'application/json'},
-      body:JSON.stringify({model,prompt,n:1,size:gptSize,quality:'high'})
+      body:JSON.stringify({model,prompt,n:1,size:gptSize,quality:'medium'})
     });
     if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.error?.message||`HTTP ${res.status}: 请求失败`)}
     const data=await res.json();
