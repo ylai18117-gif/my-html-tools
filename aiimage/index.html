@@ -643,10 +643,18 @@ window.openEditorDirect=function(imageUrl,fallbackUrl){
     }
   }
 };
-window.openEditorFromHist=function(id){
+window.openEditorFromHist=async function(id){
   const h=loadHistory().find(x=>x.id===id);
   if(!h){showToast('历史记录不存在');return;}
-  const url=h.thumbnail||h.imageUrl;
+  let url=h.thumbnail||h.imageUrl;
+  // Fallback: try IndexedDB for old records with empty thumbnail
+  if(!url){
+    const imageKey=h.imageKey||h.id;
+    if(imageKey){
+      const original=await getOriginalImage(imageKey);
+      if(original)url=original;
+    }
+  }
   if(!url){showToast('无图片可编辑');return;}
   if(typeof trackEvent==='function')trackEvent('ai_editor_open',{tool:'history'});
   try{
