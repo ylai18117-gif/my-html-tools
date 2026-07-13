@@ -23,7 +23,7 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);min-height:1
 .hdr-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
 /* CANVAS AREA */
-.canvas-wrap{flex:1;position:relative;overflow:hidden;background:var(--bg-deep)}
+.canvas-wrap{flex:1;position:relative;overflow:hidden;background:var(--bg-deep);padding-bottom:112px}
 .canvas-wrap canvas{display:block;width:100%;height:100%}
 .canvas-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);gap:12px;text-align:center;padding:20px}
 .canvas-empty .icon{font-size:48px}
@@ -34,7 +34,7 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);min-height:1
 .status-bar span{background:rgba(255,255,255,.85);padding:2px 6px;border-radius:6px}
 
 /* TOOLBAR */
-.toolbar{flex-shrink:0;display:none;align-items:center;gap:4px;padding:8px 12px;background:var(--surface);border-top:1px solid var(--border-lt);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.toolbar{position:fixed;bottom:56px;left:0;right:0;z-index:50;display:none;align-items:center;gap:4px;padding:8px 12px;background:var(--surface);border-top:1px solid var(--border-lt);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;box-shadow:0 -2px 12px rgba(0,0,0,.06)}
 .toolbar.show{display:flex}
 .toolbar::-webkit-scrollbar{display:none}
 .tool-btn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;border:1.5px solid var(--border);background:var(--bg);border-radius:10px;padding:6px 10px;cursor:pointer;font-family:var(--ff-b);font-size:10px;font-weight:500;color:var(--text2);transition:all .2s;min-width:56px}
@@ -47,7 +47,7 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);min-height:1
 .brush-size input{width:60px;accent-color:var(--accent)}
 
 /* ACTIONS BAR */
-.actions-bar{flex-shrink:0;display:none;align-items:center;gap:8px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--border-lt)}
+.actions-bar{position:fixed;bottom:0;left:0;right:0;z-index:50;display:none;align-items:center;gap:8px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--border-lt);box-shadow:0 -2px 12px rgba(0,0,0,.06)}
 .actions-bar.show{display:flex}
 .act-btn{flex:1;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;font-family:var(--ff-b);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s}
 .act-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -311,7 +311,7 @@ function loadImageFromURL(url){
 
 // ═══ CANVAS INIT ═══
 function initCanvas(){
-  const w=wrap.clientWidth, h=wrap.clientHeight;
+  const w=wrap.clientWidth, h=wrap.clientHeight-112; // subtract padding for fixed bars
   canvas.width=origImg.width; canvas.height=origImg.height;
   // Fit to view
   const scale=Math.min(w/origImg.width, h/origImg.height, 1);
@@ -373,7 +373,7 @@ canvas.addEventListener('touchend',e=>{e.preventDefault();onPointerUp()},{passiv
 
 function getCanvasPos(e){
   const rect=canvas.getBoundingClientRect();
-  return{x:(e.clientX-rect.left)/zoom, y:(e.clientY-rect.top)/zoom};
+  return{x:(e.clientX-rect.left-offsetX)/zoom, y:(e.clientY-rect.top-offsetY)/zoom};
 }
 
 function onPointerDown(e){

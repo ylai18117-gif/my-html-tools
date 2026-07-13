@@ -455,6 +455,18 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 </div>
 
 <script>
+// ═══ TOAST ═══
+function showToast(msg,duration=2000){
+  const t=document.createElement('div');
+  t.textContent=msg;
+  t.style.cssText='position:fixed;bottom:120px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:9999;pointer-events:none;animation:fadeInOut '+duration+'ms ease';
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),duration);
+}
+const style=document.createElement('style');
+style.textContent='@keyframes fadeInOut{0%{opacity:0;transform:translateX(-50%) translateY(10px)}10%{opacity:1;transform:translateX(-50%) translateY(0)}90%{opacity:1}100%{opacity:0}}';
+document.head.appendChild(style);
+
 // ═══ CONFIG & CRYPTO ═══
 const API_BASE='/api/dmxapi/v1';
 const API_BASE_BETA='/api/dmxapi/v1beta';
@@ -1228,12 +1240,21 @@ window.downloadHistImage=async function(id){
   const imageKey=getHistImageKey(h);
   const original=imageKey?await getOriginalImage(imageKey):null;
   const src=original||(h&&h.thumbnail)||'';
-  if(src)downloadImage(src,id);
+  if(src){
+    downloadImage(src,id);
+    showToast('已开始下载');
+  }else{
+    showToast('无图片可下载');
+  }
 };
 
 window.copyHistPrompt=function(id){
   const h=loadHistory().find(x=>x.id===id);if(!h)return;
-  navigator.clipboard?.writeText(h.prompt||'').catch(()=>{});
+  navigator.clipboard?.writeText(h.prompt||'').then(()=>{
+    showToast('提示词已复制');
+  }).catch(()=>{
+    showToast('复制失败');
+  });
 };
 
 window.editFromHistory=function(id){if(typeof trackEvent==='function')trackEvent('ai_history_edit');
