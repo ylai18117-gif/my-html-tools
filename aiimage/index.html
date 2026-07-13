@@ -1112,8 +1112,9 @@ async function completeHistoryEntry(id,updates){
   if(updates.imageUrl){
     entry.imageKey=id;
     await saveOriginalImage(id,updates.imageUrl);
-    entry.thumbnail=await generateThumbnail(updates.imageUrl,300);
-    delete entry.imageUrl;
+    const thumb=await generateThumbnail(updates.imageUrl,300);
+    entry.thumbnail=thumb||updates.imageUrl;
+    if(thumb)delete entry.imageUrl;
   }
   updateHistoryEntry(id,entry);
 }
