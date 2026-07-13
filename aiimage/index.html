@@ -632,7 +632,13 @@ window.openEditorFromHist=function(id){
     getOriginalImage(imageKey).then(img=>{
       const url=img||h.thumbnail||h.imageUrl;
       if(url)window.openEditorDirect(url);
+      else showToast('无图片可编辑');
     });
+  }else{
+    // Fallback: use thumbnail or imageUrl directly
+    const url=h.thumbnail||h.imageUrl;
+    if(url)window.openEditorDirect(url);
+    else showToast('无图片可编辑');
   }
 };
 

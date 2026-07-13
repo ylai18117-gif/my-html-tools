@@ -24,7 +24,7 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);min-height:1
 
 /* CANVAS AREA */
 .canvas-wrap{flex:1;position:relative;overflow:hidden;background:var(--bg-deep);padding-bottom:112px}
-.canvas-wrap canvas{display:block;width:100%;height:100%}
+.canvas-wrap canvas{display:block;position:absolute;transform-origin:0 0}
 .canvas-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);gap:12px;text-align:center;padding:20px}
 .canvas-empty .icon{font-size:48px}
 .canvas-empty p{font-size:13px;line-height:1.5}
@@ -311,25 +311,28 @@ function loadImageFromURL(url){
 
 // ═══ CANVAS INIT ═══
 function initCanvas(){
-  const w=wrap.clientWidth, h=wrap.clientHeight-112; // subtract padding for fixed bars
   canvas.width=origImg.width; canvas.height=origImg.height;
-  // Fit to view
+  const w=wrap.clientWidth, h=wrap.clientHeight-112;
+  // Fit image to view
   const scale=Math.min(w/origImg.width, h/origImg.height, 1);
   zoom=scale;
   offsetX=(w-origImg.width*scale)/2;
   offsetY=(h-origImg.height*scale)/2;
-  drawCanvas();
+  applyCanvasTransform();
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(origImg,0,0);
   document.getElementById('empty-state').style.display='none';
   document.getElementById('status-bar').style.display='flex';
   updateStatus();
 }
 
+function applyCanvasTransform(){
+  canvas.style.transform=`translate(${offsetX}px,${offsetY}px) scale(${zoom})`;
+}
+
 function drawCanvas(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.save();
-  ctx.setTransform(zoom,0,0,zoom,offsetX,offsetY);
-  if(origImg)ctx.drawImage(origImg,0,0);
-  ctx.restore();
+  // Canvas content persists in the bitmap; this is only called after view changes
+  // No need to redraw — CSS transform handles display positioning
 }
 
 function updateStatus(){
@@ -373,7 +376,7 @@ canvas.addEventListener('touchend',e=>{e.preventDefault();onPointerUp()},{passiv
 
 function getCanvasPos(e){
   const rect=canvas.getBoundingClientRect();
-  return{x:(e.clientX-rect.left-offsetX)/zoom, y:(e.clientY-rect.top-offsetY)/zoom};
+  return{x:(e.clientX-rect.left)/zoom, y:(e.clientY-rect.top)/zoom};
 }
 
 function onPointerDown(e){
@@ -386,7 +389,7 @@ function onPointerMove(e){
   if(currentTool==='move'&&isDragging){
     offsetX+=(e.clientX-lastX);offsetY+=(e.clientY-lastY);
     lastX=e.clientX;lastY=e.clientY;
-    drawCanvas();return;
+    applyCanvasTransform();return;
   }
   if(!drawing)return;
   const p=getCanvasPos(e);
@@ -417,7 +420,7 @@ canvas.addEventListener('wheel',e=>{
   zoom=Math.max(0.1,Math.min(10,zoom));
   offsetX=mx-(mx-offsetX)*(zoom/prev);
   offsetY=my-(my-offsetY)*(zoom/prev);
-  drawCanvas();updateStatus();
+  applyCanvasTransform();updateStatus();
 },{passive:false});
 
 // ═══ UNDO/REDO ═══
@@ -455,11 +458,13 @@ document.getElementById('btn-matting').addEventListener('click',async()=>{
     const url=URL.createObjectURL(blob);
     const img=new Image();
     img.onload=()=>{
-      origImg=img;canvas.width=img.width;canvas.height=img.height;
-      const w=wrap.clientWidth,h=wrap.clientHeight;
+      origImg=img;
+      canvas.width=img.width;canvas.height=img.height;
+      const w=wrap.clientWidth,h=wrap.clientHeight-112;
       zoom=Math.min(w/img.width,h/img.height,1);
       offsetX=(w-img.width*zoom)/2;offsetY=(h-img.height*zoom)/2;
-      drawCanvas();pushUndo();saveHistEntry('AI 抠图');
+      ctx.drawImage(img,0,0);
+      applyCanvasTransform();pushUndo();saveHistEntry('AI 抠图');
       hideLoading();
     };
     img.src=url;
@@ -517,8 +522,13 @@ document.getElementById('btn-compress').addEventListener('click',()=>{
     const dataUrl=canvas.toDataURL('image/jpeg',0.7);
     const img=new Image();
     img.onload=()=>{
-      origImg=img;canvas.width=img.width;canvas.height=img.height;
-      drawCanvas();pushUndo();hideLoading();saveHistEntry('压缩');
+      origImg=img;
+      canvas.width=img.width;canvas.height=img.height;
+      const w=wrap.clientWidth,h=wrap.clientHeight-112;
+      zoom=Math.min(w/img.width,h/img.height,1);
+      offsetX=(w-img.width*zoom)/2;offsetY=(h-img.height*zoom)/2;
+      ctx.drawImage(img,0,0);
+      applyCanvasTransform();pushUndo();hideLoading();saveHistEntry('压缩');
     };
     img.src=dataUrl;
   },100);
@@ -568,7 +578,7 @@ histBody.addEventListener('click',e=>{
   if(del){e.stopPropagation();const arr=loadHist().filter(h=>h.id!==del.dataset.id);saveHistArr(arr);renderHist();return}
   const item=e.target.closest('.hist-item');if(!item)return;
   const h=loadHist().find(x=>x.id===item.dataset.id);if(!h||!h.img)return;
-  const img=new Image();img.onload=()=>{origImg=img;canvas.width=img.width;canvas.height=img.height;initCanvas();pushUndo();histPanel.classList.remove('show')};img.src=h.img;
+  const img=new Image();img.onload=()=>{origImg=img;canvas.width=img.width;canvas.height=img.height;ctx.drawImage(img,0,0);const w=wrap.clientWidth,h2=wrap.clientHeight-112;zoom=Math.min(w/img.width,h2/img.height,1);offsetX=(w-img.width*zoom)/2;offsetY=(h2-img.height*zoom)/2;applyCanvasTransform();pushUndo();histPanel.classList.remove('show')};img.src=h.img;
 });
 function timeAgo(ts){const s=Math.floor((Date.now()-ts)/1000);if(s<60)return '刚刚';if(s<3600)return Math.floor(s/60)+'分钟前';if(s<86400)return Math.floor(s/3600)+'小时前';return Math.floor(s/86400)+'天前'}
 
@@ -584,7 +594,15 @@ if(params.get('tool')){/* future: auto-apply tool */}
 if(params.get('image'))loadImageFromURL(params.get('image'));
 
 // ═══ RESIZE ═══
-window.addEventListener('resize',()=>{if(origImg)drawCanvas()});
+window.addEventListener('resize',()=>{
+  if(!origImg)return;
+  const w=wrap.clientWidth, h=wrap.clientHeight-112;
+  const scale=Math.min(w/origImg.width, h/origImg.height, 1);
+  zoom=scale;
+  offsetX=(w-origImg.width*scale)/2;
+  offsetY=(h-origImg.height*scale)/2;
+  applyCanvasTransform();
+});
 </script>
 </body>
 </html>
