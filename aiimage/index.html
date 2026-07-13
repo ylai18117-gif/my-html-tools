@@ -873,8 +873,8 @@ function resetBotToLoading(msgId,model){
 function replaceWithResult(msgId,imageUrl,model,size,elapsed){
   const botEl=document.getElementById(msgId+'-bot');if(!botEl)return;
   if(botEl._timerId)clearInterval(botEl._timerId);
-  const mn=model.includes('gpt')?'gpt-image-2':'gemini-3.1';
-  botEl.innerHTML=`<div class="result-card"><img src="${imageUrl}" alt="生成结果" onclick="openLightbox(this.src)"><div class="result-meta"><span class="model-tag">${mn}</span><span class="meta-sep">·</span><span>${size}</span><span class="meta-sep">·</span><span>${elapsed}s</span><button class="edit-btn" onclick="openEditorDirect('${imageUrl}')"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>编辑</button><button class="download-btn" onclick="downloadImage('${imageUrl}','${msgId}')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>保存</button></div></div>`;
+  const mn=model.includes('gpt')?'gpt-image-1':'gemini-3.1';
+  botEl.innerHTML=`<div class="result-card"><img src="${imageUrl}" alt="生成结果" onclick="openLightbox(this.src)"><div class="result-meta"><span class="model-tag">${mn}</span><span class="meta-sep">·</span><span>${size}</span><span class="meta-sep">·</span><span>${elapsed}s</span><button class="edit-btn" onclick="openEditorDirect('${imageUrl}','${imageUrl}')"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>编辑</button><button class="download-btn" onclick="downloadImage('${imageUrl}','${msgId}')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>保存</button></div></div>`;
   scrollBottom();
 }
 
