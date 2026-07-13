@@ -34,7 +34,8 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);min-height:1
 .status-bar span{background:rgba(255,255,255,.85);padding:2px 6px;border-radius:6px}
 
 /* TOOLBAR */
-.toolbar{flex-shrink:0;display:flex;align-items:center;gap:4px;padding:8px 12px;background:var(--surface);border-top:1px solid var(--border-lt);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.toolbar{flex-shrink:0;display:none;align-items:center;gap:4px;padding:8px 12px;background:var(--surface);border-top:1px solid var(--border-lt);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.toolbar.show{display:flex}
 .toolbar::-webkit-scrollbar{display:none}
 .tool-btn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;border:1.5px solid var(--border);background:var(--bg);border-radius:10px;padding:6px 10px;cursor:pointer;font-family:var(--ff-b);font-size:10px;font-weight:500;color:var(--text2);transition:all .2s;min-width:56px}
 .tool-btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -46,7 +47,8 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);min-height:1
 .brush-size input{width:60px;accent-color:var(--accent)}
 
 /* ACTIONS BAR */
-.actions-bar{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--border-lt)}
+.actions-bar{flex-shrink:0;display:none;align-items:center;gap:8px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--border-lt)}
+.actions-bar.show{display:flex}
 .act-btn{flex:1;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;font-family:var(--ff-b);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s}
 .act-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .act-primary{background:var(--accent);color:#fff}.act-primary:hover{background:#b06d49}
@@ -157,7 +159,7 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);min-height:1
 </div>
 
 <!-- TOOLBAR -->
-<div class="toolbar" id="toolbar" style="display:none">
+<div class="toolbar" id="toolbar">
   <button class="tool-btn active" data-tool="move" title="移动/缩放">
     <svg viewBox="0 0 24 24"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
     <span>移动</span>
@@ -186,7 +188,7 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);min-height:1
 </div>
 
 <!-- ACTIONS -->
-<div class="actions-bar" id="actions-bar" style="display:none">
+<div class="actions-bar" id="actions-bar">
   <button class="act-btn act-primary" id="btn-matting">
     <svg viewBox="0 0 24 24"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>
     AI 抠图
@@ -338,8 +340,8 @@ function updateStatus(){
 }
 
 function showToolbar(show){
-  document.getElementById('toolbar').style.display=show?'flex':'none';
-  document.getElementById('actions-bar').style.display=show?'flex':'none';
+  document.getElementById('toolbar').classList.toggle('show',show);
+  document.getElementById('actions-bar').classList.toggle('show',show);
 }
 
 // ═══ TOOLS ═══
