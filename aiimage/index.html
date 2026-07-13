@@ -1229,9 +1229,7 @@ async function openHistDetail(id){
   const mn=h.model.includes('gpt')?'ChatGPT':'Gemini';
   const mode=h.mode==='i2i'?'图生图':'文生图';
   const st=histStatus(h);
-  const imageKey=getHistImageKey(h);
-  const original=imageKey?await getOriginalImage(imageKey):null;
-  const displayImg=original||h.thumbnail||h.imageUrl;
+  const displayImg=h.thumbnail||h.imageUrl;
   const visual=displayImg?`<img class="hist-detail-img" src="${displayImg}" alt="" onclick="openLightbox(this.src)">`:`<div class="hist-img-placeholder" style="border-radius:14px">${histStatusIcon(st)}</div>`;
   histDetailBody.innerHTML=`
     ${visual}
@@ -1266,11 +1264,9 @@ async function openHistDetail(id){
   histDetail.classList.add('show');
 }
 
-window.downloadHistImage=async function(id){
+window.downloadHistImage=function(id){
   const h=loadHistory().find(x=>x.id===id);
-  const imageKey=getHistImageKey(h);
-  const original=imageKey?await getOriginalImage(imageKey):null;
-  const src=original||(h&&h.thumbnail)||'';
+  const src=(h&&h.thumbnail)||'';
   if(src){
     downloadImage(src,id);
     showToast('已开始下载');
