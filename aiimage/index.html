@@ -645,28 +645,16 @@ window.openEditorDirect=function(imageUrl,fallbackUrl){
 };
 window.openEditorFromHist=function(id){
   const h=loadHistory().find(x=>x.id===id);
-  if(!h){console.error('[openEditorFromHist] History item not found:', id);return;}
-  console.log('[openEditorFromHist] Found history item:', {id, hasThumbnail: !!h.thumbnail, hasImageUrl: !!h.imageUrl});
-  const imageKey=getHistImageKey(h);
-  console.log('[openEditorFromHist] imageKey:', imageKey);
-  if(imageKey){
-    getOriginalImage(imageKey).then(img=>{
-      console.log('[openEditorFromHist] Got original image:', !!img);
-      const url=img||h.thumbnail||h.imageUrl;
-      console.log('[openEditorFromHist] Final URL:', !!url, 'length:', url?url.length:0);
-      if(url)window.openEditorDirect(url,h.thumbnail);
-      else{console.error('[openEditorFromHist] No URL available');showToast('无图片可编辑');}
-    }).catch((e)=>{
-      console.error('[openEditorFromHist] getOriginalImage failed:', e);
-      const url=h.thumbnail||h.imageUrl;
-      if(url)window.openEditorDirect(url,h.thumbnail);
-      else showToast('无图片可编辑');
-    });
-  }else{
-    console.log('[openEditorFromHist] No imageKey, using thumbnail/imageUrl');
-    const url=h.thumbnail||h.imageUrl;
-    if(url)window.openEditorDirect(url,h.thumbnail);
-    else showToast('无图片可编辑');
+  if(!h){showToast('历史记录不存在');return;}
+  const url=h.thumbnail||h.imageUrl;
+  if(!url){showToast('无图片可编辑');return;}
+  if(typeof trackEvent==='function')trackEvent('ai_editor_open',{tool:'history'});
+  try{
+    sessionStorage.setItem('editor_image',url);
+    window.location.href='./editor.html';
+  }catch(e){
+    if(url.length<50000)window.location.href='./editor.html?image='+encodeURIComponent(url);
+    else showToast('图片数据过大，无法打开编辑');
   }
 };
 
