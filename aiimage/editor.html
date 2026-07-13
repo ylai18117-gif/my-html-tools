@@ -103,6 +103,20 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);min-height:1
 .bg-colors{display:flex;gap:8px;justify-content:center;margin-top:8px}
 .bg-color{width:32px;height:32px;border-radius:8px;border:2px solid var(--border);cursor:pointer;transition:all .2s}
 .bg-color.active{border-color:var(--accent);transform:scale(1.1)}
+
+/* VERSION SHEET */
+.version-sheet{position:fixed;inset:0;z-index:200;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.28);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.version-sheet.show{display:flex}
+.version-card{width:100%;max-width:520px;background:var(--surface);border-radius:20px 20px 0 0;padding:16px 16px 20px;box-shadow:0 -10px 40px rgba(0,0,0,.12);animation:slideUp .28s var(--ease) both}
+.version-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.version-head h3{font-family:var(--ff-d);font-size:18px}
+.version-close{border:none;background:var(--bg-deep);width:32px;height:32px;border-radius:10px;color:var(--text2);font-size:18px;cursor:pointer}
+.version-list{display:flex;flex-direction:column;gap:12px;max-height:60vh;overflow-y:auto}
+.version-entry{border:1px solid var(--border-lt);border-radius:12px;padding:12px}
+.version-entry h4{font-size:13px;font-weight:600;margin-bottom:4px;color:var(--accent)}
+.version-entry time{font-size:10px;color:var(--text3)}
+.version-entry ul{font-size:12px;color:var(--text2);line-height:1.6;margin-top:4px;padding-left:16px}
+@media(min-width:768px){.version-sheet{align-items:center}.version-card{border-radius:20px}}
 </style>
 </head>
 <body>
@@ -114,6 +128,9 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);min-height:1
     返回
   </a>
   <div class="header-title">图片编辑</div>
+  <button class="hdr-btn" id="btn-changelog" title="更新日志" style="width:32px;height:32px;border-radius:8px">
+    <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+  </button>
   <button class="hdr-btn" id="btn-history" title="编辑历史">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
   </button>
@@ -221,6 +238,24 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);min-height:1
     <button class="hist-clear" id="hist-clear">清空</button>
   </div>
   <div class="hist-body" id="hist-body"></div>
+</div>
+
+<!-- VERSION SHEET -->
+<div class="version-sheet" id="version-sheet">
+  <div class="version-card">
+    <div class="version-head"><h3>版本更新说明</h3><button class="version-close" id="version-close">×</button></div>
+    <div class="version-list">
+      <div class="version-entry">
+        <h4>v1.0 — 2026-07-13</h4>
+        <ul>
+          <li>新增高级图片编辑页（AI 抠图、证件照、二次编辑）</li>
+          <li>新增 AI 图片工坊更多工具面板</li>
+          <li>底部输入栏改为两层结构</li>
+          <li>生成结果和历史详情新增编辑入口</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -534,6 +569,12 @@ histBody.addEventListener('click',e=>{
   const img=new Image();img.onload=()=>{origImg=img;canvas.width=img.width;canvas.height=img.height;initCanvas();pushUndo();histPanel.classList.remove('show')};img.src=h.img;
 });
 function timeAgo(ts){const s=Math.floor((Date.now()-ts)/1000);if(s<60)return '刚刚';if(s<3600)return Math.floor(s/60)+'分钟前';if(s<86400)return Math.floor(s/3600)+'小时前';return Math.floor(s/86400)+'天前'}
+
+// ═══ VERSION SHEET ═══
+const versionSheet=document.getElementById('version-sheet');
+document.getElementById('btn-changelog').addEventListener('click',()=>versionSheet.classList.add('show'));
+document.getElementById('version-close').addEventListener('click',()=>versionSheet.classList.remove('show'));
+versionSheet.addEventListener('click',e=>{if(e.target===versionSheet)versionSheet.classList.remove('show')});
 
 // ═══ URL PARAM ═══
 const params=new URLSearchParams(window.location.search);

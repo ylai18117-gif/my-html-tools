@@ -82,6 +82,21 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:
 .more-item .mi-desc{font-size:10px;color:var(--text3);margin-top:2px}
 @media(min-width:768px){.more-sheet{align-items:center}.more-card{border-radius:20px;max-width:520px}.more-grid{grid-template-columns:repeat(3,1fr)}}
 
+/* VERSION SHEET */
+.version-sheet{position:fixed;inset:0;z-index:190;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.28);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.version-sheet.show{display:flex}
+.version-card{width:100%;max-width:520px;background:var(--surface);border-radius:20px 20px 0 0;padding:16px 16px 20px;box-shadow:0 -10px 40px rgba(0,0,0,.12);animation:sheetUp .28s var(--ease) both}
+.version-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.version-head h3{font-family:var(--ff-d);font-size:18px}
+.version-close{border:none;background:var(--bg-deep);width:32px;height:32px;border-radius:10px;color:var(--text2);font-size:18px;cursor:pointer}
+.version-list{display:flex;flex-direction:column;gap:12px;max-height:60vh;overflow-y:auto}
+.version-entry{border:1px solid var(--border-lt);border-radius:12px;padding:12px}
+.version-entry h4{font-size:13px;font-weight:600;margin-bottom:4px;color:var(--accent)}
+.version-entry time{font-size:10px;color:var(--text3)}
+.version-entry p{font-size:12px;color:var(--text2);line-height:1.5;margin-top:6px}
+.version-entry ul{font-size:12px;color:var(--text2);line-height:1.6;margin-top:4px;padding-left:16px}
+@media(min-width:768px){.version-sheet{align-items:center}.version-card{border-radius:20px}}
+
 /* DRAG OVERLAY */
 .drag-overlay{position:fixed;inset:0;z-index:50;background:rgba(193,122,86,.08);border:3px dashed var(--accent);border-radius:16px;display:none;align-items:center;justify-content:center;pointer-events:none}
 .drag-overlay.show{display:flex}
@@ -305,6 +320,9 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       <span class="hist-badge" id="hist-badge"></span>
     </button>
+    <button class="hdr-btn" id="btn-changelog" title="更新日志" style="width:32px;height:32px;border-radius:8px">
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    </button>
   </div>
 
   <div class="controls">
@@ -389,6 +407,51 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
     <button class="back" id="hist-detail-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> 返回</button>
   </div>
   <div class="hist-detail-body" id="hist-detail-body"></div>
+</div>
+
+<!-- VERSION SHEET -->
+<div class="version-sheet" id="version-sheet">
+  <div class="version-card">
+    <div class="version-head"><h3>版本更新说明</h3><button class="version-close" id="version-close">×</button></div>
+    <div class="version-list">
+      <div class="version-entry">
+        <h4>v1.0 — 2026-07-13</h4>
+        <time>2026-07-13</time>
+        <ul>
+          <li>新增高级图片编辑页 AI 抠图（Hugging Face RMBG-1.4）</li>
+          <li>新增 AI 证件照换背景</li>
+          <li>新增二次编辑（橡皮擦、涂抹恢复、移动缩放）</li>
+          <li>新增图片格式转换（PNG/JPG/WebP）</li>
+          <li>新增图片压缩</li>
+          <li>新增编辑历史记录持久化</li>
+          <li>底部输入框改为两层结构，新增"更多"工具面板</li>
+          <li>生成结果卡片和历史详情新增"编辑"入口</li>
+        </ul>
+      </div>
+      <div class="version-entry">
+        <h4>v0.6 — 2026-07-10</h4>
+        <time>2026-07-10</time>
+        <ul>
+          <li>新增比例选择弹窗，底部输入栏新增比例按钮</li>
+          <li>支持 9 种常用比例（含默认比例）</li>
+          <li>AI 生成失败后保留参数，支持重试</li>
+          <li>历史记录改为生成中/已完成/失败状态流</li>
+          <li>历史详情新增复制提示词、再次编辑</li>
+          <li>上传图片自动压缩</li>
+          <li>浏览器标签页新增 favicon</li>
+        </ul>
+      </div>
+      <div class="version-entry">
+        <h4>v0.5 — 2026-07-10</h4>
+        <time>2026-07-10</time>
+        <ul>
+          <li>StepFun API 改为 Cloudflare Pages Function 代理</li>
+          <li>AI 图片工坊 DMXAPI 改为同源代理</li>
+          <li>修复历史详情图片串到最新记录问题</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -560,6 +623,14 @@ window.openEditorFromHist=function(id){
     });
   }
 };
+
+// ═══ VERSION SHEET ═══
+const versionSheet=document.getElementById('version-sheet');
+const btnChangelog=document.getElementById('btn-changelog');
+const versionClose=document.getElementById('version-close');
+btnChangelog.addEventListener('click',()=>versionSheet.classList.add('show'));
+versionClose.addEventListener('click',()=>versionSheet.classList.remove('show'));
+versionSheet.addEventListener('click',e=>{if(e.target===versionSheet)versionSheet.classList.remove('show')});
 
 imgInput.addEventListener('change',e=>{
   const files=[...e.target.files];
