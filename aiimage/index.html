@@ -621,17 +621,24 @@ window.openEditor=function(tool){
   if(typeof trackEvent==='function')trackEvent('ai_editor_open',{tool});
   window.location.href='./editor.html?tool='+encodeURIComponent(tool);
 };
-window.openEditorDirect=function(imageUrl){
+window.openEditorDirect=function(imageUrl,fallbackUrl){
   if(typeof trackEvent==='function')trackEvent('ai_editor_open',{tool:'direct'});
-  // Use sessionStorage for large data URLs to avoid URL length limits
+  // Try sessionStorage first (for large data URLs to avoid URL length limits)
   try{
     sessionStorage.setItem('editor_image',imageUrl);
     window.location.href='./editor.html';
-  }catch(e){
-    // Fallback: try URL param for small images
-    if(imageUrl.length<50000){
-      window.location.href='./editor.html?image='+encodeURIComponent(imageUrl);
-    }else{
+    return;
+  }catch(e){/* sessionStorage full, try fallback */}
+  // Fallback: use thumbnail/fallbackUrl which is smaller
+  const url=fallbackUrl||imageUrl;
+  if(url.length<50000){
+    window.location.href='./editor.html?image='+encodeURIComponent(url);
+  }else{
+    // Last resort: try sessionStorage with the smaller fallback
+    try{
+      sessionStorage.setItem('editor_image',url);
+      window.location.href='./editor.html';
+    }catch(e2){
       showToast('图片数据过大，无法打开编辑');
     }
   }
@@ -642,16 +649,16 @@ window.openEditorFromHist=function(id){
   if(imageKey){
     getOriginalImage(imageKey).then(img=>{
       const url=img||h.thumbnail||h.imageUrl;
-      if(url)window.openEditorDirect(url);
+      if(url)window.openEditorDirect(url,h.thumbnail);
       else showToast('无图片可编辑');
     }).catch(()=>{
       const url=h.thumbnail||h.imageUrl;
-      if(url)window.openEditorDirect(url);
+      if(url)window.openEditorDirect(url,h.thumbnail);
       else showToast('无图片可编辑');
     });
   }else{
     const url=h.thumbnail||h.imageUrl;
-    if(url)window.openEditorDirect(url);
+    if(url)window.openEditorDirect(url,h.thumbnail);
     else showToast('无图片可编辑');
   }
 };
