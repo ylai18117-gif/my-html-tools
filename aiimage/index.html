@@ -643,27 +643,40 @@ window.openEditorDirect=function(imageUrl,fallbackUrl){
     }
   }
 };
-window.openEditorFromHist=async function(id){
+window.openEditorFromHist=function(id){
   const h=loadHistory().find(x=>x.id===id);
   if(!h){showToast('历史记录不存在');return;}
   let url=h.thumbnail||h.imageUrl;
-  // Fallback: try IndexedDB for old records with empty thumbnail
-  if(!url){
-    const imageKey=h.imageKey||h.id;
-    if(imageKey){
-      const original=await getOriginalImage(imageKey);
-      if(original)url=original;
+  
+  // Helper function to navigate
+  const navigate=(imgUrl)=>{
+    if(!imgUrl){showToast('无图片可编辑');return;}
+    if(typeof trackEvent==='function')trackEvent('ai_editor_open',{tool:'history'});
+    try{
+      sessionStorage.setItem('editor_image',imgUrl);
+      window.location.href='./editor.html';
+    }catch(e){
+      if(imgUrl.length<50000)window.location.href='./editor.html?image='+encodeURIComponent(imgUrl);
+      else showToast('图片数据过大，无法打开编辑');
     }
+  };
+  
+  // If we have a URL, navigate immediately
+  if(url){
+    navigate(url);
+    return;
   }
-  if(!url){showToast('无图片可编辑');return;}
-  if(typeof trackEvent==='function')trackEvent('ai_editor_open',{tool:'history'});
-  try{
-    sessionStorage.setItem('editor_image',url);
-    window.location.href='./editor.html';
-  }catch(e){
-    if(url.length<50000)window.location.href='./editor.html?image='+encodeURIComponent(url);
-    else showToast('图片数据过大，无法打开编辑');
-  }
+  
+  // Fallback: try IndexedDB for old records with empty thumbnail
+  const imageKey=h.imageKey||h.id;
+  if(!imageKey){showToast('无图片可编辑');return;}
+  
+  showToast('正在加载图片...');
+  getOriginalImage(imageKey).then(original=>{
+    navigate(original);
+  }).catch(()=>{
+    showToast('图片加载失败');
+  });
 };
 
 // ═══ VERSION SHEET ═══
