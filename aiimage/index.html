@@ -1021,7 +1021,16 @@ async function saveOriginalImage(id,dataUrl){
   try{const db=await openImageDB();const tx=db.transaction('images','readwrite');tx.objectStore('images').put(dataUrl,id)}catch(e){console.warn('[History] IndexedDB save failed:',e)}
 }
 async function getOriginalImage(id){
-  try{const db=await openImageDB();return new Promise(resolve=>{const tx=db.transaction('images','readonly');const r=tx.objectStore('images').get(id);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>resolve(null)})}catch{return null}
+  try{
+    const db=await openImageDB();
+    return new Promise((resolve)=>{
+      const timeout=setTimeout(()=>{console.warn('[getOriginalImage] Timeout, returning null');resolve(null)},3000);
+      const tx=db.transaction('images','readonly');
+      const r=tx.objectStore('images').get(id);
+      r.onsuccess=()=>{clearTimeout(timeout);resolve(r.result||null)};
+      r.onerror=()=>{clearTimeout(timeout);resolve(null)};
+    });
+  }catch(e){console.warn('[getOriginalImage] Error:',e);return null}
 }
 async function deleteOriginalImage(id){
   try{const db=await openImageDB();const tx=db.transaction('images','readwrite');tx.objectStore('images').delete(id)}catch{}
