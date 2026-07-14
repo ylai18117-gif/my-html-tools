@@ -174,11 +174,22 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
       <div class="card-arrow"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
     </a>
 
-    <!-- AI Image -->
-    <a class="nav-card glow-orange" href="aiimage/index.html" id="card-aiimage">
-      <div class="card-icon orange">🎨</div>
+    <!-- AI Image (Stable) -->
+    <a class="nav-card glow-green" href="aiimage/stable.html" id="card-aiimage-stable">
+      <div class="card-icon green">🎨</div>
       <div class="card-body">
-        <h3 data-i18n="card.ai.title">AI 图片工坊</h3>
+        <h3>AI 图片工坊（稳定版）</h3>
+        <p>ChatGPT / Gemini 文生图 & 图生图 — 稳定可用版本</p>
+      </div>
+      <span class="card-badge lock">🔒 需验证</span>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+
+    <!-- AI Image (Test) -->
+    <a class="nav-card glow-orange" href="aiimage/index.html" id="card-aiimage">
+      <div class="card-icon orange">🧪</div>
+      <div class="card-body">
+        <h3 data-i18n="card.ai.title">AI 图片工坊（测试版）</h3>
         <p data-i18n="card.ai.desc">ChatGPT / Gemini 文生图 & 图生图，AI 对话式创作</p>
       </div>
       <span class="card-badge lock" data-i18n="badge.lock">🔒 需验证</span>
@@ -313,6 +324,7 @@ I18n.renderSelector('lang-selector');
 
   const card = document.getElementById('card-data');
   const card2 = document.getElementById('card-aiimage');
+  const card3 = document.getElementById('card-aiimage-stable');
 
   function gateCard(el) {
     if (!el) return;
@@ -329,6 +341,7 @@ I18n.renderSelector('lang-selector');
   }
   gateCard(card);
   gateCard(card2);
+  gateCard(card3);
 
   function showAuth(targetUrl) {
     const old = document.getElementById('auth-overlay');
