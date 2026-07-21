@@ -15,7 +15,7 @@ export async function onRequest(context) {
   headers.set('Authorization', `Bearer ${apiKey}`);
   headers.delete('x-client-api-key');
   
-  const resp = await fetch(url, { method: request.method, headers, body: request.body });
+  const resp = await fetch(url, { method: request.method, headers, body: request.body, signal: AbortSignal.timeout(25000) });
   const respHeaders = new Headers(resp.headers);
   respHeaders.set('Access-Control-Allow-Origin', '*');
   respHeaders.set('Cache-Control', 'no-store');

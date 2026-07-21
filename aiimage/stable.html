@@ -744,14 +744,18 @@ async function callAgnesImage(prompt,images,model,mode){
     body.extra_body={image:images.map(i=>`data:${i.mimeType||'image/png'};base64,${i.base64}`),response_format:'b64_json'};
     delete body.return_base64;
   }
-  const res=await fetch('/api/agnes/v1/images/generations',{
-    method:'POST',headers:{'x-client-api-key':getAgnesKey(),'Content-Type':'application/json'},
-    body:JSON.stringify(body)
-  });
-  if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.error?.message||`HTTP ${res.status}: 请求失败`)}
-  const data=await res.json();
-  if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'1K'}}
-  throw apiError(0,'未返回图片数据');
+  const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),25000);
+  try{
+    const res=await fetch('https://apihub.agnes-ai.com/v1/images/generations',{
+      method:'POST',headers:{'Authorization':'Bearer '+getAgnesKey(),'Content-Type':'application/json'},
+      body:JSON.stringify(body),signal:ctrl.signal
+    });
+    clearTimeout(to);
+    if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.error?.message||`HTTP ${res.status}: 请求失败`)}
+    const data=await res.json();
+    if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'1K'}}
+    throw apiError(0,'未返回图片数据');
+  }catch(e){clearTimeout(to);throw e.name==='AbortError'?apiError(0,'上游超时，请重试或切换模型'):e}
 }
 
 async function callSenseNovaImage(prompt,images,model,mode){
@@ -775,17 +779,21 @@ async function callQwenImage(prompt,images,model,mode){
     images.forEach(i=>content.unshift({image:`data:${i.mimeType||'image/png'};base64,${i.base64}`}));
   }
   const body={model:'wan2.7-image',input:{messages:[{role:'user',content}]},parameters:{size:'1K',n:1,watermark:false}};
-  const res=await fetch('/api/qwen/api/v1/services/aigc/multimodal-generation/generation',{
-    method:'POST',headers:{'x-client-api-key':getQwenKey(),'Content-Type':'application/json'},
-    body:JSON.stringify(body)
-  });
-  if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.message||err.error?.message||`HTTP ${res.status}: 请求失败`)}
-  const data=await res.json();
-  if(data.output&&data.output.choices&&data.output.choices[0]){
-    const parts=data.output.choices[0].message.content;
-    for(const p of parts){if(p.image)return{url:p.image,size:'1K'}}
-  }
-  throw apiError(0,'未返回图片数据');
+  const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),30000);
+  try{
+    const res=await fetch('https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis',{
+      method:'POST',headers:{'Authorization':'Bearer '+getQwenKey(),'Content-Type':'application/json'},
+      body:JSON.stringify(body),signal:ctrl.signal
+    });
+    clearTimeout(to);
+    if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.message||err.error?.message||`HTTP ${res.status}: 请求失败`)}
+    const data=await res.json();
+    if(data.output&&data.output.choices&&data.output.choices[0]){
+      const parts=data.output.choices[0].message.content;
+      for(const p of parts){if(p.image)return{url:p.image,size:'1K'}}
+    }
+    throw apiError(0,'未返回图片数据');
+  }catch(e){clearTimeout(to);throw e.name==='AbortError'?apiError(0,'上游超时，请重试或切换模型'):e}
 }
 
 // ═══ RETRY ═══
