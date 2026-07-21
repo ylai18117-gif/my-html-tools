@@ -56,6 +56,16 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:
 .seg-group button.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .controls .spacer{flex:1}
 
+/* MODEL SELECT */
+.model-select-wrap{position:relative;flex:1;min-width:0}
+.model-select{appearance:none;-webkit-appearance:none;width:100%;padding:7px 30px 7px 12px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-deep);color:var(--text);font-size:12px;font-weight:600;font-family:var(--ff-b);cursor:pointer;outline:none;transition:border-color .25s,background .25s,box-shadow .25s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.model-select:hover{border-color:var(--accent)}
+.model-select:focus{border-color:var(--accent);background:var(--surface);box-shadow:0 0 0 3px rgba(193,122,86,.12)}
+.model-select-wrap::after{content:'';position:absolute;right:11px;top:50%;transform:translateY(-50%);width:7px;height:7px;border-right:1.5px solid var(--text2);border-bottom:1.5px solid var(--text2);transform:translateY(-65%) rotate(45deg);pointer-events:none;transition:border-color .2s}
+.model-select-wrap:hover::after{border-color:var(--accent)}
+.mode-badge{flex-shrink:0;font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-light);border:1px solid rgba(193,122,86,.25);border-radius:100px;padding:4px 10px;white-space:nowrap;animation:fadeUp .3s var(--ease) both}
+.mode-badge:empty{display:none}
+
 /* DRAG OVERLAY */
 .drag-overlay{position:fixed;inset:0;z-index:50;background:rgba(193,122,86,.08);border:3px dashed var(--accent);border-radius:16px;display:none;align-items:center;justify-content:center;pointer-events:none}
 .drag-overlay.show{display:flex}
@@ -96,6 +106,8 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:
 .error-card .err-detail{font-size:12px;color:#8B4444;line-height:1.5;word-break:break-all}
 .error-card .retry-btn{margin-top:10px;padding:6px 14px;border:1px solid #E8AAAA;border-radius:8px;background:#fff;color:var(--error);font-size:12px;font-weight:500;font-family:var(--ff-b);cursor:pointer;transition:all .2s}
 .error-card .retry-btn:hover{background:var(--error);color:#fff}
+.error-card .err-tag{margin-left:auto;font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:rgba(217,79,79,.12);color:var(--error);white-space:nowrap;flex-shrink:0}
+.error-card .err-hint{font-size:11px;color:#A06060;margin-top:6px;line-height:1.5}
 
 /* RESULT META */
 .result-meta{padding:8px 14px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-lt);font-size:11px;color:var(--text3)}
@@ -273,15 +285,10 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
   </div>
 
   <div class="controls">
-    <div class="seg-group" id="model-switch">
-      <button class="active" data-model="gpt-image-2">ChatGPT</button>
-      <button data-model="gemini-3.1-flash-image">Gemini</button>
+    <div class="model-select-wrap">
+      <select class="model-select" id="model-select" title="选择生图模型"></select>
     </div>
-    <div class="spacer"></div>
-    <div class="seg-group" id="mode-switch">
-      <button class="active" data-mode="t2i">文生图</button>
-      <button data-mode="i2i">图生图</button>
-    </div>
+    <span class="mode-badge" id="mode-badge"></span>
   </div>
 
   <div class="chat-area" id="chat-area">
@@ -334,6 +341,9 @@ const API_BASE='/api/dmxapi/v1';
 const API_BASE_BETA='/api/dmxapi/v1beta';
 const ENC_KEY_XOR='aR7mK2';
 const ENC_B64='EjkaXQBcUBZlKi4HKhteDwB5WTlZFRh6DCADXQpfNAFfDxJHExdPKgdGNR10XTFKDQFQ';
+const ENC_AGNES='EjkaKnJ7FDFVABx/Dz5bGAp7EgNVOCprOxl6G3xXKhtPPB5dJzNBNQhIWTlSLyp/BApU';
+const ENC_SENSENOVA='EjkaVQ8HKwVlVSlaEhhlFAVGCmFnIX5kJjBmFApgNSRZXgQ=';
+const ENC_QWEN='EjkaHjsfKXxyPQ9rJXxOXS8LTx9yNAh7MBEPICpzVyBCBzNZNDdED31tF2dGKhsDNBt7CDtENTFdKD5QCDtTAQhkKiJAJCNzLSJaB3t4BBMPHRtZVjFEOhFzJBsaGQADKjVYKHpECBcFLBJtEGpyLxpTBw==';
 const PW_HASH=-551981607;
 const PW_XOR_KEY='pW9x';
 const PW_XOR_B64='MSQYTkljAEBJYA9I';
@@ -342,10 +352,22 @@ const MAX_IMAGES=16; // ChatGPT limit
 function decryptXor(b64,key){const b=atob(b64);let r='';for(let i=0;i<b.length;i++)r+=String.fromCharCode(b.charCodeAt(i)^key.charCodeAt(i%key.length));return r}
 function verifyPassword(input){let h=0;for(let i=0;i<input.length;i++)h=((h<<5)-h+input.charCodeAt(i))|0;if(h!==PW_HASH)return false;const x=[];for(let i=0;i<input.length;i++)x.push(input.charCodeAt(i)^PW_XOR_KEY.charCodeAt(i%PW_XOR_KEY.length));return btoa(String.fromCharCode(...x))===PW_XOR_B64}
 function getApiKey(){return decryptXor(ENC_B64,ENC_KEY_XOR)}
+function getAgnesKey(){return decryptXor(ENC_AGNES,ENC_KEY_XOR)}
+function getSenseNovaKey(){return decryptXor(ENC_SENSENOVA,ENC_KEY_XOR)}
+function getQwenKey(){return decryptXor(ENC_QWEN,ENC_KEY_XOR)}
 
 // ═══ STATE ═══
+const MODELS=[
+  {id:'gpt-image-2',label:'GPT Image 2',family:'gpt',api:'openai',desc:'最强画质 · 偶尔排队'},
+  {id:'gemini-3.1-flash-image',label:'Gemini 3.1 Flash',family:'gemini',api:'gemini',desc:'快速稳定'},
+  {id:'doubao-seedream-4-0-250828',label:'豆包 Seedream 4.0',family:'doubao',api:'openai',desc:'高质量中文友好'},
+  {id:'agnes-image-2.1-flash',label:'Agnes 2.1 Flash',family:'agnes',api:'agnes',desc:'免费 · 高信息密度'},
+  {id:'sensenova-u1-fast',label:'商汤 U1 Fast',family:'sensenova',api:'sensenova',desc:'信息图生成'},
+  {id:'wan2.7-image',label:'万相 2.7',family:'qwen',api:'qwen',desc:'阿里云 · 支持4K'}
+];
+function modelById(id){return MODELS.find(m=>m.id===id)||MODELS[0]}
+function modelLabel(id){return modelById(id).label}
 let currentModel='gpt-image-2';
-let currentMode='t2i';
 let attachedImages=[]; // [{dataUrl, base64, mimeType}]
 let msgIdCounter=0;
 
@@ -375,20 +397,23 @@ if(sessionStorage.getItem('_v')==='1'){authOverlay.style.display='none';app.clas
 authBtn.addEventListener('click',tryAuth);
 authPw.addEventListener('keydown',e=>{if(e.key==='Enter')tryAuth()});
 
-// ═══ MODEL & MODE ═══
-document.getElementById('model-switch').addEventListener('click',e=>{
-  const b=e.target.closest('button[data-model]');if(!b)return;
-  document.querySelectorAll('#model-switch button').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');currentModel=b.dataset.model;if(typeof trackEvent==='function')trackEvent('ai_model_switch',{model:currentModel});updatePlaceholder();
+// ═══ MODEL SELECT ═══
+const modelSelect=document.getElementById('model-select');
+MODELS.forEach(m=>{
+  const opt=document.createElement('option');
+  opt.value=m.id;opt.textContent=`${m.label} — ${m.desc}`;
+  modelSelect.appendChild(opt);
 });
-document.getElementById('mode-switch').addEventListener('click',e=>{
-  const b=e.target.closest('button[data-mode]');if(!b)return;
-  document.querySelectorAll('#mode-switch button').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');currentMode=b.dataset.mode;if(typeof trackEvent==='function')trackEvent('ai_mode_switch',{mode:currentMode});updatePlaceholder();
+modelSelect.value=currentModel;
+modelSelect.addEventListener('change',()=>{
+  currentModel=modelSelect.value;
+  if(typeof trackEvent==='function')trackEvent('ai_model_switch',{model:currentModel});
+  updatePlaceholder();
 });
 function updatePlaceholder(){
   const inp=document.getElementById('prompt-input');
-  inp.placeholder=currentMode==='i2i'?'描述你想如何修改图片...':'描述你想要的画面...';
+  const m=modelById(currentModel);
+  inp.placeholder=`${m.label}：描述你想要的画面，上传参考图可图生图...`;
 }
 
 // ═══ DRAG & DROP (full page) ═══
@@ -516,13 +541,16 @@ function restoreComposer(prompt,images){
   renderAttachPreviews();
   promptInput.focus();
 }
+function updateModeBadge(){
+  const badge=document.getElementById('mode-badge');
+  badge.textContent=attachedImages.length>0?`图生图 · ${attachedImages.length}张参考图`:'';
+}
 function handleSend(){
   const prompt=promptInput.value.trim();
   if(!prompt&&attachedImages.length===0)return;
-  if(typeof trackEvent==='function')trackEvent('ai_send',{model:currentModel,mode:currentMode});
-  if(currentMode==='i2i'&&attachedImages.length===0){
-    promptInput.placeholder='请先添加参考图片 ⬆';promptInput.focus();return;
-  }
+  const mode=attachedImages.length>0?'i2i':'t2i'; // 发送时判断：有参考图=图生图
+  updateModeBadge(); // 发送时更新 badge，反映实际发送的模式
+  if(typeof trackEvent==='function')trackEvent('ai_send',{model:currentModel,mode});
 
   const welcome=document.getElementById('welcome');
   if(welcome)welcome.style.display='none';
@@ -530,7 +558,6 @@ function handleSend(){
   const msgId='msg-'+(++msgIdCounter);
   const images=[...attachedImages]; // snapshot
   const model=currentModel;
-  const mode=currentMode;
 
   appendUserMsg(msgId,prompt,images);
   appendLoadingMsg(msgId,model);
@@ -552,7 +579,7 @@ function appendUserMsg(msgId,text,images){
 }
 
 function loadingHTML(msgId,model){
-  const mn=model.includes('gpt')?'ChatGPT':'Gemini';
+  const mn=modelLabel(model);
   return `<div class="loading-card"><div class="loading-spinner"></div><div class="loading-text">${mn} 正在生成...</div><div class="loading-timer" id="${msgId}-timer">0s</div></div>`;
 }
 function startLoadingTimer(el,msgId){
@@ -582,13 +609,13 @@ function resetBotToLoading(msgId,model){
 function replaceWithResult(msgId,imageUrl,model,size,elapsed){
   const botEl=document.getElementById(msgId+'-bot');if(!botEl)return;
   if(botEl._timerId)clearInterval(botEl._timerId);
-  const mn=model.includes('gpt')?'gpt-image-2':'gemini-3.1';
+  const mn=modelLabel(model);
   botEl.innerHTML=`<div class="result-card"><img src="${imageUrl}" alt="生成结果" onclick="openLightbox(this.src)"><div class="result-meta"><span class="model-tag">${mn}</span><span class="meta-sep">·</span><span>${size}</span><span class="meta-sep">·</span><span>${elapsed}s</span><button class="download-btn" onclick="downloadImage('${imageUrl}','${msgId}')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>保存</button></div></div>`;
   scrollBottom();
 
   // Save to history
   const params=requestParams[msgId];
-  if(typeof trackEvent==='function')trackEvent('ai_generate_complete',{model:model.includes('gpt')?'gpt':'gemini',mode:params?params.mode:'t2i'});
+  if(typeof trackEvent==='function')trackEvent('ai_generate_complete',{model:modelById(model).family,mode:params?params.mode:'t2i'});
   addToHistory({
     id:makeHistId(),
     prompt:params?params.prompt:'',
@@ -602,12 +629,30 @@ function replaceWithResult(msgId,imageUrl,model,size,elapsed){
   });
 }
 
-function replaceWithError(msgId,errorMsg,model){
+function apiError(status,message){const e=new Error(message);e.status=status;return e}
+function classifyError(status,msg){
+  const m=String(msg||'').toLowerCase();
+  if(m.includes('failed to fetch')||m.includes('networkerror')||m.includes('load failed'))
+    return{tag:'网络问题',title:'网络连接失败',detail:'无法连接到生成服务，请检查你的网络后重试。',hint:'已为你保留本次提示词与参考图，可直接重试。'};
+  if(status===429)
+    return{tag:'上游拥堵',title:'上游供应商拥堵',detail:'当前模型的生成队列已满（供应商暂时过载），这不是你的网络问题。请稍等片刻重试，或切换到其他模型生成。',hint:''};
+  if(status===404||m.includes('unknown_model')||m.includes('not found')||m.includes('does not exist'))
+    return{tag:'模型不可用',title:'模型暂不可用',detail:'该模型当前已下线或供应商正在调整，请切换到其他模型。',hint:''};
+  if(status===401||status===403)
+    return{tag:'鉴权失败',title:'鉴权失败',detail:'API 密钥无效或已过期，请联系管理员。',hint:''};
+  if(status>=500)
+    return{tag:'上游异常',title:'上游服务异常',detail:'模型供应商服务暂时不稳定，请稍后重试，或切换到其他模型。',hint:''};
+  if(status===400)
+    return{tag:'请求错误',title:'请求参数错误',detail:msg||'请求内容不符合模型要求，请调整提示词后重试。',hint:''};
+  return{tag:'生成失败',title:'生成失败',detail:msg||'未知错误，请重试。',hint:''};
+}
+
+function replaceWithError(msgId,err,model){
   const botEl=document.getElementById(msgId+'-bot');if(!botEl)return;
   if(botEl._timerId)clearInterval(botEl._timerId);
-  const mn=model.includes('gpt')?'ChatGPT':'Gemini';
-  const friendly=String(errorMsg||'未知错误').includes('Failed to fetch')?'网络请求失败，已为你保留本次内容，可直接重试或修改后再发送。':errorMsg;
-  botEl.innerHTML=`<div class="error-card"><div class="err-head"><div class="err-icon">!</div><div class="err-title">${mn} 生成失败</div></div><div class="err-detail">${escapeHtml(friendly)}</div><button class="retry-btn" onclick="retryRequest('${msgId}')">重试</button></div>`;
+  const mn=modelLabel(model);
+  const c=classifyError((err&&err.status)||0,(err&&err.message)||'');
+  botEl.innerHTML=`<div class="error-card"><div class="err-head"><div class="err-icon">!</div><div class="err-title">${mn} · ${c.title}</div><span class="err-tag">${c.tag}</span></div><div class="err-detail">${escapeHtml(c.detail)}</div>${c.hint?`<div class="err-hint">${escapeHtml(c.hint)}</div>`:''}<button class="retry-btn" onclick="retryRequest('${msgId}')">重试</button></div>`;
   scrollBottom();
 }
 
@@ -619,19 +664,23 @@ async function fireRequest(msgId,prompt,images,model,mode){
   requestParams[msgId]={prompt,images,model,mode};
   try{
     const apiKey=getApiKey();
+    const cfg=modelById(model);
     let result;
-    if(model.includes('gpt'))result=await callGPTImage(prompt,images,model,mode,apiKey);
-    else result=await callGeminiImage(prompt,images,model,mode,apiKey);
+    if(cfg.api==='gemini')result=await callGeminiImage(prompt,images,model,mode,apiKey);
+    else if(cfg.api==='agnes')result=await callAgnesImage(prompt,images,model,mode);
+    else if(cfg.api==='sensenova')result=await callSenseNovaImage(prompt,images,model,mode);
+    else if(cfg.api==='qwen')result=await callQwenImage(prompt,images,model,mode);
+    else result=await callOpenAIImage(prompt,images,model,mode,apiKey);
     const elapsed=Math.floor((Date.now()-start)/1000);
     replaceWithResult(msgId,result.url,model,result.size,elapsed);
     ok=true;
   }catch(err){
-    replaceWithError(msgId,err.message||'未知错误',model);
+    replaceWithError(msgId,err,model);
   }finally{if(ok)delete requestParams[msgId]}
 }
 
 // ═══ API CALLS ═══
-async function callGPTImage(prompt,images,model,mode,apiKey){
+async function callOpenAIImage(prompt,images,model,mode,apiKey){
   if(mode==='i2i'&&images.length>0){
     const fd=new FormData();
     fd.append('model',model);
@@ -645,20 +694,20 @@ async function callGPTImage(prompt,images,model,mode,apiKey){
     const res=await fetch(`${API_BASE}/images/edits`,{
       method:'POST',headers:{'x-client-api-key':apiKey},body:fd
     });
-    if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.error?.message||`HTTP ${res.status}: 请求失败`)}
+    if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.error?.message||`HTTP ${res.status}: 请求失败`)}
     const data=await res.json();
     if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'1024×1024'}}
-    throw new Error('未返回图片数据');
+    throw apiError(0,'未返回图片数据');
   }else{
     const res=await fetch(`${API_BASE}/images/generations`,{
       method:'POST',
       headers:{'x-client-api-key':apiKey,'Content-Type':'application/json'},
       body:JSON.stringify({model,prompt,n:1,size:'1024x1024',quality:'high'})
     });
-    if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.error?.message||`HTTP ${res.status}: 请求失败`)}
+    if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.error?.message||`HTTP ${res.status}: 请求失败`)}
     const data=await res.json();
     if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'1024×1024'}}
-    throw new Error('未返回图片数据');
+    throw apiError(0,'未返回图片数据');
   }
 }
 
@@ -679,14 +728,64 @@ async function callGeminiImage(prompt,images,model,mode,apiKey){
     headers:{'x-client-api-key':apiKey,'Content-Type':'application/json'},
     body:JSON.stringify(body)
   });
-  if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.error?.message||err.message||`HTTP ${res.status}: 请求失败`)}
+  if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.error?.message||err.message||`HTTP ${res.status}: 请求失败`)}
   const data=await res.json();
   if(data.candidates&&data.candidates[0]){
     const rp=data.candidates[0].content.parts;
     for(const p of rp){if(p.inlineData&&p.inlineData.data){const mime=p.inlineData.mimeType||'image/png';return{url:`data:${mime};base64,${p.inlineData.data}`,size:p.inlineData.imageSize||'2K'}}}
-    for(const p of rp){if(p.text)throw new Error(p.text.substring(0,200))}
+    for(const p of rp){if(p.text)throw apiError(400,p.text.substring(0,200))}
   }
-  throw new Error('未返回图片数据，请检查提示词后重试');
+  throw apiError(0,'未返回图片数据，请检查提示词后重试');
+}
+
+async function callAgnesImage(prompt,images,model,mode){
+  const body={model:'agnes-image-2.1-flash',prompt,size:'1K',return_base64:true};
+  if(mode==='i2i'&&images.length>0){
+    body.extra_body={image:images.map(i=>`data:${i.mimeType||'image/png'};base64,${i.base64}`),response_format:'b64_json'};
+    delete body.return_base64;
+  }
+  const res=await fetch('/api/agnes/v1/images/generations',{
+    method:'POST',headers:{'x-client-api-key':getAgnesKey(),'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
+  if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.error?.message||`HTTP ${res.status}: 请求失败`)}
+  const data=await res.json();
+  if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'1K'}}
+  throw apiError(0,'未返回图片数据');
+}
+
+async function callSenseNovaImage(prompt,images,model,mode){
+  const body={model:'sensenova-u1-fast',prompt,n:1,size:'2048x2048'};
+  if(mode==='i2i'&&images.length>0){
+    body.image=images.map(i=>`data:${i.mimeType||'image/png'};base64,${i.base64}`);
+  }
+  const res=await fetch('/api/sensenova/v1/images/generations',{
+    method:'POST',headers:{'x-client-api-key':getSenseNovaKey(),'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
+  if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.error?.message||`HTTP ${res.status}: 请求失败`)}
+  const data=await res.json();
+  if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'2048×2048'}}
+  throw apiError(0,'未返回图片数据');
+}
+
+async function callQwenImage(prompt,images,model,mode){
+  const content=[{text:prompt}];
+  if(mode==='i2i'&&images.length>0){
+    images.forEach(i=>content.unshift({image:`data:${i.mimeType||'image/png'};base64,${i.base64}`}));
+  }
+  const body={model:'wan2.7-image',input:{messages:[{role:'user',content}]},parameters:{size:'1K',n:1,watermark:false}};
+  const res=await fetch('/api/qwen/api/v1/services/aigc/multimodal-generation/generation',{
+    method:'POST',headers:{'x-client-api-key':getQwenKey(),'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
+  if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.message||err.error?.message||`HTTP ${res.status}: 请求失败`)}
+  const data=await res.json();
+  if(data.output&&data.output.choices&&data.output.choices[0]){
+    const parts=data.output.choices[0].message.content;
+    for(const p of parts){if(p.image)return{url:p.image,size:'1K'}}
+  }
+  throw apiError(0,'未返回图片数据');
 }
 
 // ═══ RETRY ═══
@@ -887,7 +986,7 @@ function renderHistGrid(){
     return;
   }
   histBody.innerHTML='<div class="hist-grid">'+arr.map(h=>{
-    const mn=h.model.includes('gpt')?'ChatGPT':'Gemini';
+    const mn=modelLabel(h.model);
     return `<div class="hist-item" data-id="${h.id}">
       <img src="${h.thumbnail||h.imageUrl}" alt="" loading="lazy">
       <button class="hist-del" data-id="${h.id}" title="删除">✕</button>
@@ -909,7 +1008,7 @@ histBody.addEventListener('click',e=>{
 async function openHistDetail(id){
   const h=loadHistory().find(x=>x.id===id);
   if(!h)return;
-  const mn=h.model.includes('gpt')?'ChatGPT':'Gemini';
+  const mn=modelLabel(h.model);
   const mode=h.mode==='i2i'?'图生图':'文生图';
   // Try to load original from IndexedDB, fall back to thumbnail
   const imageKey=getHistImageKey(h);
@@ -953,9 +1052,10 @@ window.reusePrompt=function(id){if(typeof trackEvent==='function')trackEvent('ai
   histDetail.classList.remove('show');
   histPanel.classList.remove('show');
   promptInput.value=h.prompt||'';
-  if(h.model){
-    const btn=document.querySelector(`#model-switch button[data-model="${h.model}"]`);
-    if(btn)btn.click();
+  if(h.model&&modelById(h.model)){
+    modelSelect.value=h.model;
+    currentModel=h.model;
+    updatePlaceholder();
   }
   promptInput.focus();
 };
