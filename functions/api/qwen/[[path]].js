@@ -1,9 +1,8 @@
-// Proxy for Qwen Token Plan API (DashScope native format)
-// Environment variable: QWEN_API_KEY
+// Proxy for Qwen Token Plan API (DashScope native format) — reads key from x-client-api-key header (page XOR-encrypted)
 export async function onRequest(context) {
-  const { request, params, env } = context;
+  const { request, params } = context;
   const path = (params.path || []).join('/');
-  const apiKey = env.QWEN_API_KEY || '';
+  const apiKey = request.headers.get('x-client-api-key') || '';
   
   if (request.method === 'OPTIONS') {
     return new Response(null, {

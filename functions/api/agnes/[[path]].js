@@ -1,9 +1,8 @@
-// Proxy for Agnes API
-// Environment variable: AGNES_API_KEY
+// Proxy for Agnes API — reads key from x-client-api-key header (page XOR-encrypted)
 export async function onRequest(context) {
-  const { request, params, env } = context;
+  const { request, params } = context;
   const path = (params.path || []).join('/');
-  const apiKey = env.AGNES_API_KEY || '';
+  const apiKey = request.headers.get('x-client-api-key') || '';
   
   if (request.method === 'OPTIONS') {
     return new Response(null, {
