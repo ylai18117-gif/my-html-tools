@@ -842,9 +842,9 @@ async function handleSend(){
     promptInput.placeholder='请先添加参考图片 ⬆';promptInput.focus();return;
   }
 
-  // Payload size check: default to untouched original, prompt user only if total size exceeds 4MB
+  // Payload size check: default to untouched original, prompt user only if total size exceeds 10MB (Cloudflare Function upper bound)
   let totalBytes = attachedImages.reduce((sum, img) => sum + (img.sizeBytes || Math.round(img.base64.length * 0.75)), 0);
-  const PAYLOAD_LIMIT_BYTES = 4 * 1024 * 1024; // 4MB threshold
+  const PAYLOAD_LIMIT_BYTES = 10 * 1024 * 1024; // 10MB threshold
 
   let finalImages = [...attachedImages];
 
