@@ -926,13 +926,12 @@ async function callGPTImage(prompt,images,model,mode,apiKey,sizeKey){
   const preset=SIZE_PRESETS[sizeKey]||SIZE_PRESETS['1024x1024'];
   const gptSize=preset.gpt;
   if(mode==='i2i'&&images.length>0){
-    const refImgs=images.slice(0,4); // Slice max 4 reference images
     const fd=new FormData();
     fd.append('model',model);
     fd.append('prompt',prompt);
     fd.append('n','1');
     fd.append('size',gptSize);
-    refImgs.forEach((img,i)=>{
+    images.forEach((img,i)=>{
       const blob=base64ToBlob(img.base64,img.mimeType);
       fd.append('image',blob,`image_${i}.png`);
     });
@@ -960,8 +959,7 @@ async function callGeminiImage(prompt,images,model,mode,apiKey,sizeKey){
   const preset=SIZE_PRESETS[sizeKey]||SIZE_PRESETS['1024x1024'];
   const parts=[];
   if(mode==='i2i'&&images.length>0){
-    const refImgs=images.slice(0,4); // Slice max 4 reference images
-    refImgs.forEach(img=>{
+    images.forEach(img=>{
       parts.push({inline_data:{mime_type:img.mimeType||'image/png',data:img.base64}});
     });
   }
