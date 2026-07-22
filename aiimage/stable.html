@@ -831,7 +831,7 @@ async function callQwenImage(prompt,images,model,mode){
   const body={model:'wan2.7-image',input:{messages:[{role:'user',content}]},parameters:{size:'1K',n:1,watermark:false}};
   const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),30000);
   try{
-    const res=await fetch('/api/qwen/v1/services/aigc/text2image/image-synthesis',{
+    const res=await fetch('/api/qwen/api/v1/services/aigc/multimodal-generation/generation',{
       method:'POST',headers:{'x-client-api-key':getQwenKey(),'Content-Type':'application/json'},
       body:JSON.stringify(body),signal:ctrl.signal
     });
