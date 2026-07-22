@@ -475,10 +475,16 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
     <div class="r-checklist reveal" style="transition-delay:.3s" id="r-checklist">
       <div class="r-cl-head">
         <h3 data-i18n="checklist_title">拍摄清单</h3>
-        <button class="r-cl-save" onclick="saveChecklist()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>
-          <span data-i18n="checklist_save">保存</span>
-        </button>
+        <div style="display:flex;gap:8px">
+          <button class="r-cl-save" onclick="copyFullReport()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+            <span data-i18n="report_copy">复制报告</span>
+          </button>
+          <button class="r-cl-save" onclick="saveChecklist()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>
+            <span data-i18n="checklist_save">保存</span>
+          </button>
+        </div>
       </div>
       <div id="r-cl-steps"></div>
     </div>
@@ -580,6 +586,9 @@ const TRANSLATIONS={
   checklist_save:'保存',
   checklist_copied:'已复制 \u2713',
   checklist_header:'\u{1F4F7} 拍摄清单',
+  report_copy:'复制完整报告',
+  report_copied_toast:'已复制完整拆解报告到剪贴板！',
+  report_copy_failed:'复制失败，请重试',
   cta_another:'分析另一张',
   hist_title:'分析历史',
   hist_detail_title:'分析详情',
@@ -1233,6 +1242,51 @@ function saveChecklist(){
   setTimeout(()=>{btn.innerHTML=_saveBtnOriginalHTML},1800);
 }
 
+function copyFullReport(){
+  if(!curData){
+    showToast('暂无分析数据');
+    return;
+  }
+  if(typeof trackEvent==='function')trackEvent('pw_report_copy');
+  
+  let text=`📸 PhotoWhisper 拍照拆解报告\n\n`;
+  if(curData.quote)text+=`💡 【一句话精髓】：${curData.quote}\n`;
+  if(curData.compBadge)text+=`📐 【构图技巧】：${curData.compBadge}\n`;
+  if(curData.tags&&curData.tags.length)text+=`🏷️ 【分类标签】：${curData.tags.join(' / ')}\n`;
+  
+  text+=`\n📊 ===== 详细维度拆解 =====\n`;
+  const dimNames={
+    pose:'💃 被拍人姿势',
+    angle:'📷 摄影师角度与距离',
+    light:'☀️ 光线与环境时机',
+    comp:'🎨 构图法则与线条',
+    env:'🌿 场地与背景条件',
+    settings:'⚙️ 手机/相机建议设置'
+  };
+  
+  for(const[key,name]of Object.entries(dimNames)){
+    if(curData[key]&&Array.isArray(curData[key])&&curData[key].length){
+      text+=`\n${name}：\n`;
+      curData[key].forEach(item=>{
+        text+=`  • ${item.l}: ${item.d}\n`;
+      });
+    }
+  }
+  
+  if(curData.checklist&&curData.checklist.length){
+    text+=`\n📋 ===== 可执行拍摄步骤 =====\n`;
+    curData.checklist.forEach((step,idx)=>{
+      text+=`  ${idx+1}. ${step}\n`;
+    });
+  }
+  
+  navigator.clipboard.writeText(text).then(()=>{
+    showToast(I18n.t('report_copied_toast')||'已复制完整拆解报告到剪贴板！');
+  }).catch(()=>{
+    showToast(I18n.t('report_copy_failed')||'复制失败');
+  });
+}
+
 // ═══════════════════════════════════════════
 // COMPOSITION GRID TOGGLE
 // ═══════════════════════════════════════════
@@ -1443,10 +1497,10 @@ function formatTimeAgo(ts){
 }
 
 // ═══════════════════════════════════════════
-// AI ANALYSIS (StepFun step-3.7-flash)
+// AI ANALYSIS (OpenCode Zen mimo-v2.5-free)
 // ═══════════════════════════════════════════
-const AI_URL='/api/stepfun';
-const AI_MODEL='step-3.7-flash';
+const AI_URL='/api/zen';
+const AI_MODEL='mimo-v2.5-free';
 
 function resizeForAI(src,maxDim){
   return new Promise(resolve=>{
@@ -1517,6 +1571,21 @@ function getAIPrompt(){
   return prompt;
 }
 
+function extractJSONFromText(text){
+  if(!text)return null;
+  let cleaned=text.trim();
+  cleaned=cleaned.replace(/<think>[\s\S]*?<\/think>/gi,'').trim();
+  if(cleaned.includes('```')){
+    cleaned=cleaned.replace(/```(?:json)?([\s\S]*?)```/gi,'$1').trim();
+  }
+  const firstBrace=cleaned.indexOf('{');
+  const lastBrace=cleaned.lastIndexOf('}');
+  if(firstBrace!==-1 && lastBrace>firstBrace){
+    cleaned=cleaned.substring(firstBrace,lastBrace+1);
+  }
+  return JSON.parse(cleaned);
+}
+
 async function analyzePhotoAI(dataUrl){
   const resized=await resizeForAI(dataUrl,1024);
   let resp;
@@ -1564,12 +1633,15 @@ async function analyzePhotoAI(dataUrl){
     console.log('[PhotoWhisper AI] full json:', JSON.stringify(json).substring(0,1000));
     throw new Error(I18n.t('error_empty_result'));
   }
-  // Strip markdown code blocks if present
-  let cleaned=content.trim();
-  if(cleaned.startsWith('```'))cleaned=cleaned.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'');
-  const data=JSON.parse(cleaned);
+  let data;
+  try {
+    data=extractJSONFromText(content);
+  } catch(parseErr) {
+    console.error('[PhotoWhisper AI] JSON parse error:', parseErr, content);
+    throw new Error(I18n.t('error_incomplete')+' ('+parseErr.message+')');
+  }
   // Validate required fields
-  if(!data.quote||!data.tags||!data.scene||!data.pose)throw new Error(I18n.t('error_incomplete'));
+  if(!data||!data.quote||!data.tags||!data.scene||!data.pose)throw new Error(I18n.t('error_incomplete'));
   return data;
 }
 

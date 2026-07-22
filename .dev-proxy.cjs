@@ -25,6 +25,7 @@ const ROUTES={
   '/api/agnes/':{base:'https://apihub.agnes-ai.com/',auth:'bearer',key:'agnes'},
   '/api/sensenova/':{base:'https://token.sensenova.cn/',auth:'bearer',key:'sensenova'},
   '/api/qwen/':{base:'https://token-plan.cn-beijing.maas.aliyuncs.com/',auth:'bearer',key:'qwen'},
+  '/api/zen':{base:'https://opencode.ai/zen/v1/chat/completions',auth:'direct-key',key:'sk-lEXaCfXGjqIlHH7eY31Og3pLfr7y6KduiLY6MshY7PygUWEEdWzV9FkGRr0m1WZX'},
 };
 
 const MIME={'.html':'text/html;charset=utf-8','.js':'application/javascript','.css':'text/css','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.json':'application/json'};
@@ -44,7 +45,7 @@ http.createServer(async(req,res)=>{
     if(url.pathname.startsWith(prefix)){
       const upstreamUrl=cfg.base+url.pathname.slice(prefix.length);
       const headers={'Content-Type':req.headers['content-type']||'application/json'};
-      const key=KEYS[cfg.key];
+      const key=cfg.auth==='direct-key'?cfg.key:KEYS[cfg.key];
       if(cfg.auth==='x-goog-api-key')headers['x-goog-api-key']=key;
       else headers['Authorization']=`Bearer ${key}`;
       try{
