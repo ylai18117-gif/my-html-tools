@@ -464,7 +464,7 @@ function addImages(files){if(typeof trackEvent==='function')trackEvent('ai_image
   toAdd.forEach(f=>readFile(f));
 }
 
-function compressRefImage(dataUrl, maxDim=1024, quality=0.8){
+function compressRefImage(dataUrl, maxDim=1200, quality=0.85){
   return new Promise(resolve=>{
     const img=new Image();
     img.onload=()=>{
@@ -488,10 +488,15 @@ function compressRefImage(dataUrl, maxDim=1024, quality=0.8){
 
 function readFile(file){
   const reader=new FileReader();
-  reader.onload=async e=>{
+  reader.onload=e=>{
     const dataUrl=e.target.result;
-    const comp=await compressRefImage(dataUrl,1024,0.8);
-    attachedImages.push(comp);
+    const base64=dataUrl.split(',')[1];
+    attachedImages.push({
+      dataUrl,
+      base64,
+      mimeType:file.type,
+      sizeBytes:file.size || Math.round(base64.length * 0.75)
+    });
     renderAttachPreviews();
   };
   reader.readAsDataURL(file);
@@ -567,7 +572,7 @@ function updateModeBadge(){
   const badge=document.getElementById('mode-badge');
   badge.textContent=attachedImages.length>0?`图生图 · ${attachedImages.length}张参考图`:'';
 }
-function handleSend(){
+async function handleSend(){
   const prompt=promptInput.value.trim();
   if(!prompt&&attachedImages.length===0)return;
 
@@ -578,15 +583,30 @@ function handleSend(){
     return;
   }
 
-  const mode=attachedImages.length>0?'i2i':'t2i'; // 发送时判断：有参考图=图生图
-  updateModeBadge(); // 发送时更新 badge，反映实际发送的模式
+  // Payload size check: default to untouched original, prompt user only if total size exceeds 4MB
+  let totalBytes = attachedImages.reduce((sum, img) => sum + (img.sizeBytes || Math.round(img.base64.length * 0.75)), 0);
+  const PAYLOAD_LIMIT_BYTES = 4 * 1024 * 1024; // 4MB threshold
+
+  let finalImages = [...attachedImages];
+
+  if(totalBytes > PAYLOAD_LIMIT_BYTES){
+    const totalMB = (totalBytes / (1024 * 1024)).toFixed(1);
+    const agreeCompress = confirm(`⚠️ 图片体积提示\n\n您本次上传的参考图总体积较大（约 ${totalMB} MB），若直接发送可能会超过服务端传输限制而导致失败。\n\n本次生图需要对参考图进行尺寸优化压缩。\n是否同意压缩图片后继续生图？\n\n• 点击【确定】：同意压缩图片并开始生图\n• 点击【取消】：取消发送，保持原图不变`);
+    
+    if(!agreeCompress) return;
+
+    finalImages = await Promise.all(attachedImages.map(img => compressRefImage(img.dataUrl)));
+  }
+
+  const mode=attachedImages.length>0?'i2i':'t2i';
+  updateModeBadge();
   if(typeof trackEvent==='function')trackEvent('ai_send',{model:currentModel,mode});
 
   const welcome=document.getElementById('welcome');
   if(welcome)welcome.style.display='none';
 
   const msgId='msg-'+(++msgIdCounter);
-  const images=[...attachedImages]; // snapshot
+  const images=[...finalImages];
   const model=currentModel;
 
   appendUserMsg(msgId,prompt,images);
