@@ -682,12 +682,13 @@ async function fireRequest(msgId,prompt,images,model,mode){
 // ═══ API CALLS ═══
 async function callOpenAIImage(prompt,images,model,mode,apiKey){
   if(mode==='i2i'&&images.length>0){
+    const refImgs=images.slice(0,4); // Slice max 4 reference images to avoid payload limit
     const fd=new FormData();
     fd.append('model',model);
     fd.append('prompt',prompt);
     fd.append('n','1');
     fd.append('size','1024x1024');
-    images.forEach((img,i)=>{
+    refImgs.forEach((img,i)=>{
       const blob=base64ToBlob(img.base64,img.mimeType);
       fd.append('image',blob,`image_${i}.png`);
     });
@@ -714,7 +715,8 @@ async function callOpenAIImage(prompt,images,model,mode,apiKey){
 async function callGeminiImage(prompt,images,model,mode,apiKey){
   const parts=[];
   if(mode==='i2i'&&images.length>0){
-    images.forEach(img=>{
+    const refImgs=images.slice(0,4); // Slice max 4 reference images to avoid payload limit
+    refImgs.forEach(img=>{
       parts.push({inline_data:{mime_type:img.mimeType||'image/png',data:img.base64}});
     });
   }
@@ -741,13 +743,14 @@ async function callGeminiImage(prompt,images,model,mode,apiKey){
 async function callAgnesImage(prompt,images,model,mode){
   const body={model:'agnes-image-2.1-flash',prompt,size:'1K',return_base64:true};
   if(mode==='i2i'&&images.length>0){
-    body.extra_body={image:images.map(i=>`data:${i.mimeType||'image/png'};base64,${i.base64}`),response_format:'b64_json'};
+    const refImgs=images.slice(0,6); // Agnes only supports max 6 input images
+    body.extra_body={image:refImgs.map(i=>`data:${i.mimeType||'image/png'};base64,${i.base64}`),response_format:'b64_json'};
     delete body.return_base64;
   }
   const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),25000);
   try{
-    const res=await fetch('https://apihub.agnes-ai.com/v1/images/generations',{
-      method:'POST',headers:{'Authorization':'Bearer '+getAgnesKey(),'Content-Type':'application/json'},
+    const res=await fetch('/api/agnes/v1/images/generations',{
+      method:'POST',headers:{'x-client-api-key':getAgnesKey(),'Content-Type':'application/json'},
       body:JSON.stringify(body),signal:ctrl.signal
     });
     clearTimeout(to);
@@ -761,7 +764,8 @@ async function callAgnesImage(prompt,images,model,mode){
 async function callSenseNovaImage(prompt,images,model,mode){
   const body={model:'sensenova-u1-fast',prompt,n:1,size:'2048x2048'};
   if(mode==='i2i'&&images.length>0){
-    body.image=images.map(i=>`data:${i.mimeType||'image/png'};base64,${i.base64}`);
+    const refImgs=images.slice(0,4); // Slice max 4 reference images to avoid payload limit
+    body.image=refImgs.map(i=>`data:${i.mimeType||'image/png'};base64,${i.base64}`);
   }
   const res=await fetch('/api/sensenova/v1/images/generations',{
     method:'POST',headers:{'x-client-api-key':getSenseNovaKey(),'Content-Type':'application/json'},
@@ -776,13 +780,14 @@ async function callSenseNovaImage(prompt,images,model,mode){
 async function callQwenImage(prompt,images,model,mode){
   const content=[{text:prompt}];
   if(mode==='i2i'&&images.length>0){
-    images.forEach(i=>content.unshift({image:`data:${i.mimeType||'image/png'};base64,${i.base64}`}));
+    const refImgs=images.slice(0,4); // Slice max 4 reference images for Qwen
+    refImgs.forEach(i=>content.unshift({image:`data:${i.mimeType||'image/png'};base64,${i.base64}`}));
   }
   const body={model:'wan2.7-image',input:{messages:[{role:'user',content}]},parameters:{size:'1K',n:1,watermark:false}};
   const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),30000);
   try{
-    const res=await fetch('https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis',{
-      method:'POST',headers:{'Authorization':'Bearer '+getQwenKey(),'Content-Type':'application/json'},
+    const res=await fetch('/api/qwen/v1/services/aigc/text2image/image-synthesis',{
+      method:'POST',headers:{'x-client-api-key':getQwenKey(),'Content-Type':'application/json'},
       body:JSON.stringify(body),signal:ctrl.signal
     });
     clearTimeout(to);
