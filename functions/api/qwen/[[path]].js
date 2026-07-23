@@ -1,54 +1,68 @@
-export async function onRequest(context) {
-  const { request, params } = context;
+export async function onRequestOptions() {
+  return new Response(null, { headers: corsHeaders() });
+}
 
-  if (request.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, x-client-api-key',
-        'Access-Control-Max-Age': '86400'
-      }
-    });
-  }
+export async function onRequestGet() {
+  return json({ ok: true, service: 'qwen-proxy' });
+}
 
-  const apiKey = request.headers.get('x-client-api-key') || '';
+export async function onRequestPost(context) {
+  const { request, params, env } = context;
+
+  const apiKey = env.QWEN_API_KEY || request.headers.get('x-client-api-key') || '';
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'Missing x-client-api-key header' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-    });
+    return json({ error: 'Missing x-client-api-key header' }, 400);
   }
 
-  const pathStr = Array.isArray(params.path) ? params.path.join('/') : String(params.path || '');
-  const url = `https://token-plan.cn-beijing.maas.aliyuncs.com/${pathStr}`;
+  const parts = Array.isArray(params.path) ? params.path : String(params.path || '').split('/').filter(Boolean);
+  if (!parts.length) {
+    return json({ error: 'Missing Qwen path' }, 400);
+  }
 
+  const upstreamUrl = `https://token-plan.cn-beijing.maas.aliyuncs.com/${parts.join('/')}`;
   const contentType = request.headers.get('content-type') || 'application/json';
-  const bodyText = request.method !== 'GET' && request.method !== 'HEAD' ? await request.text() : undefined;
+  const bodyText = await request.text();
 
+  let upstream;
   try {
-    const resp = await fetch(url, {
-      method: request.method,
+    upstream = await fetch(upstreamUrl, {
+      method: 'POST',
       headers: {
         'Content-Type': contentType,
         'Authorization': `Bearer ${apiKey}`,
       },
       body: bodyText,
     });
-
-    const responseText = await resp.text();
-    return new Response(responseText, {
-      status: resp.status,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': resp.headers.get('content-type') || 'application/json; charset=utf-8',
-        'Cache-Control': 'no-store',
-      },
-    });
   } catch (err) {
-    return new Response(JSON.stringify({ error: 'Qwen Proxy error', detail: err.message || String(err) }), {
-      status: 502,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-    });
+    return json({ error: 'Upstream request failed', detail: err.message || String(err) }, 502);
   }
+
+  const text = await upstream.text();
+  return new Response(text, {
+    status: upstream.status,
+    headers: {
+      ...corsHeaders(),
+      'Content-Type': upstream.headers.get('content-type') || 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+    },
+  });
+}
+
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      ...corsHeaders(),
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+    },
+  });
+}
+
+function corsHeaders() {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type,x-client-api-key',
+  };
 }
