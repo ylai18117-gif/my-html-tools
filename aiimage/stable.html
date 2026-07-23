@@ -794,7 +794,7 @@ async function callAgnesImage(prompt,images,model,mode){
     body.extra_body={image:images.map(i=>`data:${i.mimeType||'image/png'};base64,${i.base64}`),response_format:'b64_json'};
     delete body.return_base64;
   }
-  const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),25000);
+  const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),90000);
   try{
     const res=await fetch('/api/agnes/v1/images/generations',{
       method:'POST',headers:{'x-client-api-key':getAgnesKey(),'Content-Type':'application/json'},
@@ -829,7 +829,7 @@ async function callQwenImage(prompt,images,model,mode){
     images.forEach(i=>content.unshift({image:`data:${i.mimeType||'image/png'};base64,${i.base64}`}));
   }
   const body={model:'wan2.7-image',input:{messages:[{role:'user',content}]},parameters:{size:'1K',n:1,watermark:false}};
-  const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),30000);
+  const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),90000);
   try{
     const res=await fetch('/api/qwen/api/v1/services/aigc/multimodal-generation/generation',{
       method:'POST',headers:{'x-client-api-key':getQwenKey(),'Content-Type':'application/json'},
