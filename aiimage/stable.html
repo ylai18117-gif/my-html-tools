@@ -785,6 +785,7 @@ async function pollOpenAITask(taskId,baseUrl,apiKey){
 }
 
 async function callOpenAISINGLE(prompt,images,targetModel,mode,baseUrl,useKey){
+  let res;
   if(mode==='i2i'&&images.length>0){
     if(baseUrl===API_BASE_VIGAME){
       const body={
@@ -792,19 +793,13 @@ async function callOpenAISINGLE(prompt,images,targetModel,mode,baseUrl,useKey){
         prompt:prompt,
         n:1,
         size:'1024x1024',
-        image:images[0].dataUrl,
-        images:images.map(i=>i.dataUrl)
+        image:images.map(i=>i.dataUrl)
       };
-      const res=await fetch(`${baseUrl}/images/generations`,{
+      res=await fetch(`${baseUrl}/images/generations`,{
         method:'POST',
         headers:{'x-client-api-key':useKey,'Content-Type':'application/json'},
         body:JSON.stringify(body)
       });
-      if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.error?.message||`HTTP ${res.status}: 请求失败`)}
-      const data=await res.json();
-      if(data.metadata&&data.metadata.task_id)return await pollOpenAITask(data.metadata.task_id,baseUrl,useKey);
-      if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'1024×1024'}}
-      throw apiError(0,'未返回图片数据');
     }else{
       const fd=new FormData();
       fd.append('model',targetModel);
@@ -815,27 +810,23 @@ async function callOpenAISINGLE(prompt,images,targetModel,mode,baseUrl,useKey){
         const blob=base64ToBlob(img.base64,img.mimeType);
         fd.append('image',blob,`image_${i}.png`);
       });
-      const res=await fetch(`${baseUrl}/images/edits`,{
+      res=await fetch(`${baseUrl}/images/edits`,{
         method:'POST',headers:{'x-client-api-key':useKey},body:fd
       });
-      if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.error?.message||`HTTP ${res.status}: 请求失败`)}
-      const data=await res.json();
-      if(data.metadata&&data.metadata.task_id)return await pollOpenAITask(data.metadata.task_id,baseUrl,useKey);
-      if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'1024×1024'}}
-      throw apiError(0,'未返回图片数据');
     }
   }else{
-    const res=await fetch(`${baseUrl}/images/generations`,{
+    res=await fetch(`${baseUrl}/images/generations`,{
       method:'POST',
       headers:{'x-client-api-key':useKey,'Content-Type':'application/json'},
       body:JSON.stringify({model:targetModel,prompt,n:1,size:'1024x1024',quality:'high'})
     });
-    if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.error?.message||`HTTP ${res.status}: 请求失败`)}
-    const data=await res.json();
-    if(data.metadata&&data.metadata.task_id)return await pollOpenAITask(data.metadata.task_id,baseUrl,useKey);
-    if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'1024×1024'}}
-    throw apiError(0,'未返回图片数据');
   }
+
+  if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.error?.message||`HTTP ${res.status}: 请求失败`)}
+  const data=await res.json();
+  if(data.metadata&&data.metadata.task_id)return await pollOpenAITask(data.metadata.task_id,baseUrl,useKey);
+  if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'1024×1024'}}
+  throw apiError(0,'未返回图片数据');
 }
 
 async function callOpenAIImage(prompt,images,model,mode,apiKey){
