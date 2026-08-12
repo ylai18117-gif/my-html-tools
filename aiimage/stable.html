@@ -784,14 +784,9 @@ async function pollOpenAITask(taskId,baseUrl,apiKey){
   throw apiError(504,'生成超时，请稍后重试');
 }
 
-async function callOpenAIImage(prompt,images,model,mode,apiKey){
-  const isVigame=model==='gpt-image-2';
-  const baseUrl=isVigame?API_BASE_VIGAME:API_BASE;
-  const useKey=isVigame?getVigameKey():apiKey;
-  const targetModel=isVigame?'gpt-image-2-bd':model;
-
+async function callOpenAISINGLE(prompt,images,targetModel,mode,baseUrl,useKey){
   if(mode==='i2i'&&images.length>0){
-    if(isVigame){
+    if(baseUrl===API_BASE_VIGAME){
       const body={
         model:targetModel,
         prompt:prompt,
@@ -840,6 +835,28 @@ async function callOpenAIImage(prompt,images,model,mode,apiKey){
     if(data.metadata&&data.metadata.task_id)return await pollOpenAITask(data.metadata.task_id,baseUrl,useKey);
     if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'1024×1024'}}
     throw apiError(0,'未返回图片数据');
+  }
+}
+
+async function callOpenAIImage(prompt,images,model,mode,apiKey){
+  if(model==='gpt-image-2'){
+    const attempts=[
+      {model:'gpt-image-2-bd',url:API_BASE_VIGAME,key:getVigameKey()},
+      {model:'gpt-image-2-tx',url:API_BASE_VIGAME,key:getVigameKey()},
+      {model:'gpt-image-2',url:API_BASE,key:apiKey}
+    ];
+    let lastErr=null;
+    for(const att of attempts){
+      try{
+        return await callOpenAISINGLE(prompt,images,att.model,mode,att.url,att.key);
+      }catch(err){
+        console.warn(`Channel ${att.model} failed, trying fallback...`,err);
+        lastErr=err;
+      }
+    }
+    throw lastErr||apiError(500,'所有 GPT 生图渠道均异常，请稍后重试');
+  }else{
+    return await callOpenAISINGLE(prompt,images,model,mode,API_BASE,apiKey);
   }
 }
 
