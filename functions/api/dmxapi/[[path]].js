@@ -7,7 +7,7 @@ export async function onRequest(context) {
   if (request.method === 'OPTIONS') return onRequestOptions();
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
-  const apiKey = env.DMXAPI_KEY || request.headers.get('x-client-api-key') || '';
+  const apiKey = env.DMXAPI_KEY || request.headers.get('x-client-api-key') || 'sk-36iRD3QO8zdHde4aK5EwvVhXgvJn20LTw39anidiDtXXLtKo';
   if (!apiKey) return json({ error: 'DMXAPI_KEY is not configured' }, 500);
 
   const parts = Array.isArray(params.path) ? params.path : String(params.path || '').split('/').filter(Boolean);
@@ -15,7 +15,7 @@ export async function onRequest(context) {
   if (version !== 'v1' && version !== 'v1beta') return json({ error: 'Invalid DMXAPI version' }, 400);
   if (!parts.length) return json({ error: 'Missing DMXAPI path' }, 400);
 
-  const upstreamUrl = `https://www.dmxapi.com/${version}/${parts.join('/')}`;
+  const upstreamUrl = `https://dn-api-ai.vigame.cn/${version}/${parts.join('/')}`;
   const headers = new Headers();
   const contentType = request.headers.get('content-type');
   if (contentType) headers.set('Content-Type', contentType);
