@@ -645,6 +645,7 @@ async function handleSend(){
   appendLoadingMsg(msgId,model);
 
   resetComposer();
+  updateModeBadge();
 
   fireRequest(msgId,prompt,images,model,mode);
 }
