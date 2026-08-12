@@ -5,7 +5,7 @@ export async function onRequestOptions() {
 export async function onRequest(context) {
   const { request, env, params } = context;
   if (request.method === 'OPTIONS') return onRequestOptions();
-  if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+  if (request.method !== 'POST' && request.method !== 'GET') return json({ error: 'Method not allowed' }, 405);
 
   const apiKey = env.DMXAPI_KEY || request.headers.get('x-client-api-key') || 'sk-36iRD3QO8zdHde4aK5EwvVhXgvJn20LTw39anidiDtXXLtKo';
   if (!apiKey) return json({ error: 'DMXAPI_KEY is not configured' }, 500);
@@ -25,9 +25,9 @@ export async function onRequest(context) {
   let upstream;
   try {
     upstream = await fetch(upstreamUrl, {
-      method: 'POST',
+      method: request.method,
       headers,
-      body: request.body,
+      body: request.method === 'POST' ? request.body : undefined,
     });
   } catch (err) {
     return json({ error: 'Upstream request failed', detail: err.message || String(err) }, 502);
@@ -53,7 +53,7 @@ function json(data, status = 200) {
 function corsHeaders() {
   return {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST,OPTIONS',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type,x-client-api-key',
   };
 }
