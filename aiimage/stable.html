@@ -787,33 +787,18 @@ async function pollOpenAITask(taskId,baseUrl,apiKey){
 async function callOpenAISINGLE(prompt,images,targetModel,mode,baseUrl,useKey){
   let res;
   if(mode==='i2i'&&images.length>0){
-    if(baseUrl===API_BASE_VIGAME){
-      const body={
-        model:targetModel,
-        prompt:prompt,
-        n:1,
-        size:'1024x1024',
-        image:images.map(i=>i.dataUrl)
-      };
-      res=await fetch(`${baseUrl}/images/generations`,{
-        method:'POST',
-        headers:{'x-client-api-key':useKey,'Content-Type':'application/json'},
-        body:JSON.stringify(body)
-      });
-    }else{
-      const fd=new FormData();
-      fd.append('model',targetModel);
-      fd.append('prompt',prompt);
-      fd.append('n','1');
-      fd.append('size','1024x1024');
-      images.forEach((img,i)=>{
-        const blob=base64ToBlob(img.base64,img.mimeType);
-        fd.append('image',blob,`image_${i}.png`);
-      });
-      res=await fetch(`${baseUrl}/images/edits`,{
-        method:'POST',headers:{'x-client-api-key':useKey},body:fd
-      });
-    }
+    const fd=new FormData();
+    fd.append('model',targetModel);
+    fd.append('prompt',prompt);
+    fd.append('n','1');
+    fd.append('size','1024x1024');
+    images.forEach((img,i)=>{
+      const blob=base64ToBlob(img.base64,img.mimeType);
+      fd.append('image',blob,`image_${i}.png`);
+    });
+    res=await fetch(`${baseUrl}/images/edits`,{
+      method:'POST',headers:{'x-client-api-key':useKey},body:fd
+    });
   }else{
     res=await fetch(`${baseUrl}/images/generations`,{
       method:'POST',
