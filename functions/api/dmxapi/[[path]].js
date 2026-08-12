@@ -7,7 +7,8 @@ export async function onRequest(context) {
   if (request.method === 'OPTIONS') return onRequestOptions();
   if (request.method !== 'POST' && request.method !== 'GET') return json({ error: 'Method not allowed' }, 405);
 
-  const apiKey = env.DMXAPI_KEY || request.headers.get('x-client-api-key') || '';
+  const urlObj = new URL(request.url);
+  const apiKey = env.DMXAPI_KEY || request.headers.get('x-client-api-key') || request.headers.get('x-goog-api-key') || urlObj.searchParams.get('key') || 'sk-0Kn1DRGe5KIibKK8knxSHmr40AmUShbYurExGLtTOC0zxlSg';
   if (!apiKey) return json({ error: 'DMXAPI_KEY is not configured' }, 500);
 
   const parts = Array.isArray(params.path) ? params.path : String(params.path || '').split('/').filter(Boolean);
