@@ -46,7 +46,7 @@ http.createServer(async(req,res)=>{
   // Proxy routes
   for(const[prefix,cfg]of Object.entries(ROUTES)){
     if(url.pathname.startsWith(prefix)){
-      const upstreamUrl=cfg.base+url.pathname.slice(prefix.length);
+      const upstreamUrl=cfg.base+url.pathname.slice(prefix.length)+url.search;
       const headers={'Content-Type':req.headers['content-type']||'application/json'};
       const key=cfg.auth==='direct-key'?cfg.key:KEYS[cfg.key];
       if(cfg.auth==='x-goog-api-key')headers['x-goog-api-key']=key;

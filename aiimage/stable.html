@@ -109,13 +109,63 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:
 .error-card .err-tag{margin-left:auto;font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:rgba(217,79,79,.12);color:var(--error);white-space:nowrap;flex-shrink:0}
 .error-card .err-hint{font-size:11px;color:#A06060;margin-top:6px;line-height:1.5}
 
-/* RESULT META */
-.result-meta{padding:8px 14px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-lt);font-size:11px;color:var(--text3)}
+/* RESULT META & ACTIONS */
+.result-meta{padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:6px;border-top:1px solid var(--border-lt);font-size:11px;color:var(--text3);flex-wrap:wrap}
+.result-meta .meta-left{display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .result-meta .model-tag{font-weight:600;color:var(--accent)}
 .result-meta .meta-sep{color:var(--border)}
-.result-meta .download-btn{margin-left:auto;background:none;border:none;color:var(--text2);cursor:pointer;font-size:12px;font-family:var(--ff-b);display:flex;align-items:center;gap:4px;transition:color .2s}
-.result-meta .download-btn:hover{color:var(--accent)}
-.result-meta .download-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.result-meta .card-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
+.card-action-btn{background:none;border:none;color:var(--text2);cursor:pointer;font-size:11px;font-weight:500;font-family:var(--ff-b);display:flex;align-items:center;gap:3px;padding:3px 6px;border-radius:6px;transition:all .2s;white-space:nowrap}
+.card-action-btn:hover{color:var(--accent);background:var(--bg-deep)}
+.card-action-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* RATIO & EXTRA CONTROLS */
+.input-extra{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ratio-btn{min-width:64px;height:38px;padding:0 10px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text2);font-size:12px;font-weight:600;font-family:var(--ff-b);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;cursor:pointer;transition:all .2s;flex-shrink:0}
+.ratio-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ratio-btn:active{transform:scale(.96)}
+.ratio-btn small{font-size:9px;color:var(--text3);font-weight:500;margin-top:1px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* RATIO SHEET */
+.ratio-sheet{position:fixed;inset:0;z-index:180;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.36);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.ratio-sheet.show{display:flex}
+.ratio-card{width:100%;max-width:520px;background:var(--surface);border-radius:20px 20px 0 0;padding:16px 16px 24px;box-shadow:0 -10px 40px rgba(0,0,0,.15);animation:sheetUp .28s var(--ease) both}
+.ratio-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ratio-head h3{font-family:var(--ff-d);font-size:18px}
+.ratio-close{border:none;background:var(--bg-deep);width:32px;height:32px;border-radius:10px;color:var(--text2);font-size:18px;cursor:pointer}
+.ratio-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-height:65vh;overflow-y:auto;padding-right:2px}
+.ratio-option{border:1.5px solid var(--border);background:var(--bg);border-radius:12px;padding:10px 12px;text-align:left;cursor:pointer;transition:all .2s;font-family:var(--ff-b);display:flex;flex-direction:column;gap:3px}
+.ratio-option:hover{border-color:var(--accent);background:var(--surface)}
+.ratio-option .ro-title{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text)}
+.ratio-option .ro-tag{font-size:9px;font-weight:700;color:var(--accent);background:var(--accent-light);padding:1px 5px;border-radius:4px;border:1px solid rgba(193,122,86,.3)}
+.ratio-option .ro-desc{font-size:11px;color:var(--text3);line-height:1.3}
+.ratio-option.active{border-color:var(--accent);background:var(--accent-light)}
+.ratio-option.active .ro-title{color:var(--accent)}
+.ratio-option.active .ro-desc{color:rgba(193,122,86,.8)}
+
+/* MORE MENU SHEET */
+.more-sheet{position:fixed;inset:0;z-index:185;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.36);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.more-sheet.show{display:flex}
+.more-card{width:100%;max-width:480px;background:var(--surface);border-radius:20px 20px 0 0;padding:16px 16px 24px;box-shadow:0 -10px 40px rgba(0,0,0,.15);animation:sheetUp .28s var(--ease) both}
+.more-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.more-head h3{font-family:var(--ff-d);font-size:18px}
+.more-close{border:none;background:var(--bg-deep);width:32px;height:32px;border-radius:10px;color:var(--text2);font-size:18px;cursor:pointer}
+.more-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.more-item{border:1.5px solid var(--border);background:var(--bg);border-radius:14px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s;font-family:var(--ff-b)}
+.more-item:active{transform:scale(.96)}
+.more-item:hover{border-color:var(--accent);background:var(--accent-light)}
+.more-item .mi-icon{font-size:24px;margin-bottom:6px}
+.more-item .mi-label{font-size:12px;font-weight:600;color:var(--text)}
+.more-item .mi-desc{font-size:10px;color:var(--text3);margin-top:2px}
+@keyframes sheetUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@media(min-width:768px){
+  .ratio-sheet{align-items:center}.ratio-card{border-radius:20px;max-width:540px}.ratio-grid{grid-template-columns:repeat(2,1fr)}
+  .more-sheet{align-items:center}.more-card{border-radius:20px;max-width:500px}
+}
+
+/* APP TOAST */
+.app-toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(10px);background:rgba(26,26,26,.9);color:#fff;padding:8px 16px;border-radius:100px;font-size:12px;font-weight:500;font-family:var(--ff-b);pointer-events:none;opacity:0;z-index:9999;transition:all .25s var(--ease);box-shadow:0 4px 16px rgba(0,0,0,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);white-space:nowrap}
+.app-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* INPUT BAR */
 .input-bar{flex-shrink:0;padding:12px 12px calc(12px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--border-lt)}
@@ -187,9 +237,10 @@ body{font-family:var(--ff-b);background:var(--bg);color:var(--text);line-height:
 .hist-detail-prompt{margin-top:16px;font-size:14px;line-height:1.6;color:var(--text);background:var(--surface);border:1px solid var(--border-lt);border-radius:12px;padding:14px}
 .hist-detail-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .hist-detail-tags span{font-size:11px;font-weight:500;padding:3px 10px;border-radius:100px;background:var(--bg-deep);color:var(--text2)}
-.hist-detail-actions{display:flex;gap:8px;margin-top:16px}
-.hist-detail-actions button{flex:1;padding:12px;border-radius:12px;font-size:14px;font-weight:600;font-family:var(--ff-b);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
-.hist-detail-actions button svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hist-detail-actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:16px}
+.hist-detail-actions .btn-primary{grid-column:1/-1}
+.hist-detail-actions button{padding:10px 8px;border-radius:12px;font-size:13px;font-weight:600;font-family:var(--ff-b);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.hist-detail-actions button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .hist-detail-actions .btn-primary{background:var(--accent);color:#fff;border:none}
 .hist-detail-actions .btn-primary:hover{background:#b06d49}
 .hist-detail-actions .btn-secondary{background:var(--surface);color:var(--text);border:1.5px solid var(--border)}
@@ -301,6 +352,10 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 
   <div class="input-bar">
     <div class="attach-previews" id="attach-previews"></div>
+    <div class="input-extra">
+      <button class="ratio-btn" id="ratio-btn" type="button"><span>比例</span><small id="ratio-label">默认</small></button>
+      <button class="ratio-btn" id="more-btn" type="button"><span>更多</span><small>工具</small></button>
+    </div>
     <div class="input-row">
       <div class="attach-btn" id="attach-btn" title="添加参考图（可多选）">
         <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
@@ -316,6 +371,29 @@ const _ga=getAnalytics(app);window.trackEvent=(n,p)=>{try{logEvent(_ga,n,p)}catc
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox"><img id="lightbox-img" src="" alt=""></div>
+
+<!-- RATIO SHEET -->
+<div class="ratio-sheet" id="ratio-sheet">
+  <div class="ratio-card">
+    <div class="ratio-head"><h3>选择生成比例</h3><button class="ratio-close" id="ratio-close">×</button></div>
+    <div class="ratio-grid" id="ratio-grid"></div>
+  </div>
+</div>
+
+<!-- MORE MENU SHEET -->
+<div class="more-sheet" id="more-sheet">
+  <div class="more-card">
+    <div class="more-head"><h3>高级图片工具</h3><button class="more-close" id="more-close">×</button></div>
+    <div class="more-grid">
+      <button class="more-item" onclick="openEditor('matting')"><div class="mi-icon">✂️</div><div class="mi-label">AI 抠图</div><div class="mi-desc">自动去背景</div></button>
+      <button class="more-item" onclick="openEditor('inpainting')"><div class="mi-icon">🖌️</div><div class="mi-label">AI 修补</div><div class="mi-desc">修复瑕疵边缘</div></button>
+      <button class="more-item" onclick="openEditor('edit')"><div class="mi-icon">🎨</div><div class="mi-label">二次编辑</div><div class="mi-desc">橡皮擦/缩放</div></button>
+      <button class="more-item" onclick="openEditor('idphoto')"><div class="mi-icon">📷</div><div class="mi-label">证件照</div><div class="mi-desc">抠图+换背景</div></button>
+      <button class="more-item" onclick="openEditor('convert')"><div class="mi-icon">🔄</div><div class="mi-label">格式转换</div><div class="mi-desc">PNG/JPG/WebP</div></button>
+      <button class="more-item" onclick="openEditor('compress')"><div class="mi-icon">📦</div><div class="mi-label">图片压缩</div><div class="mi-desc">减小文件体积</div></button>
+    </div>
+  </div>
+</div>
 
 <!-- HISTORY PANEL -->
 <div class="hist-panel" id="hist-panel">
@@ -369,8 +447,370 @@ const MODELS=[
 function modelById(id){return MODELS.find(m=>m.id===id)||MODELS[0]}
 function modelLabel(id){return modelById(id).label}
 let currentModel='gpt-image-2.5-flare-grsai';
-let attachedImages=[]; // [{dataUrl, base64, mimeType}]
+let attachedImages=[]; // [{dataUrl, base64, mimeType, width, height, ratioVal}]
 let msgIdCounter=0;
+
+// ═══ RATIO & SIZING CONFIG ═══
+const CANDIDATE_RATIOS = [
+  { key: '9:16', val: 9/16, label: '手机壁纸', desc: '9:16', gpt: '1024x1536', gemini: '9:16', sensenova: '1152x2048', hint: '手机壁纸 · 竖屏满屏' },
+  { key: '2:3',  val: 2/3,  label: '人像写真', desc: '2:3',  gpt: '1024x1536', gemini: '9:16', sensenova: '1536x2048', hint: '人像写真 · 单反竖图' },
+  { key: '3:4',  val: 3/4,  label: '社媒竖版', desc: '3:4',  gpt: '1024x1536', gemini: '3:4',  sensenova: '1536x2048', hint: '社媒竖版 · 小红书/海报' },
+  { key: '4:5',  val: 4/5,  label: '社交海报', desc: '4:5',  gpt: '1024x1536', gemini: '3:4',  sensenova: '1536x2048', hint: '社交海报 · 4:5 画幅' },
+  { key: '1:1',  val: 1,    label: '方图',     desc: '1:1',  gpt: '1024x1024', gemini: '1:1',  sensenova: '2048x2048', hint: '正方形 · 头像/社交画幅' },
+  { key: '4:3',  val: 4/3,  label: '经典横版', desc: '4:3',  gpt: '1536x1024', gemini: '4:3',  sensenova: '2048x1536', hint: '复古横版 · 相机摄影' },
+  { key: '3:2',  val: 3/2,  label: '风光摄影', desc: '3:2',  gpt: '1536x1024', gemini: '16:9', sensenova: '2048x1536', hint: '风光摄影 · 单反横图' },
+  { key: '16:9', val: 16/9, label: '横版封面', desc: '16:9', gpt: '1536x1024', gemini: '16:9', sensenova: '2048x1152', hint: '横版封面 · 电脑壁纸' },
+  { key: '21:9', val: 21/9, label: '超宽全景', desc: '21:9', gpt: '1536x1024', gemini: '16:9', sensenova: '2048x1152', hint: '超宽全景 · 电影宽幅' }
+];
+
+const RATIO_CONFIG = {};
+for (const c of CANDIDATE_RATIOS) {
+  RATIO_CONFIG[c.key] = c;
+}
+RATIO_CONFIG['auto'] = {
+  key: 'auto',
+  label: '跟随参考图',
+  desc: '原图比例',
+  gpt: '1024x1024',
+  gemini: '1:1',
+  sensenova: '2048x2048',
+  hint: '自动跟随参考图尺寸与画幅'
+};
+
+let userSelectedRatio = 'auto'; // 'auto' (follow reference) or explicit ratio key like '16:9'
+
+function matchClosestRatio(r) {
+  if (!r || r <= 0 || isNaN(r)) return '1:1';
+  let bestKey = '1:1';
+  let minDiff = Infinity;
+  for (const c of CANDIDATE_RATIOS) {
+    const diff = Math.abs(Math.log(r / c.val));
+    if (diff < minDiff) {
+      minDiff = diff;
+      bestKey = c.key;
+    }
+  }
+  return bestKey;
+}
+
+function detectPromptRatio(text) {
+  if (!text || typeof text !== 'string') return null;
+  const str = text.trim();
+
+  // 1. Keyword prefix with explicit ratio: 尺寸9:16, 尺寸: 16:9, 比例1:1, 画幅 3:4, 分辨率 1024x1536, 宽高比16:9, 大小 9:16
+  const prefixMatch = str.match(/(?:尺寸|比例|画幅|宽高比|分辨率|大小)\s*[:：=为]?\s*([0-9]{1,4})\s*[:：xX*×_/]\s*([0-9]{1,4})/i);
+  if (prefixMatch) {
+    const w = parseInt(prefixMatch[1], 10);
+    const h = parseInt(prefixMatch[2], 10);
+    if (w > 0 && h > 0) {
+      const closest = matchClosestRatio(w / h);
+      return { ratioKey: closest, raw: prefixMatch[0], w, h };
+    }
+  }
+
+  // 2. Midjourney / Stable Diffusion style parameters: --ar 16:9, -ar 9:16, --aspect 1:1, --ar 3/2
+  const arMatch = str.match(/(?:--ar|-ar|--aspect)\s+([0-9]{1,4})\s*[:：/xX]\s*([0-9]{1,4})/i);
+  if (arMatch) {
+    const w = parseInt(arMatch[1], 10);
+    const h = parseInt(arMatch[2], 10);
+    if (w > 0 && h > 0) {
+      const closest = matchClosestRatio(w / h);
+      return { ratioKey: closest, raw: arMatch[0], w, h };
+    }
+  }
+
+  // 3. Ratio followed by keyword: 9:16尺寸, 16:9比例, 1:1画幅
+  const suffixMatch = str.match(/([0-9]{1,2})\s*[:：]\s*([0-9]{1,2})\s*(?:尺寸|比例|画幅|壁纸)/i);
+  if (suffixMatch) {
+    const w = parseInt(suffixMatch[1], 10);
+    const h = parseInt(suffixMatch[2], 10);
+    if (w > 0 && h > 0) {
+      const closest = matchClosestRatio(w / h);
+      return { ratioKey: closest, raw: suffixMatch[0], w, h };
+    }
+  }
+
+  // 4. Standalone resolution: e.g. 1024x1536, 1920x1080
+  const resMatch = str.match(/(?:[^\d]|^)([0-9]{3,4})\s*[xX*×]\s*([0-9]{3,4})(?:[^\d]|$)/);
+  if (resMatch) {
+    const w = parseInt(resMatch[1], 10);
+    const h = parseInt(resMatch[2], 10);
+    if (w > 0 && h > 0) {
+      const closest = matchClosestRatio(w / h);
+      return { ratioKey: closest, raw: `${w}x${h}`, w, h };
+    }
+  }
+
+  // 5. Standalone ratio patterns (supports unspaced Chinese e.g. 一只猫16:9)
+  const ratioMatch = str.match(/(?:[^\d]|^)(16:9|9:16|1:1|3:4|4:3|2:3|3:2|4:5|5:4|21:9|16：9|9：16|1：1|3：4|4：3|2：3|3：2|4：5|5：4|21：9)(?:[^\d]|$)/);
+  if (ratioMatch) {
+    const parts = ratioMatch[1].replace('：', ':').split(':');
+    const w = parseInt(parts[0], 10);
+    const h = parseInt(parts[1], 10);
+    if (w > 0 && h > 0) {
+      const closest = matchClosestRatio(w / h);
+      return { ratioKey: closest, raw: ratioMatch[1], w, h };
+    }
+  }
+
+  // 6. Natural language keywords
+  if (/(?:超宽屏|带鱼屏|超宽全景)/i.test(str)) {
+    return { ratioKey: '21:9', raw: '超宽屏/带鱼屏', w: 21, h: 9 };
+  }
+  if (/(?:手机壁纸|竖屏|竖版|竖图)/i.test(str)) {
+    return { ratioKey: '9:16', raw: '手机壁纸/竖屏', w: 9, h: 16 };
+  }
+  if (/(?:电脑壁纸|桌面壁纸|横屏|横版|横图|宽屏)/i.test(str)) {
+    return { ratioKey: '16:9', raw: '电脑壁纸/横屏', w: 16, h: 9 };
+  }
+  if (/(?:头像尺寸|正方形|方图|方型)/i.test(str)) {
+    return { ratioKey: '1:1', raw: '头像/方图', w: 1, h: 1 };
+  }
+  if (/(?:小红书|海报|传单)/i.test(str)) {
+    return { ratioKey: '3:4', raw: '小红书/海报', w: 3, h: 4 };
+  }
+
+  return null;
+}
+
+function resolveFinalSize(prompt, attachedImages, userSelectedRatio) {
+  // 1. Highest Priority: Explicit size instruction in prompt
+  const promptDetection = detectPromptRatio(prompt);
+  if (promptDetection) {
+    const cfg = RATIO_CONFIG[promptDetection.ratioKey] || RATIO_CONFIG['1:1'];
+    return {
+      ratioKey: promptDetection.ratioKey,
+      label: cfg.desc || promptDetection.ratioKey,
+      gptSize: cfg.gpt,
+      geminiAspect: cfg.gemini,
+      senseNovaSize: cfg.sensenova,
+      source: 'prompt',
+      detail: promptDetection.raw
+    };
+  }
+
+  // 2. Second Priority: User actively selected a specific ratio in selector
+  if (userSelectedRatio && userSelectedRatio !== 'auto') {
+    const cfg = RATIO_CONFIG[userSelectedRatio] || RATIO_CONFIG['1:1'];
+    return {
+      ratioKey: userSelectedRatio,
+      label: cfg.desc || userSelectedRatio,
+      gptSize: cfg.gpt,
+      geminiAspect: cfg.gemini,
+      senseNovaSize: cfg.sensenova,
+      source: 'selector',
+      detail: `手动选择 ${userSelectedRatio}`
+    };
+  }
+
+  // 3. Fallback:
+  // If reference images exist: Follow reference image ratio
+  if (attachedImages && attachedImages.length > 0) {
+    const ref = attachedImages[0];
+    const r = ref.ratioVal || (ref.width && ref.height ? ref.width / ref.height : 1);
+    const matchedKey = matchClosestRatio(r);
+    const cfg = RATIO_CONFIG[matchedKey] || RATIO_CONFIG['1:1'];
+    return {
+      ratioKey: matchedKey,
+      label: cfg.desc || matchedKey,
+      gptSize: cfg.gpt,
+      geminiAspect: cfg.gemini,
+      senseNovaSize: cfg.sensenova,
+      source: 'reference',
+      detail: `跟随参考图 (${cfg.desc})`
+    };
+  }
+
+  // If no reference images: Default to 1:1
+  const defaultCfg = RATIO_CONFIG['1:1'];
+  return {
+    ratioKey: '1:1',
+    label: '1:1',
+    gptSize: defaultCfg.gpt,
+    geminiAspect: defaultCfg.gemini,
+    senseNovaSize: defaultCfg.sensenova,
+    source: 'default',
+    detail: '默认 (1:1)'
+  };
+}
+
+function updateRatioButtonDisplay() {
+  const btnLabel = document.getElementById('ratio-label');
+  if (!btnLabel) return;
+
+  if (userSelectedRatio && userSelectedRatio !== 'auto') {
+    const cfg = RATIO_CONFIG[userSelectedRatio];
+    btnLabel.textContent = cfg ? cfg.desc : userSelectedRatio;
+  } else {
+    if (attachedImages.length > 0) {
+      const ref = attachedImages[0];
+      const r = ref.ratioVal || (ref.width && ref.height ? ref.width / ref.height : 1);
+      const matchedKey = matchClosestRatio(r);
+      const cfg = RATIO_CONFIG[matchedKey];
+      btnLabel.textContent = `跟随(${cfg ? cfg.desc : matchedKey})`;
+    } else {
+      btnLabel.textContent = '默认';
+    }
+  }
+}
+
+function renderRatioOptions() {
+  const grid = document.getElementById('ratio-grid');
+  if (!grid) return;
+
+  let refDesc = '';
+  if (attachedImages.length > 0) {
+    const ref = attachedImages[0];
+    const r = ref.ratioVal || (ref.width && ref.height ? ref.width / ref.height : 1);
+    const matchedKey = matchClosestRatio(r);
+    const cfg = RATIO_CONFIG[matchedKey];
+    refDesc = `已匹配 ${cfg ? cfg.desc : matchedKey} · 自动适配模型`;
+  } else {
+    refDesc = '添加参考图后生效 · 无参考图默认1:1';
+  }
+
+  const isAutoActive = userSelectedRatio === 'auto' || !userSelectedRatio;
+  let html = `
+    <button class="ratio-option ${isAutoActive ? 'active' : ''}" data-size="auto">
+      <div class="ro-title"><b>跟随参考图</b><span class="ro-tag">默认推荐</span></div>
+      <span class="ro-desc">${refDesc}</span>
+    </button>
+  `;
+
+  const fixedKeys = ['1:1', '9:16', '16:9', '3:4', '4:3', '2:3', '3:2'];
+  fixedKeys.forEach(k => {
+    const cfg = RATIO_CONFIG[k];
+    const isActive = !isAutoActive && userSelectedRatio === k;
+    html += `
+      <button class="ratio-option ${isActive ? 'active' : ''}" data-size="${k}">
+        <div class="ro-title"><b>${cfg.label}</b><span>${cfg.desc}</span></div>
+        <span class="ro-desc">${cfg.hint || ''}</span>
+      </button>
+    `;
+  });
+
+  grid.innerHTML = html;
+}
+
+// ═══ TOAST ═══
+function showToast(msg, duration = 2200) {
+  let t = document.getElementById('app-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'app-toast';
+    t.className = 'app-toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.classList.add('show');
+  if (t._timeout) clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ═══ EDITOR & REFERENCE HELPERS ═══
+function openEditorDirect(imageUrl) {
+  try {
+    sessionStorage.setItem('editor_image', imageUrl);
+  } catch (e) {
+    console.warn('sessionStorage set failed', e);
+  }
+  if (!imageUrl.startsWith('data:') && (imageUrl.startsWith('http') || imageUrl.length < 2000)) {
+    window.location.href = './editor.html?image=' + encodeURIComponent(imageUrl);
+  } else {
+    window.location.href = './editor.html';
+  }
+}
+
+function openEditor(tool) {
+  const img = attachedImages[0];
+  if (img) {
+    openEditorDirect(img.dataUrl);
+  } else {
+    window.location.href = './editor.html' + (tool ? '?tool=' + encodeURIComponent(tool) : '');
+  }
+}
+
+function urlToDataUrl(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      } catch (err) {
+        fetch(url)
+          .then(r => r.blob())
+          .then(b => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(b);
+          })
+          .catch(reject);
+      }
+    };
+    img.onerror = () => {
+      fetch(url)
+        .then(r => r.blob())
+        .then(b => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(b);
+        })
+        .catch(reject);
+    };
+    img.src = url;
+  });
+}
+
+async function addCardAsRef(imageUrl) {
+  const m = modelById(currentModel);
+  const maxAllowed = m.maxImages || 16;
+  if (attachedImages.length >= maxAllowed) {
+    alert(`当前模型【${m.label}】最多只支持 ${maxAllowed} 张参考图`);
+    return;
+  }
+
+  try {
+    let dataUrl = imageUrl;
+    if (!imageUrl.startsWith('data:')) {
+      dataUrl = await urlToDataUrl(imageUrl);
+    }
+    const proc = await ensureMinDimensions(dataUrl, 240);
+    attachedImages.push({
+      dataUrl: proc.dataUrl,
+      base64: proc.base64,
+      mimeType: 'image/png',
+      sizeBytes: Math.round(proc.base64.length * 0.75),
+      width: proc.width,
+      height: proc.height,
+      ratioVal: proc.ratioVal
+    });
+    userSelectedRatio = 'auto';
+    renderAttachPreviews();
+    updateModeBadge();
+    updateRatioButtonDisplay();
+
+    const matched = matchClosestRatio(proc.ratioVal);
+    const cfg = RATIO_CONFIG[matched];
+    showToast(`已添加为参考图 · 自动匹配画幅 (${cfg ? cfg.desc : matched})`);
+
+    const inp = document.getElementById('prompt-input');
+    if (inp) {
+      inp.focus();
+      inp.scrollIntoView({ behavior: 'smooth' });
+    }
+  } catch (e) {
+    console.error('Failed to add reference image:', e);
+    showToast('添加参考图失败');
+  }
+}
 
 // ═══ AUTH ═══
 const authOverlay=document.getElementById('auth-overlay');
@@ -471,7 +911,7 @@ function ensureMinDimensions(dataUrl, minDim=240){
     img.onload=()=>{
       let w=img.width,h=img.height;
       if(w>=minDim&&h>=minDim){
-        resolve({dataUrl,base64:dataUrl.split(',')[1],mimeType:'image/png'});
+        resolve({dataUrl,base64:dataUrl.split(',')[1],mimeType:'image/png',width:w,height:h,ratioVal:w/h});
         return;
       }
       const scale=Math.max(minDim/w,minDim/h);
@@ -484,10 +924,10 @@ function ensureMinDimensions(dataUrl, minDim=240){
       ctx.imageSmoothingQuality='high';
       ctx.drawImage(img,0,0,w,h);
       const comp=c.toDataURL('image/png');
-      resolve({dataUrl:comp,base64:comp.split(',')[1],mimeType:'image/png'});
+      resolve({dataUrl:comp,base64:comp.split(',')[1],mimeType:'image/png',width:w,height:h,ratioVal:w/h});
     };
     img.onerror=()=>{
-      resolve({dataUrl,base64:dataUrl.split(',')[1],mimeType:'image/png'});
+      resolve({dataUrl,base64:dataUrl.split(',')[1],mimeType:'image/png',width:1024,height:1024,ratioVal:1});
     };
     img.src=dataUrl;
   });
@@ -506,10 +946,10 @@ function compressRefImage(dataUrl, maxDim=1200, quality=0.85){
       c.width=w;c.height=h;
       c.getContext('2d').drawImage(img,0,0,w,h);
       const comp=c.toDataURL('image/jpeg',quality);
-      resolve({dataUrl:comp,base64:comp.split(',')[1],mimeType:'image/jpeg'});
+      resolve({dataUrl:comp,base64:comp.split(',')[1],mimeType:'image/jpeg',width:w,height:h,ratioVal:w/h});
     };
     img.onerror=()=>{
-      resolve({dataUrl,base64:dataUrl.split(',')[1],mimeType:'image/png'});
+      resolve({dataUrl,base64:dataUrl.split(',')[1],mimeType:'image/png',width:1024,height:1024,ratioVal:1});
     };
     img.src=dataUrl;
   });
@@ -524,9 +964,15 @@ function readFile(file){
       dataUrl: proc.dataUrl,
       base64: proc.base64,
       mimeType: file.type || proc.mimeType,
-      sizeBytes: file.size || Math.round(proc.base64.length * 0.75)
+      sizeBytes: file.size || Math.round(proc.base64.length * 0.75),
+      width: proc.width,
+      height: proc.height,
+      ratioVal: proc.ratioVal
     });
+    userSelectedRatio = 'auto';
     renderAttachPreviews();
+    updateModeBadge();
+    updateRatioButtonDisplay();
   };
   reader.readAsDataURL(file);
 }
@@ -562,6 +1008,8 @@ attachPreviews.addEventListener('click',e=>{
   const idx=parseInt(rm.dataset.idx);
   attachedImages.splice(idx,1);
   renderAttachPreviews();
+  updateModeBadge();
+  updateRatioButtonDisplay();
 });
 
 // Paste support
@@ -588,6 +1036,8 @@ function resetComposer(){
   promptInput.style.height='auto';
   attachedImages=[];
   renderAttachPreviews();
+  updateModeBadge();
+  updateRatioButtonDisplay();
 }
 function restoreComposer(prompt,images){
   promptInput.value=prompt||'';
@@ -595,6 +1045,8 @@ function restoreComposer(prompt,images){
   promptInput.style.height=Math.min(promptInput.scrollHeight,120)+'px';
   attachedImages=(images||[]).map(i=>({...i}));
   renderAttachPreviews();
+  updateModeBadge();
+  updateRatioButtonDisplay();
   promptInput.focus();
 }
 function updateModeBadge(){
@@ -639,16 +1091,22 @@ async function handleSend(){
   const images=[...finalImages];
   const model=currentModel;
 
-  appendUserMsg(msgId,prompt,images);
-  appendLoadingMsg(msgId,model);
+  // Resolve final size using 3-tier priority rules: Prompt > Selector > Reference / 1:1
+  const finalSize = resolveFinalSize(prompt, images, userSelectedRatio);
+  if(finalSize.source === 'prompt'){
+    showToast(`✨ 智能识别尺寸指令：${finalSize.label}`);
+  }
+
+  appendUserMsg(msgId,prompt,images,finalSize);
+  appendLoadingMsg(msgId,model,finalSize);
 
   resetComposer();
   updateModeBadge();
 
-  fireRequest(msgId,prompt,images,model,mode);
+  fireRequest(msgId,prompt,images,model,mode,finalSize);
 }
 
-function appendUserMsg(msgId,text,images){
+function appendUserMsg(msgId,text,images,finalSize){
   const div=document.createElement('div');
   div.className='msg msg-user';div.id=msgId+'-user';
   let html='';
@@ -656,12 +1114,16 @@ function appendUserMsg(msgId,text,images){
     html+='<div class="ref-thumbs">'+images.map(i=>`<img src="${i.dataUrl}" alt="">`).join('')+'</div>';
   }
   if(text)html+=`<div class="bubble">${escapeHtml(text)}</div>`;
+  if(finalSize&&finalSize.label){
+    html+=`<div style="font-size:10px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:4px"><span>📐 画幅：${finalSize.label}</span>${finalSize.source==='prompt'?'<span style="color:var(--accent);font-weight:600">(提示词指定)</span>':(finalSize.source==='reference'?'<span style="color:var(--accent);font-weight:600">(跟随参考图)</span>':'')}</div>`;
+  }
   div.innerHTML=html;chatArea.appendChild(div);scrollBottom();
 }
 
-function loadingHTML(msgId,model){
+function loadingHTML(msgId,model,finalSize){
   const mn=modelLabel(model);
-  return `<div class="loading-card"><div class="loading-spinner"></div><div class="loading-text">${mn} 正在生成...</div><div class="loading-timer" id="${msgId}-timer">0s</div></div>`;
+  const sizeTag=finalSize?.label?` · ${finalSize.label}`:'';
+  return `<div class="loading-card"><div class="loading-spinner"></div><div class="loading-text">${mn}${sizeTag} 正在生成...</div><div class="loading-timer" id="${msgId}-timer">0s</div></div>`;
 }
 function startLoadingTimer(el,msgId){
   if(el._timerId)clearInterval(el._timerId);
@@ -673,25 +1135,26 @@ function startLoadingTimer(el,msgId){
   },1000);
   el._timerId=tid;
 }
-function appendLoadingMsg(msgId,model){
+function appendLoadingMsg(msgId,model,finalSize){
   const div=document.createElement('div');
   div.className='msg msg-bot';div.id=msgId+'-bot';
-  div.innerHTML=loadingHTML(msgId,model);
+  div.innerHTML=loadingHTML(msgId,model,finalSize);
   chatArea.appendChild(div);scrollBottom();
   startLoadingTimer(div,msgId);
 }
-function resetBotToLoading(msgId,model){
+function resetBotToLoading(msgId,model,finalSize){
   const botEl=document.getElementById(msgId+'-bot');if(!botEl)return;
-  botEl.innerHTML=loadingHTML(msgId,model);
+  botEl.innerHTML=loadingHTML(msgId,model,finalSize);
   startLoadingTimer(botEl,msgId);
   scrollBottom();
 }
 
-function replaceWithResult(msgId,imageUrl,model,size,elapsed){
+function replaceWithResult(msgId,imageUrl,model,size,elapsed,finalSize){
   const botEl=document.getElementById(msgId+'-bot');if(!botEl)return;
   if(botEl._timerId)clearInterval(botEl._timerId);
   const mn=modelLabel(model);
-  botEl.innerHTML=`<div class="result-card"><img src="${imageUrl}" alt="生成结果" onclick="openLightbox(this.src)"><div class="result-meta"><span class="model-tag">${mn}</span><span class="meta-sep">·</span><span>${size}</span><span class="meta-sep">·</span><span>${elapsed}s</span><button class="download-btn" onclick="downloadImage('${imageUrl}','${msgId}')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>保存</button></div></div>`;
+  const displayRatio = finalSize?.label || size;
+  botEl.innerHTML=`<div class="result-card"><img src="${imageUrl}" alt="生成结果" onclick="openLightbox(this.src)"><div class="result-meta"><div class="meta-left"><span class="model-tag">${mn}</span><span class="meta-sep">·</span><span>${displayRatio}</span><span class="meta-sep">·</span><span>${elapsed}s</span></div><div class="card-actions"><button class="card-action-btn edit-btn" onclick="addCardAsRef('${imageUrl}')" title="将此图作为参考图放入输入框继续创作"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>编辑</button><button class="card-action-btn canvas-btn" onclick="openEditorDirect('${imageUrl}')" title="在画板中抠图与涂鸦"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>修图</button><button class="card-action-btn download-btn" onclick="downloadImage('${imageUrl}','${msgId}')" title="保存图片到本地"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>保存</button></div></div></div>`;
   scrollBottom();
 
   // Save to history
@@ -704,7 +1167,8 @@ function replaceWithResult(msgId,imageUrl,model,size,elapsed){
     mode:params?params.mode:'t2i',
     imageUrl,
     refImageCount:params&&params.images?params.images.length:0,
-    size,
+    size:displayRatio,
+    ratioKey:finalSize?.ratioKey||'1:1',
     duration:elapsed,
     timestamp:Date.now()
   });
@@ -739,21 +1203,21 @@ function replaceWithError(msgId,err,model){
 
 const requestParams={};
 
-async function fireRequest(msgId,prompt,images,model,mode){
+async function fireRequest(msgId,prompt,images,model,mode,finalSize){
   const start=Date.now();
   let ok=false;
-  requestParams[msgId]={prompt,images,model,mode};
+  requestParams[msgId]={prompt,images,model,mode,finalSize};
   try{
     const apiKey=getApiKey();
     const cfg=modelById(model);
     let result;
-    if(cfg.api==='gemini')result=await callGeminiImage(prompt,images,model,mode,apiKey);
-    else if(cfg.api==='agnes')result=await callAgnesImage(prompt,images,model,mode);
-    else if(cfg.api==='sensenova')result=await callSenseNovaImage(prompt,images,model,mode);
-    else if(cfg.api==='vigame')result=await callVigameImage(prompt,images,model,mode);
-    else result=await callOpenAIImage(prompt,images,model,mode,apiKey);
+    if(cfg.api==='gemini')result=await callGeminiImage(prompt,images,model,mode,apiKey,finalSize);
+    else if(cfg.api==='agnes')result=await callAgnesImage(prompt,images,model,mode,finalSize);
+    else if(cfg.api==='sensenova')result=await callSenseNovaImage(prompt,images,model,mode,finalSize);
+    else if(cfg.api==='vigame')result=await callVigameImage(prompt,images,model,mode,finalSize);
+    else result=await callOpenAIImage(prompt,images,model,mode,apiKey,finalSize);
     const elapsed=Math.floor((Date.now()-start)/1000);
-    replaceWithResult(msgId,result.url,model,result.size,elapsed);
+    replaceWithResult(msgId,result.url,model,result.size||finalSize?.label,elapsed,finalSize);
     ok=true;
   }catch(err){
     replaceWithError(msgId,err,model);
@@ -761,7 +1225,7 @@ async function fireRequest(msgId,prompt,images,model,mode){
 }
 
 // ═══ API CALLS ═══
-async function pollOpenAITask(taskId,baseUrl,apiKey){
+async function pollOpenAITask(taskId,baseUrl,apiKey,sizeStr='1024x1024'){
   const start=Date.now();
   while(Date.now()-start<120000){
     await new Promise(r=>setTimeout(r,2500));
@@ -781,21 +1245,21 @@ async function pollOpenAITask(taskId,baseUrl,apiKey){
       if(meta.status==='failed')throw apiError(500,meta.error||'任务处理失败');
       if(data.data&&data.data[0]&&(data.data[0].url||data.data[0].b64_json)){
         const d=data.data[0];
-        return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'1024×1024'};
+        return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:sizeStr};
       }
     }catch(e){if(e.status)throw e}
   }
   throw apiError(504,'生成超时，请稍后重试');
 }
 
-async function callOpenAISINGLE(prompt,images,targetModel,mode,baseUrl,useKey){
+async function callOpenAISINGLE(prompt,images,targetModel,mode,baseUrl,useKey,sizeStr='1024x1024'){
   let res;
   if(mode==='i2i'&&images.length>0){
     const fd=new FormData();
     fd.append('model',targetModel);
     fd.append('prompt',prompt);
     fd.append('n','1');
-    fd.append('size','1024x1024');
+    fd.append('size',sizeStr);
     images.forEach((img,i)=>{
       const blob=base64ToBlob(img.base64,img.mimeType);
       fd.append('image',blob,`image_${i}.png`);
@@ -807,7 +1271,7 @@ async function callOpenAISINGLE(prompt,images,targetModel,mode,baseUrl,useKey){
     res=await fetch(`${baseUrl}/images/generations`,{
       method:'POST',
       headers:{'x-client-api-key':useKey,'Content-Type':'application/json'},
-      body:JSON.stringify({model:targetModel,prompt,n:1,size:'1024x1024'})
+      body:JSON.stringify({model:targetModel,prompt,n:1,size:sizeStr})
     });
   }
 
@@ -815,17 +1279,18 @@ async function callOpenAISINGLE(prompt,images,targetModel,mode,baseUrl,useKey){
   const data=await res.json();
   if(data.data&&data.data[0]&&(data.data[0].url||data.data[0].b64_json)){
     const d=data.data[0];
-    return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'1024×1024'};
+    return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:sizeStr};
   }
-  if(data.metadata&&data.metadata.task_id)return await pollOpenAITask(data.metadata.task_id,baseUrl,useKey);
+  if(data.metadata&&data.metadata.task_id)return await pollOpenAITask(data.metadata.task_id,baseUrl,useKey,sizeStr);
   throw apiError(0,'未返回图片数据');
 }
 
-async function callVigameImage(prompt,images,model,mode){
+async function callVigameImage(prompt,images,model,mode,finalSize){
+  const sizeStr=finalSize?.gptSize||'1024x1024';
   const maxRetries=2;
   for(let attempt=0;attempt<=maxRetries;attempt++){
     try{
-      return await callOpenAISINGLE(prompt,images,model,mode,API_BASE_VIGAME,getVigameKey());
+      return await callOpenAISINGLE(prompt,images,model,mode,API_BASE_VIGAME,getVigameKey(),sizeStr);
     }catch(err){
       const isOverload=String(err.message||'').includes('cpu overloaded')||err.status===429;
       if(isOverload&&attempt<maxRetries){
@@ -837,7 +1302,8 @@ async function callVigameImage(prompt,images,model,mode){
   }
 }
 
-async function callOpenAIImage(prompt,images,model,mode,apiKey){
+async function callOpenAIImage(prompt,images,model,mode,apiKey,finalSize){
+  const sizeStr=finalSize?.gptSize||'1024x1024';
   if(model==='gpt-image-2'){
     const attempts=[
       {model:'gpt-image-2-bd',url:API_BASE_VIGAME,key:getVigameKey()},
@@ -847,7 +1313,7 @@ async function callOpenAIImage(prompt,images,model,mode,apiKey){
     let lastErr=null;
     for(const att of attempts){
       try{
-        return await callOpenAISINGLE(prompt,images,att.model,mode,att.url,att.key);
+        return await callOpenAISINGLE(prompt,images,att.model,mode,att.url,att.key,sizeStr);
       }catch(err){
         console.warn(`Channel ${att.model} failed, trying fallback...`,err);
         lastErr=err;
@@ -855,11 +1321,11 @@ async function callOpenAIImage(prompt,images,model,mode,apiKey){
     }
     throw lastErr||apiError(500,'所有 GPT 生图渠道均异常，请稍后重试');
   }else{
-    return await callOpenAISINGLE(prompt,images,model,mode,API_BASE,apiKey);
+    return await callOpenAISINGLE(prompt,images,model,mode,API_BASE,apiKey,sizeStr);
   }
 }
 
-async function callGeminiImage(prompt,images,model,mode,apiKey){
+async function callGeminiImage(prompt,images,model,mode,apiKey,finalSize){
   const parts=[];
   if(mode==='i2i'&&images.length>0){
     images.forEach(img=>{
@@ -867,9 +1333,10 @@ async function callGeminiImage(prompt,images,model,mode,apiKey){
     });
   }
   parts.push({text:prompt});
+  const aspect=finalSize?.geminiAspect||'1:1';
   const body={
     contents:[{role:'user',parts}],
-    generationConfig:{responseModalities:['IMAGE','TEXT'],imageConfig:{aspectRatio:'1:1',imageSize:'2K'}}
+    generationConfig:{responseModalities:['IMAGE','TEXT'],imageConfig:{aspectRatio:aspect,imageSize:'2K'}}
   };
   const res=await fetch(`${API_BASE_BETA}/models/${model}:generateContent`,{
     method:'POST',
@@ -880,13 +1347,13 @@ async function callGeminiImage(prompt,images,model,mode,apiKey){
   const data=await res.json();
   if(data.candidates&&data.candidates[0]){
     const rp=data.candidates[0].content.parts;
-    for(const p of rp){if(p.inlineData&&p.inlineData.data){const mime=p.inlineData.mimeType||'image/png';return{url:`data:${mime};base64,${p.inlineData.data}`,size:p.inlineData.imageSize||'2K'}}}
+    for(const p of rp){if(p.inlineData&&p.inlineData.data){const mime=p.inlineData.mimeType||'image/png';return{url:`data:${mime};base64,${p.inlineData.data}`,size:aspect}}}
     for(const p of rp){if(p.text)throw apiError(400,p.text.substring(0,200))}
   }
   throw apiError(0,'未返回图片数据，请检查提示词后重试');
 }
 
-async function callAgnesImage(prompt,images,model,mode){
+async function callAgnesImage(prompt,images,model,mode,finalSize){
   const targetModel=model||'agnes-image-2.5-flash';
   const body={model:targetModel,prompt,size:'1K',return_base64:true};
   if(mode==='i2i'&&images.length>0){
@@ -902,14 +1369,15 @@ async function callAgnesImage(prompt,images,model,mode){
     clearTimeout(to);
     if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.error?.message||`HTTP ${res.status}: 请求失败`)}
     const data=await res.json();
-    if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'1K'}}
+    if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:finalSize?.label||'1K'}}
     throw apiError(0,'未返回图片数据');
   }catch(e){clearTimeout(to);throw e.name==='AbortError'?apiError(0,'上游超时，请重试或切换模型'):e}
 }
 
-async function callSenseNovaImage(prompt,images,model,mode){
+async function callSenseNovaImage(prompt,images,model,mode,finalSize){
   const targetModel=model||'sensenova-u1.5-lite';
-  const body={model:targetModel,prompt,n:1,size:'2048x2048'};
+  const targetSize=finalSize?.senseNovaSize||'2048x2048';
+  const body={model:targetModel,prompt,n:1,size:targetSize};
   if(mode==='i2i'&&images.length>0){
     body.image=images.map(i=>`data:${i.mimeType||'image/png'};base64,${i.base64}`);
   }
@@ -919,7 +1387,7 @@ async function callSenseNovaImage(prompt,images,model,mode){
   });
   if(!res.ok){const err=await res.json().catch(()=>({}));throw apiError(res.status,err.error?.message||`HTTP ${res.status}: 请求失败`)}
   const data=await res.json();
-  if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:'2048×2048'}}
+  if(data.data&&data.data[0]){const d=data.data[0];return{url:d.b64_json?`data:image/png;base64,${d.b64_json}`:d.url,size:targetSize}}
   throw apiError(0,'未返回图片数据');
 }
 
@@ -927,8 +1395,8 @@ async function callSenseNovaImage(prompt,images,model,mode){
 function retryRequest(msgId){
   const params=requestParams[msgId];
   if(params){
-    resetBotToLoading(msgId,params.model);
-    fireRequest(msgId,params.prompt,params.images,params.model,params.mode);
+    resetBotToLoading(msgId,params.model,params.finalSize);
+    fireRequest(msgId,params.prompt,params.images,params.model,params.mode,params.finalSize);
     return;
   }
   const userEl=document.getElementById(msgId+'-user');if(!userEl)return;
@@ -1160,18 +1628,48 @@ async function openHistDetail(id){
         <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
         重新生成
       </button>
+      <button class="btn-secondary" onclick="useHistAsRef('${id}')">
+        <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        加入参考图
+      </button>
+      <button class="btn-secondary" onclick="openHistInEditor('${id}')">
+        <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        图片编辑
+      </button>
       <button class="btn-secondary" onclick="downloadHistImage('${id}')">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        下载
+        下载图片
       </button>
       <button class="btn-danger" onclick="deleteFromDetail('${h.id}')">
         <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-        删除
+        删除记录
       </button>
     </div>
   `;
   histDetail.classList.add('show');
 }
+
+window.useHistAsRef=async function(id){
+  const h=loadHistory().find(x=>x.id===id);
+  if(!h)return;
+  const imageKey=getHistImageKey(h);
+  const original=imageKey?await getOriginalImage(imageKey):null;
+  const imgUrl=original||h.thumbnail||h.imageUrl;
+  if(!imgUrl)return;
+  histDetail.classList.remove('show');
+  histPanel.classList.remove('show');
+  await addCardAsRef(imgUrl);
+};
+
+window.openHistInEditor=async function(id){
+  const h=loadHistory().find(x=>x.id===id);
+  if(!h)return;
+  const imageKey=getHistImageKey(h);
+  const original=imageKey?await getOriginalImage(imageKey):null;
+  const imgUrl=original||h.thumbnail||h.imageUrl;
+  if(!imgUrl)return;
+  openEditorDirect(imgUrl);
+};
 
 window.downloadHistImage=async function(id){
   const h=loadHistory().find(x=>x.id===id);
@@ -1192,6 +1690,10 @@ window.reusePrompt=function(id){if(typeof trackEvent==='function')trackEvent('ai
     currentModel=h.model;
     updatePlaceholder();
   }
+  if(h.ratioKey&&RATIO_CONFIG[h.ratioKey]){
+    userSelectedRatio=h.ratioKey;
+  }
+  updateRatioButtonDisplay();
   promptInput.focus();
 };
 
@@ -1202,7 +1704,45 @@ window.deleteFromDetail=function(id){
   renderHistGrid();
 };
 
-// Init badge
+// ═══ RATIO & MORE SHEET LISTENERS ═══
+const ratioBtn=document.getElementById('ratio-btn');
+const ratioLabel=document.getElementById('ratio-label');
+const ratioSheet=document.getElementById('ratio-sheet');
+const ratioGrid=document.getElementById('ratio-grid');
+const ratioClose=document.getElementById('ratio-close');
+
+const moreBtn=document.getElementById('more-btn');
+const moreSheet=document.getElementById('more-sheet');
+const moreClose=document.getElementById('more-close');
+
+function openRatioSheet(){renderRatioOptions();ratioSheet.classList.add('show')}
+function closeRatioSheet(){ratioSheet.classList.remove('show')}
+function openMoreSheet(){moreSheet.classList.add('show')}
+function closeMoreSheet(){moreSheet.classList.remove('show')}
+
+ratioBtn.addEventListener('click',openRatioSheet);
+ratioClose.addEventListener('click',closeRatioSheet);
+ratioSheet.addEventListener('click',e=>{if(e.target===ratioSheet)closeRatioSheet()});
+
+moreBtn.addEventListener('click',openMoreSheet);
+moreClose.addEventListener('click',closeMoreSheet);
+moreSheet.addEventListener('click',e=>{if(e.target===moreSheet)closeMoreSheet()});
+
+ratioGrid.addEventListener('click',e=>{
+  const opt=e.target.closest('.ratio-option');
+  if(!opt)return;
+  const sizeKey=opt.dataset.size;
+  userSelectedRatio=sizeKey;
+  updateRatioButtonDisplay();
+  renderRatioOptions();
+  closeRatioSheet();
+  if(typeof trackEvent==='function')trackEvent('ai_ratio_select',{ratio:userSelectedRatio});
+  const cfg=RATIO_CONFIG[sizeKey];
+  showToast(sizeKey==='auto'?'已切换为：跟随参考图比例':`已选择比例：${cfg.desc}`);
+});
+
+// Init UI
+updateRatioButtonDisplay();
 updateHistBadge();
 </script>
 </body>
