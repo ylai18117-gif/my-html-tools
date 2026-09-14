@@ -9,12 +9,14 @@ function decryptXor(b64,key){const b=Buffer.from(b64,'base64');let r='';for(let 
 const ENC_DMX='EjkaXQBcUBZlKi4HKhteDwB5WTlZFRh6DCADXQpfNAFfDxJHExdPKgdGNR10XTFKDQFQ';
 const ENC_AGNES='EjkaKnJ7FDFVABx/Dz5bGAp7EgNVOCprOxl6G3xXKhtPPB5dJzNBNQhIWTlSLyp/BApU';
 const ENC_SENSENOVA='EjkaVQ8HKwVlVSlaEhhlFAVGCmFnIX5kJjBmFApgNSRZXgQ=';
+const ENC_VIGAME='EjkaXn1bMxYEPAQKGzZ/CS4GABkCKDxENzpvCj14D2AHIR9FUmtWAyJWCBZDNRN+FRlY';
 const ENC_QWEN='EjkaHjsfKXxyPQ9rJXxOXS8LTx9yNAh7MBEPICpzVyBCBzNZNDdED31tF2dGKhsDNBt7CDtENTFdKD5QCDtTAQhkKiJAJCNzLSJaB3t4BBMPHRtZVjFEOhFzJBsaGQADKjVYKHpECBcFLBJtEGpyLxpTBw==';
 
 const KEYS={
   dmx:decryptXor(ENC_DMX,XOR_KEY),
   agnes:decryptXor(ENC_AGNES,XOR_KEY),
   sensenova:decryptXor(ENC_SENSENOVA,XOR_KEY),
+  vigame:decryptXor(ENC_VIGAME,XOR_KEY),
   qwen:decryptXor(ENC_QWEN,XOR_KEY)
 };
 
@@ -24,6 +26,7 @@ const ROUTES={
   '/api/dmxapi/v1/':{base:'https://www.dmxapi.com/v1/',auth:'bearer',key:'dmx'},
   '/api/agnes/':{base:'https://apihub.agnes-ai.com/',auth:'bearer',key:'agnes'},
   '/api/sensenova/':{base:'https://token.sensenova.cn/',auth:'bearer',key:'sensenova'},
+  '/api/vigame/':{base:'https://dn-api-ai.vigame.cn/',auth:'bearer',key:'vigame'},
   '/api/qwen/':{base:'https://token-plan.cn-beijing.maas.aliyuncs.com/',auth:'bearer',key:'qwen'},
   '/api/zen':{base:'https://opencode.ai/zen/v1/chat/completions',auth:'direct-key',key:'sk-lEXaCfXGjqIlHH7eY31Og3pLfr7y6KduiLY6MshY7PygUWEEdWzV9FkGRr0m1WZX'},
 };
