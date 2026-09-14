@@ -345,7 +345,6 @@ const ENC_B64='EjkaXQBcUBZlKi4HKhteDwB5WTlZFRh6DCADXQpfNAFfDxJHExdPKgdGNR10XTFKD
 const ENC_VIGAME='EjkaXn1bMxYEPAQKGzZ/CS4GABkCKDxENzpvCj14D2AHIR9FUmtWAyJWCBZDNRN+FRlY';
 const ENC_AGNES='EjkaKnJ7FDFVABx/Dz5bGAp7EgNVOCprOxl6G3xXKhtPPB5dJzNBNQhIWTlSLyp/BApU';
 const ENC_SENSENOVA='EjkaVQ8HKwVlVSlaEhhlFAVGCmFnIX5kJjBmFApgNSRZXgQ=';
-const ENC_QWEN='EjkaHjsfKXxyPQ9rJXxOXS8LTx9yNAh7MBEPICpzVyBCBzNZNDdED31tF2dGKhsDNBt7CDtENTFdKD5QCDtTAQhkKiJAJCNzLSJaB3t4BBMPHRtZVjFEOhFzJBsaGQADKjVYKHpECBcFLBJtEGpyLxpTBw==';
 const PW_HASH=-551981607;
 const PW_XOR_KEY='pW9x';
 const PW_XOR_B64='MSQYTkljAEBJYA9I';
@@ -357,7 +356,6 @@ function getApiKey(){return decryptXor(ENC_B64,ENC_KEY_XOR)}
 function getVigameKey(){return decryptXor(ENC_VIGAME,ENC_KEY_XOR)}
 function getAgnesKey(){return decryptXor(ENC_AGNES,ENC_KEY_XOR)}
 function getSenseNovaKey(){return decryptXor(ENC_SENSENOVA,ENC_KEY_XOR)}
-function getQwenKey(){return decryptXor(ENC_QWEN,ENC_KEY_XOR)}
 
 // ═══ STATE ═══
 const MODELS=[
@@ -771,7 +769,13 @@ async function pollOpenAITask(taskId,baseUrl,apiKey){
       const res=await fetch(`${baseUrl}/images/generations/${taskId}`,{
         method:'GET',headers:{'x-client-api-key':apiKey}
       });
-      if(!res.ok)continue;
+      if(!res.ok){
+        if(res.status>=400&&res.status!==404){
+          const errData=await res.json().catch(()=>({}));
+          throw apiError(res.status,errData.error?.message||`HTTP ${res.status}: 任务查询失败`);
+        }
+        continue;
+      }
       const data=await res.json();
       const meta=data.metadata||{};
       if(meta.status==='failed')throw apiError(500,meta.error||'任务处理失败');
@@ -818,14 +822,18 @@ async function callOpenAISINGLE(prompt,images,targetModel,mode,baseUrl,useKey){
 }
 
 async function callVigameImage(prompt,images,model,mode){
-  try{
-    return await callOpenAISINGLE(prompt,images,model,mode,API_BASE_VIGAME,getVigameKey());
-  }catch(err){
-    if(String(err.message||'').includes('cpu overloaded')){
-      await new Promise(r=>setTimeout(r,2500));
+  const maxRetries=2;
+  for(let attempt=0;attempt<=maxRetries;attempt++){
+    try{
       return await callOpenAISINGLE(prompt,images,model,mode,API_BASE_VIGAME,getVigameKey());
+    }catch(err){
+      const isOverload=String(err.message||'').includes('cpu overloaded')||err.status===429;
+      if(isOverload&&attempt<maxRetries){
+        await new Promise(r=>setTimeout(r,2500*(attempt+1)));
+        continue;
+      }
+      throw err;
     }
-    throw err;
   }
 }
 

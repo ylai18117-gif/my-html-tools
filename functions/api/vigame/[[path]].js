@@ -14,7 +14,8 @@ export async function onRequest(context) {
   const version = parts.shift() || 'v1';
   if (!parts.length) return json({ error: 'Missing VIGAME path' }, 400);
 
-  const upstreamUrl = `https://dn-api-ai.vigame.cn/${version}/${parts.join('/')}`;
+  const urlObj = new URL(request.url);
+  const upstreamUrl = `https://dn-api-ai.vigame.cn/${version}/${parts.join('/')}${urlObj.search}`;
   const headers = new Headers();
   const contentType = request.headers.get('content-type');
   if (contentType) headers.set('Content-Type', contentType);
