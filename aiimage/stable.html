@@ -1136,6 +1136,8 @@ function classifyError(status,msg){
     return{tag:'鉴权失败',title:'鉴权失败',detail:'API 密钥无效或已过期，请联系管理员。',hint:''};
   if(status>=500)
     return{tag:'上游异常',title:'上游服务异常',detail:'模型供应商服务暂时不稳定，请稍后重试，或切换到其他模型。',hint:''};
+  if(m.includes('修复')||m.includes('维护')||m.includes('maintain')||m.includes('repair'))
+    return{tag:'通道维护',title:'供应商通道维护中',detail:`上游服务反馈：“${msg}”。当前该通道正在维护修复，请稍后再试或切换其他模型。`,hint:'这不是你的参数或网络问题，可先切换到上方其他可用模型（如 Gemini 3.1 Flash）。'};
   if(status===400)
     return{tag:'请求错误',title:'请求参数错误',detail:msg||'请求内容不符合模型要求，请调整提示词后重试。',hint:''};
   return{tag:'生成失败',title:'生成失败',detail:msg||'未知错误，请重试。',hint:''};
